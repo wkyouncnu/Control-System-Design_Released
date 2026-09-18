@@ -1,0 +1,7 @@
+# 공개 저장소 — 비공개 저장소 Control-System-Design 의 2026_실습 을 옮긴 것입니다.
+slprj/
+*.slxc
+*.asv
+*_Solution.mlx
+*_Solution_src.m
+*_solution.m
