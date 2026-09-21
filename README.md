@@ -134,6 +134,7 @@ Scope 창이 자동으로 열리며 결과가 나타납니다.
 | `W02_01_tf_basics.m` | 전달함수 만들기, 극점 위치와 응답 모양의 대응 |
 | `W02_02_msd_derivation.m` | 물리에서 전달함수까지 4단계, 댐퍼에 따른 극점 이동 |
 | `W02_03_run_simulink.m` | 적분기 / 전달함수 / 상태공간 세 방식 비교 |
+| `W02_04_ss_tf_conversion.m` | `ss2tf` · `tf2ss` 로 두 표현 오가기, 실현의 비유일성, 초기조건 좌표 변환 |
 | `W02_MSD_ThreeWays.slx` | 같은 시스템을 세 가지로 만든 모델 |
 
 ### 3주차 — 블록선도, 상태공간, 선형화 (`W03_StateSpace_Linearization`)

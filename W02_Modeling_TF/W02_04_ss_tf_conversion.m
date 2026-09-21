@@ -185,7 +185,7 @@ fprintf('  --> 분모(극점)는 A 가, 분자(영점)는 C 와 B 가 정합니�
 %    주의  : (1) 입력 하나짜리(SISO/SIMO) 전용입니다
 %            (2) 결과 상태는 물리량이 아닙니다 (위 설명)
 %            (3) 객체로 다룰 때의 ss(G) 는 결과 행렬이 tf2ss 와 다를 수 있습니다
-%                (MATLAB 이 수치 안정성을 위해 척도를 조정합니다. 5절에서 비교)
+%                (MATLAB 이 B, C 의 척도를 따로 정합니다. 5절과 9절에서 비교)
 
 [Ac, Bc, Cc, Dc] = tf2ss(num, den);
 
@@ -231,12 +231,13 @@ sysS = ss(G);
 reals = {'(P) 물리 좌표', sysP; '(T) tf2ss', sysT; '(S) ss(G)', sysS};
 
 fprintf('=== 5-1. 세 실현 비교 ===\n');
-fprintf('  %-16s %-30s %-20s %-10s\n', '실현', 'A', '고유값', 'DC 이득');
+fprintf('  %-16s %-18s %-10s %-12s %-30s %-8s\n', '실현', 'A', 'B', 'C', '고유값', 'DC 이득');
 for i = 1:size(reals,1)
     si = reals{i,2};
-    fprintf('  %-16s %-30s %-20s %-10.4f\n', reals{i,1}, mat2str(si.A, 3), ...
-            mat2str(sort(eig(si.A)).', 3), dcgain(si));
+    fprintf('  %-16s %-18s %-10s %-12s %-30s %-8.4f\n', reals{i,1}, mat2str(si.A, 3), ...
+            mat2str(si.B, 3), mat2str(si.C, 3), mat2str(sort(eig(si.A)).', 3), dcgain(si));
 end
+fprintf('  (m = 1 이면 (T) 와 (S) 가 우연히 같습니다. m 을 바꾸면 B, C 의 척도가 갈립니다 — 9절)\n');
 
 t = (0:0.01:40)';
 F = ones(size(t));                                % 1 N 계단 입력
@@ -267,7 +268,7 @@ plot(t, xT(:,1), '--', 'LineWidth', 2);
 plot(t, xS(:,1), ':', 'LineWidth', 2);
 grid on; xlabel('Time [s]'); ylabel('첫째 상태 x_1');
 title('첫째 상태 : 실현마다 뜻이 다르다');
-legend('(P) 위치', '(T) m x 속도', '(S) MATLAB 척도 조정', 'Location','southeast');
+legend('(P) 위치', '(T) m x 속도', '(S) ss(G) 의 첫째 상태', 'Location','southeast');
 
 %% 6. 왕복하면 원래대로 돌아오는가
 %
@@ -345,7 +346,8 @@ legend('물리 좌표 x_0 = [0.5; 0]', 'tf2ss 모델, T^{-1} x_0 로 변환', ..
 %
 %   (1) 맨 위에서 plant_msd(2, 0.2, 1) 로 m = 2 를 주고 다시 실행하십시오.
 %       -> T = [0 0.5; 0.5 0] 이 되어 척도 차이가 눈에 보입니다.
-%          5-1절 표에서 (T) 와 (S) 의 A 도 서로 달라집니다.
+%          5-1절 표에서 (T) 와 (S) 는 A 는 같지만 B, C 가 달라집니다.
+%          (tf2ss 는 1/m 을 C 에, ss(G) 는 B 에 둡니다. 출력은 여전히 같습니다)
 %
 %   (2) 3절에서 C = [k b] 로 바꿔 보십시오. (벽이 받는 힘 = 스프링 힘 + 댐퍼 힘)
 %       -> 분자가 b s + k 가 되어 s = -k/b 에 영점이 생깁니다.
