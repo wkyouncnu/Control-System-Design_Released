@@ -1691,7 +1691,7 @@ table(K_two, GM, Re, ts, OS)
 % |---|---|---|---|
 % | [11/01](https://www.youtube.com/watch?v=CE3fw6PvIhI) | 60 분 | `tf` 두 가지 방식, `feedback` 대 손계산, `step`, `stepinfo`, 궤적 위를 클릭해 $K$·$\zeta$·$\%OS$·$\omega_n$ 읽기 | 2절, **2-3절**, 10-1절 |
 % | [11/05](https://www.youtube.com/watch?v=Jg_6ghLeLy4) | 52 분 | `minreal` 이 필요한 이유, `lsim` 으로 계단·램프·포물선, 궤적에서 읽은 $\zeta$ 를 $\%OS$ 공식에 넣어 검산 | 2-3절, 7-2절 |
-% | [11/10](https://www.youtube.com/watch?v=ODCpPwOeiJM) | 66 분 | **`rlocfind`**, `sgrid` 변형 네 가지, 반환된 극점에서 $\omega_n$ 계산, 공식 $t_s$·$T_p$ 가 실측과 어긋나는 것 | **6-0절, 7절, 7-1절, 7-2절** |
+% | [11/10](https://www.youtube.com/watch?v=ODCpPwOeiJM) | 66 분 | `rlocfind` **처음 등장**, `sgrid` 변형 네 가지, 반환된 극점에서 $\omega_n$ 계산, 공식 $t_s$·$T_p$ 가 실측과 어긋나는 것 | **6-0절, 7절, 7-1절, 7-2절** |
 % | [11/12](https://www.youtube.com/watch?v=fyJCuhBVZ00) | 70 분 | 사양 $\rightarrow$ $\zeta,\omega_n$ $\rightarrow$ `sgrid` $\rightarrow$ $K$ 선택 $\rightarrow$ `stepinfo` 를 반복하는 설계, $K$ 는 작을수록 좋다는 이유 | **8절**, 10절 |
 % | [11/17](https://www.youtube.com/watch?v=NaibLIAQTD8) | 53 분 | `controlSystemDesigner` 로 같은 설계를 다시 | 7주차 4-3절 |
 %
