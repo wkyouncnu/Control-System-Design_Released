@@ -227,8 +227,8 @@ title('PD (영점 s = -3 추가) : 길이 왼쪽으로 당겨진다');
 % 그때부터 오늘의 본론인 보상기 설계가 시작되고, 영점을 어디에 놓을지는
 % **2-0절의 각도 부족**으로 계산합니다. 6주차 1-2절의 각도 조건을 뒤집어 쓰는 것입니다.
 [zm, wm] = spec2pole(10, 2);
-fprintf('사양 : 오버슈트 10 %%, 정착시간 2 s\n');
-fprintf('  -> zeta >= %.4f ,  wn >= %.4f\n', zm, wm);
+zm        % 사양(오버슈트 10 %, 정착시간 2 s)이 요구하는 최소 감쇠비
+wm        % 그 사양이 요구하는 최소 고유진동수 [rad/s]
 %% 1-2. 오늘 쓰는 새 도구 두 개
 % 6주차에서 쓴 `rlocfind` 는 마우스로 궤적 위를 찍는 명령입니다.
 % 감을 잡기에는 좋지만 두 가지가 불편합니다.
@@ -309,14 +309,14 @@ disp(rl_scan(1, G_demo, [1 3 5 8], true));
 GA = 1/((s+1)*(s+3));
 TA = rl_scan(1, GA, linspace(0.5, 14, 1081));
 okA = TA.stable & TA.OS <= 10 & TA.ts <= 2;
-fprintf('예제 A 의 답 : K = %.2f ~ %.2f\n', min(TA.K(okA)), max(TA.K(okA)));
+K_min = min(TA.K(okA))     % 예제 A : 사양을 만족하는 이득 범위의 아래쪽
+K_max = max(TA.K(okA))     % 그 위쪽
 GB = (s+2)/((s+1)*(s+5));
 TB = rl_scan(1, GB, logspace(-2, 3, 200));
-fprintf('예제 B : 첨두시간이 존재한 이득 %d 개 (진동이 아예 없음)\n', sum(~isnan(TB.Tp)));
+n_oscillating = sum(~isnan(TB.Tp))   % 예제 B : 진동한 이득의 개수. 0 이면 아예 없다
 GC = 5/((s+1)*(s+2)*(s+5));
 TC = rl_scan(1, GC, linspace(0.5, 45, 1781));
-fprintf('예제 C : 오차 0.05 는 K >= 38 을 요구, 안정 한계는 K = %.1f\n', ...
-        min(TC.K(~TC.stable)));
+K_limit = min(TC.K(~TC.stable))   % 예제 C : 안정 한계. 오차 사양은 K >= 38 을 요구한다
 tiledlayout(1,3,'TileSpacing','compact');
 nexttile
 rlocus(GA); hold on; sgrid(zm, wm); xlim([-6 1]); ylim([-6 6]); grid on;
@@ -408,23 +408,25 @@ z_pd  = sig_d + wd_d/tand(phi);
 Cpd   = s + z_pd;
 K_pd  = 1/abs(evalfr(Cpd*Gd0, sd));
 
-fprintf('=== 각도 부족으로 PD 설계 ===\n');
-fprintf('1) 사양 %%OS=%g, ts=%g  ->  zeta=%.4f, wn=%.4f\n', POS_d, ts_d, zeta_d, wn_d);
-fprintf('   목표 극점 sd = %.4f %+.4fj\n', real(sd), imag(sd));
-fprintf('2) 극점 각의 합 = %.2f 도\n', sum(rad2deg(angle(sd - pole(Gd0).'))));
-fprintf('3) 보태야 할 각 = %.2f 도\n', phi);
-fprintf('4) 영점 위치    = %.4f\n', -z_pd);
-fprintf('5) 이득         = %.4f\n', K_pd);
-fprintf('   -> C(s) = %.3f (s + %.3f) = %.3f s + %.3f\n', ...
-        K_pd, z_pd, K_pd, K_pd*z_pd);
-fprintf('   즉 Kp = %.3f, Kd = %.3f 인 PD 제어기입니다.\n', K_pd*z_pd, K_pd);
+sd                 % 1단계 : 사양이 요구하는 목표 극점
+angle_sum = sum(rad2deg(angle(sd - pole(Gd0).')))   % 2단계 : 극점 각의 합 [도]
+phi                % 3단계 : 보태야 할 각 [도]
+%%
+zero_position = -z_pd     % 4단계 : 영점을 놓을 자리
+K_pd                      % 5단계 : 크기 조건이 준 이득
+%%
+Kp = K_pd*z_pd     % C(s) = K(s + z) 를 풀면 이것이 비례 이득
+Kd = K_pd          % 그리고 이것이 미분 이득
 
 T_pd = feedback(K_pd*Cpd*Gd0, 1);
-fprintf('\n확인 : 폐루프 극점 %s\n', mat2str(round(pole(T_pd).', 4)));
-fprintf('       목표 극점    %s\n', mat2str(round([sd conj(sd)], 4)));
+
+pole(T_pd)'             % 폐루프 극점
+[sd conj(sd)]           % 목표 극점. 위와 같아야 한다
+%%
 info_pd = stepinfo(T_pd);
-fprintf('       실측 오버슈트 %.2f %% (사양 %g %%), 정착시간 %.3f s (사양 %g s)\n', ...
-        info_pd.Overshoot, POS_d, info_pd.SettlingTime, ts_d);
+
+info_pd.Overshoot       % 실측 오버슈트 [%]. 사양은 POS_d
+info_pd.SettlingTime    % 실측 정착시간 [s]. 사양은 ts_d
 %% 2-0-1. 왜 오버슈트가 사양보다 크게 나오는가
 % 위 결과를 보면 **극점은 목표 자리에 정확히 갔는데 오버슈트가 $16\%$ 가 아니라
 % $18.8\%$ 로 나옵니다.** 설계가 틀린 것이 아닙니다.
@@ -445,19 +447,27 @@ fprintf('       실측 오버슈트 %.2f %% (사양 %g %%), 정착시간 %.3f s 
 % 그리고 2-1절의 표 비교 방식이 필요한 이유이기도 합니다.
 %
 % 목표를 조금 보수적으로 잡아 다시 해 보면 사양 안에 들어옵니다.
-for POS_try = [16 12 9]
-    [zt, wt] = spec2pole(POS_try, ts_d);
-    sdt = -zt*wt + 1i*wt*sqrt(1-zt^2);
-    ag  = rad2deg(angle(evalfr(Gd0, sdt)));
-    ph  = mod(-180 - ag, 360);
-    zt2 = zt*wt + wt*sqrt(1-zt^2)/tand(ph);
+OS_target = [16 12 9]';      % 목표를 조금씩 보수적으로 잡아 본다
+zero_pos = zeros(size(OS_target));   K_sel = zero_pos;
+OS_real  = zero_pos;                 ts_real = zero_pos;
+
+for i = 1:numel(OS_target)
+    [zt, wt] = spec2pole(OS_target(i), ts_d);
+    sdt = -zt*wt + 1i*wt*sqrt(1-zt^2);                  % 목표 극점
+    ph  = mod(-180 - rad2deg(angle(evalfr(Gd0, sdt))), 360);   % 부족한 각
+    zt2 = zt*wt + wt*sqrt(1-zt^2)/tand(ph);             % 영점 위치
     Ct  = s + zt2;
-    Kt  = 1/abs(evalfr(Ct*Gd0, sdt));
+    Kt  = 1/abs(evalfr(Ct*Gd0, sdt));                   % 크기 조건
     it  = stepinfo(feedback(Kt*Ct*Gd0, 1));
-    fprintf('목표 %%OS %2d %% -> 영점 %7.3f, K %6.3f -> 실측 OS %5.2f %%, ts %.3f s\n', ...
-            POS_try, -zt2, Kt, it.Overshoot, it.SettlingTime);
+
+    zero_pos(i) = -zt2;   K_sel(i) = Kt;
+    OS_real(i)  = it.Overshoot;   ts_real(i) = it.SettlingTime;
 end
-fprintf('--> 목표를 12 %% 로 낮춰 잡으면 실측 14.8 %% 로 사양 안에 들어옵니다.\n\n');
+
+table(OS_target, zero_pos, K_sel, OS_real, ts_real)
+%%
+% 목표를 $12\%$ 로 낮춰 잡으면 실측이 사양 $16\%$ 안에 들어옵니다.
+% **설계 목표와 실제 결과가 다르므로 되풀이가 필요합니다.**
 %% 2-1. 영점 위치를 고르는 지침
 % 각도 부족은 **한 점을 정확히 지나게** 하는 방법입니다.
 % 그런데 사양은 보통 점이 아니라 **영역**으로 주어지므로,
@@ -513,14 +523,20 @@ fprintf('--> 목표를 12 %% 로 낮춰 잡으면 실측 14.8 %% 로 사양 안�
 % $K$ 에 비례하는데, 정상상태 정확도는 $K_p = Kz/4$ 가 정하기 때문입니다.
 % $z$ 를 키우면 **$K$ 를 안 키우고도 $K_p$ 가 커집니다.**
 GD = 1/((s+1)*(s+4));
-fprintf('    z     고른 K   오버슈트[%%]   오차     max|u|\n');
-for z = [1 3 6]
-    Ti = rl_scan(s+z, GD, linspace(0.2, 40, 300), true);
-    ok = Ti.stable & Ti.OS <= 10 & Ti.ts <= 2.5 & Ti.umax <= 10;
-    sub = Ti(ok,:); [~, j] = min(sub.ess);
-    fprintf('  %5d  %8.2f  %10.2f  %8.4f  %8.2f\n', ...
-            z, sub.K(j), sub.OS(j), sub.ess(j), sub.umax(j));
+zero_pos = [1 3 6]';                  % 영점을 세 자리에 놓아 본다
+K_sel = zeros(size(zero_pos));  OS = K_sel;  ess = K_sel;  umax = K_sel;
+
+for i = 1:numel(zero_pos)
+    Ti  = rl_scan(s + zero_pos(i), GD, linspace(0.2, 40, 300), true);
+    ok  = Ti.stable & Ti.OS <= 10 & Ti.ts <= 2.5 & Ti.umax <= 10;
+    sub = Ti(ok,:);
+    [~, j] = min(sub.ess);            % 사양을 만족하는 것 중 오차가 가장 작은 것
+
+    K_sel(i) = sub.K(j);   OS(i) = sub.OS(j);
+    ess(i)   = sub.ess(j); umax(i) = sub.umax(j);
 end
+
+table(zero_pos, K_sel, OS, ess, umax)
 %% 2-2. 영점을 플랜트 극점 위에 놓으면 — 해도 되는 것과 절대 안 되는 것
 % 영점을 플랜트 극점과 **같은 자리**에 놓으면 그 극점이 약분되어 사라집니다.
 %
@@ -549,7 +565,7 @@ G_unst = 1/((s-1)*(s+4));
 T_bad  = feedback(5*(s-1)*G_unst, 1);
 S_bad  = feedback(G_unst, 5*(s-1));
 t_bad  = linspace(0, 8, 500)';
-fprintf('불안정 극점 상쇄 : 폐루프 극점 %s\n', mat2str(round(pole(T_bad)', 3)));
+pole(T_bad)'     % 불안정 극점을 영점으로 지우려 했을 때의 폐루프 극점
 tiledlayout(1,2,'TileSpacing','compact');
 nexttile
 plot(t_bad, step(T_bad, t_bad), 'LineWidth', 2); grid on;
@@ -608,8 +624,8 @@ xlabel('시간 [s]'); ylabel('출력'); title('크기 0.01 외란 : 발산한다
 GE = 5/((s+1)*(s+2)*(s+5));
 TE = feedback(26*(s+1.5)*GE, 1);
 TE_nz = zpk([], pole(TE), 1);  TE_nz = TE_nz/dcgain(TE_nz);
-fprintf('영점 있음 : 오버슈트 %.2f %%\n', getfield(stepinfo(TE),'Overshoot'));
-fprintf('영점 없음 : 오버슈트 %.2f %%\n', getfield(stepinfo(TE_nz),'Overshoot'));
+stepinfo(TE).Overshoot        % 영점이 있을 때의 오버슈트 [%]
+stepinfo(TE_nz).Overshoot     % 같은 극점인데 영점만 없앴을 때
 tt = linspace(0, 3, 600)';
 plot(tt, step(TE, tt), 'LineWidth', 2); hold on;
 plot(tt, step(TE_nz, tt), 'LineWidth', 2);
@@ -723,8 +739,7 @@ legend('PD 제어','목표값','오버슈트 한계','정착시간 한계','Loca
 TPI = rl_scan((s+0.8)/s, GE, linspace(0.2, 25, 300), true);
 okPI = TPI.stable & TPI.OS <= 20 & TPI.ts <= 6;
 subPI = TPI(okPI,:); [~, jPI] = min(subPI.ts);
-fprintf('PI 설계 : K = %.2f  오버슈트 %.2f %%  정착시간 %.2f s  오차 %.5f\n', ...
-        subPI.K(jPI), subPI.OS(jPI), subPI.ts(jPI), subPI.ess(jPI));
+subPI(jPI, {'K','OS','ts','ess'})    % PI 로 고른 이득과 그때의 성능
 TP0 = rl_scan(1, GE, linspace(0.2, 25, 300));
 okP0 = TP0.stable & TP0.OS <= 20;
 subP0 = TP0(okP0,:); [~, jP0] = min(subP0.ess);
@@ -816,16 +831,22 @@ title('오차는 적분기의 일, 과도응답은 미분의 일');
 % 다만 그 자리가 좋은 설계라는 뜻은 아닙니다. 초기값만 작을 뿐입니다.
 %
 % 아래에서 두 경우를 모두 확인합니다.
-Kq0 = 2;  zq0 = 5;
-fprintf('=== PD 의 초기 제어입력 ===\n');
-fprintf('  %-24s %-6s %-12s %s\n', '플랜트', '상대차수', 'u(0+) 실측', '공식');
-Gq1 = 1/(s*(s+2));                 % r = 2
-Gq2 = 1/(s*(s+2)*(s+5));           % r = 3
-[uq1, ~] = ctrl_input(Kq0*(s+zq0), Gq1, linspace(0,5,5001)');
-[uq2, ~] = ctrl_input(Kq0*(s+zq0), Gq2, linspace(0,5,5001)');
-fprintf('  %-24s %-6d %-12.4f K(z-Kb) = %.4f\n', '1/(s(s+2))',      2, uq1(1), Kq0*(zq0-Kq0));
-fprintf('  %-24s %-6d %-12.4f K z     = %.4f\n', '1/(s(s+2)(s+5))', 3, uq2(1), Kq0*zq0);
-fprintf('  --> 아래 예제의 플랜트는 상대차수 3 이므로 K*z 쪽을 씁니다.\n\n');
+Kq0 = 2;   zq0 = 5;                % C(s) = 2(s + 5)
+Gq1 = 1/(s*(s+2));                 % 상대차수 2
+Gq2 = 1/(s*(s+2)*(s+5));           % 상대차수 3
+t = linspace(0, 5, 5001)';
+
+u1 = ctrl_input(Kq0*(s+zq0), Gq1, t);
+u2 = ctrl_input(Kq0*(s+zq0), Gq2, t);
+
+plant        = ["1/(s(s+2))"; "1/(s(s+2)(s+5))"];
+relative_deg = [2; 3];
+u_measured   = [u1(1); u2(1)];                       % 실측 u(0+)
+u_formula    = [Kq0*(zq0-Kq0); Kq0*zq0];             % 유도한 공식
+
+table(plant, relative_deg, u_measured, u_formula)
+%%
+% 아래 예제의 플랜트는 상대차수 3 이므로 $Kz$ 쪽을 씁니다.
 %
 % **예 — 제어입력까지 넣어 설계한 결과**
 %
@@ -841,7 +862,8 @@ fprintf('  --> 아래 예제의 플랜트는 상대차수 3 이므로 K*z 쪽을
 Gq = 1/(s*(s+2)*(s+5));
 Tq = rl_scan(1, Gq, linspace(0.5, 12, 1151), true);
 okq = Tq.stable & Tq.ts < 5.2 & Tq.OS < 1 & Tq.umax <= 5;
-fprintf('만족하는 이득 : K = %.2f ~ %.2f\n', min(Tq.K(okq)), max(Tq.K(okq)));
+K_min = min(Tq.K(okq))     % 네 사양을 모두 만족하는 이득의 아래쪽
+K_max = max(Tq.K(okq))     % 그 위쪽. 구간이 매우 좁다
 %% 4-3. `controlSystemDesigner` — 마우스로 하는 근궤적 설계
 % MATLAB 에는 같은 일을 화면에서 하는 앱이 있습니다.
 %
@@ -1149,16 +1171,19 @@ yline(1, 'k--', 'HandleVisibility','off');
 xlabel('시간 [s]'); ylabel('출력'); ylim([0 1.6]);
 legend('Location','southeast');
 title('같은 플랜트, 네 가지 보상기');
-fprintf('=== 네 보상기 비교 (G = 1/(s(s+2))) ===\n');
-fprintf('  제어기                      오버슈트[%%]  정착시간[s]   오차\n');
-fprintf('  --------------------------  -----------  -----------  --------\n');
-for i = 1:size(ctrls,1)
+controller = string(ctrls(:,1));
+overshoot  = zeros(size(controller));
+settling   = overshoot;
+error_ss   = overshoot;
+
+for i = 1:numel(controller)
     Tc = feedback(ctrls{i,2}*Gc, 1);
-    ic = stepinfo(Tc);
-    fprintf('  %-26s  %11.2f  %11.2f  %8.4f\n', ...
-            ctrls{i,1}, ic.Overshoot, ic.SettlingTime, 1-dcgain(Tc));
+    overshoot(i) = stepinfo(Tc).Overshoot;
+    settling(i)  = stepinfo(Tc).SettlingTime;
+    error_ss(i)  = 1 - dcgain(Tc);
 end
-fprintf('\n');
+
+table(controller, overshoot, settling, error_ss)
 %% 9. Simulink 로 확인 — 잡음이 들어오면
 % 모델 `W07_PD_Noise.slx` 는 PD 와 Lead 를 나란히 놓고 **똑같은 측정 잡음**을
 % 넣은 것입니다.
