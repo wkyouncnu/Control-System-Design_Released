@@ -107,6 +107,9 @@ jobs = {
  'w04_spec_map.png',     @() dg_spec_map(),          110
  'w04_region_build.png', @() fig_w04_region_build(),  95
  'w04_sim_blocks.png',   @() dg_second_order(),      110
+ 'w04_period_freq.png',  @() fig_w04_period_freq(),   95
+ 'w04_lpf_sine.png',     @() fig_w04_lpf_sine(),      95
+ 'w04_lpf_vs_hpf.png',   @() fig_w04_lpf_vs_hpf(),    95
  'w05_gain_poles.png',   @() fig_gain_poles(),       105
  'w05_type_table.png',   @() fig_type_table(),        95
  'w05_why_error.png',    @() fig_w05_why_error(),     95
@@ -3762,6 +3765,86 @@ xlim([-2.6 0.6]); ylim([-1 1]);
 xlabel('실수부'); ylabel('허수부');
 legend('Location', 'northwest');
 title({'극점이 모두 실축 위에 있다', '허수부가 없으니 진동할 방법이 없다'});
+end
+
+
+function fig_w04_period_freq()
+% 주기와 주파수 : 같은 시간 동안 몇 번 흔들리는가
+t   = 0:0.002:4;
+f_lo = 0.5;   f_hi = 4;                 % Hz
+col  = [0.00 0.45 0.74; 0.85 0.33 0.10];
+
+figure('Position', [60 60 1040 520]);
+tiledlayout(2, 1, 'TileSpacing', 'compact');
+
+for k = 1:2
+    f = [f_lo f_hi];  f = f(k);
+    T = 1/f;
+    nexttile
+    plot(t, sin(2*pi*f*t), 'LineWidth', 2.2, 'Color', col(k,:)); hold on; grid on
+    % 한 주기를 화살표로 표시한다
+    plot([0 T], [1.35 1.35], 'k-', 'LineWidth', 1.2)
+    plot([0 0], [1.25 1.45], 'k-', 'LineWidth', 1.2)
+    plot([T T], [1.25 1.45], 'k-', 'LineWidth', 1.2)
+    % 글자는 막대 **오른쪽**에 붙인다. 가운데에 두면 주기가 짧을 때 y 축 라벨과 겹친다
+    text(T + 0.08, 1.35, sprintf('한 주기 T = %.2f s', T), ...
+         'HorizontalAlignment', 'left', 'FontSize', 11, 'FontWeight', 'bold');
+    ylim([-1.8 2.0]); xlim([0 4]);
+    ylabel('신호');
+    title(sprintf('f = %.1f Hz  (4 초 동안 %d 번 흔들린다),   \\omega = 2\\pi f = %.2f rad/s', ...
+                  f, round(4*f), 2*pi*f));
+end
+xlabel('시간 [s]');
+end
+
+
+function fig_w04_lpf_sine()
+% 1차 시스템에 사인을 넣으면 : 저주파는 그대로, 고주파는 작아지고 늦어진다
+tau = 1;
+G   = tf(1, [tau 1]);
+w   = [0.2 10];                          % 저주파, 고주파 [rad/s]
+t   = 0:0.002:40;
+
+figure('Position', [60 60 1040 520]);
+tiledlayout(2, 1, 'TileSpacing', 'compact');
+
+for k = 1:2
+    u = sin(w(k)*t);
+    y = lsim(G, u, t);
+    A = 1/sqrt(1 + (w(k)*tau)^2);        % 유도한 크기비
+    ph = -atand(w(k)*tau);               % 유도한 위상
+    nexttile
+    plot(t, u, 'LineWidth', 1.6, 'Color', [0.6 0.6 0.6]); hold on; grid on
+    plot(t, y, 'LineWidth', 2.4, 'Color', [0.00 0.45 0.74])
+    xlim([0 min(40, 12*2*pi/w(k))]); ylim([-1.4 1.8])
+    legend('입력 사인', '출력', 'Location', 'northeast')
+    ylabel('신호')
+    title(sprintf('\\omega = %.1f rad/s : 크기비 %.3f 배, 위상 %.1f 도', w(k), A, ph));
+end
+xlabel('시간 [s]');
+end
+
+
+function fig_w04_lpf_vs_hpf()
+% 저역통과와 고역통과 : 같은 tau, 통과시키는 쪽만 반대
+tau = 1;
+w   = logspace(-2, 2, 500);
+lpf = 1 ./ sqrt(1 + (w*tau).^2);         % |1/(tau s + 1)|
+hpf = (w*tau) ./ sqrt(1 + (w*tau).^2);   % |tau s/(tau s + 1)|
+
+figure('Position', [60 60 1040 460]);
+loglog(w, lpf, 'LineWidth', 2.6, 'Color', [0.00 0.45 0.74]); hold on; grid on
+loglog(w, hpf, 'LineWidth', 2.6, 'Color', [0.85 0.33 0.10])
+yline(1/sqrt(2), 'k--', 'LineWidth', 1.4);
+xline(1/tau,     'k:',  'LineWidth', 1.6);
+text(1.15/tau, 0.02, '\omega_c = 1/\tau', 'FontSize', 11, 'FontWeight', 'bold');
+text(0.012, 0.56, '0.707 (-3 dB)', 'FontSize', 10);     % 점선 아래에 두어 겹치지 않게
+text(0.02, 1.35, '저주파', 'FontSize', 12, 'FontWeight', 'bold');
+text(30,   1.35, '고주파', 'FontSize', 12, 'FontWeight', 'bold');
+ylim([0.008 2]);
+xlabel('주파수 \omega [rad/s]'); ylabel('크기비 (출력 진폭 / 입력 진폭)');
+legend('저역통과 1/(\tau s + 1)', '고역통과 \tau s/(\tau s + 1)', 'Location', 'south');
+title('같은 \tau, 통과시키는 쪽만 반대다');
 end
 
 
