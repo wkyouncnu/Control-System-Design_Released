@@ -266,6 +266,141 @@ yline(1,'k--','LineWidth',1.5); yline(0.632,'r:','LineWidth',1.5)
 grid on; xlabel('시간 [s]'); ylabel('출력')
 title('1차 시스템 : 시정수가 전부다')
 legend('\tau = 0.5','\tau = 1','\tau = 2','목표값','63.2 %','Location','southeast')
+%% 2-1. 왜 극점이 반응 속도를 정하는가 — 미분방정식을 풀어 본다
+% 앞 절은 "극점이 왼쪽에 있을수록 빠르다" 를 **그림으로** 보였습니다.
+% 그러나 그림은 결과일 뿐입니다. **왜** 그러한지는 시간 영역의 해를 손으로
+% 구해야 답할 수 있습니다. 이 절에서 그 해를 끝까지 구합니다.
+%
+% **1단계 — 전달함수를 미분방정식으로 되돌린다**
+%
+% 전달함수는 입력 $U(s)$ 와 출력 $Y(s)$ 의 비입니다.
+%
+% $$\frac{Y(s)}{U(s)} = \frac{1}{\tau s + 1}$$
+%
+% 양변에 분모를 곱해 정리합니다.
+%
+% $$(\tau s + 1)\,Y(s) = U(s) \qquad\Rightarrow\qquad \tau\,s\,Y(s) + Y(s) = U(s)$$
+%
+% 2주차에서 배운 **"$s$ 를 곱하는 것은 미분"** (초기조건이 $0$ 일 때
+% $\mathcal{L}\{\dot{y}\} = sY(s)$) 을 거꾸로 적용하면 미분방정식이 됩니다.
+%
+% $$\tau\,\dot{y}(t) + y(t) = u(t)$$
+%
+% | 항 | 라플라스 영역 | 시간 영역 | 이유 |
+% |---|---|---|---|
+% | 첫째 항 | $\tau s Y(s)$ | $\tau \dot{y}(t)$ | $s$ 곱하기 $=$ 미분 (초기조건 $0$) |
+% | 둘째 항 | $Y(s)$ | $y(t)$ | 그대로 |
+% | 오른쪽 | $U(s)$ | $u(t)$ | 그대로 |
+%
+% **2단계 — 계단 입력을 넣고 변수분리로 푼다**
+%
+% $u(t) = 1$ (단위계단), $y(0) = 0$ 으로 둡니다. 식은 이렇게 됩니다.
+%
+% $$\tau\,\frac{dy}{dt} = 1 - y$$
+%
+% $y$ 가 있는 것은 왼쪽으로, $t$ 가 있는 것은 오른쪽으로 모읍니다.
+%
+% $$\frac{dy}{1-y} = \frac{dt}{\tau}$$
+%
+% 양변을 적분합니다. 왼쪽은 $\int \frac{dy}{1-y} = -\ln\left|1-y\right|$ 입니다.
+%
+% $$-\ln\left|1 - y\right| = \frac{t}{\tau} + C$$
+%
+% 초기조건 $y(0)=0$ 을 넣으면 $-\ln 1 = 0 + C$ 이므로 $C = 0$ 입니다.
+% 양변에 $-1$ 을 곱하고 지수를 취합니다.
+%
+% $$\ln(1-y) = -\frac{t}{\tau} \qquad\Rightarrow\qquad 1 - y = e^{-t/\tau}$$
+%
+% $$y(t) = 1 - e^{-t/\tau}$$
+%
+% **이것이 1차 시스템의 계단응답입니다.** 이 한 줄에서 앞 절의 숫자가 전부 나옵니다.
+%
+% **3단계 — 라플라스로 풀어도 같은 답이 나온다**
+%
+% 같은 문제를 다른 방법으로 풀어 답을 대조합니다.
+% 계단 입력은 $U(s) = 1/s$ 이므로
+%
+% $$Y(s) = \frac{1}{\tau s + 1}\cdot\frac{1}{s}
+%        = \frac{1/\tau}{\left(s + \frac{1}{\tau}\right)s}$$
+%
+% 부분분수로 가릅니다. $\frac{1/\tau}{s(s+1/\tau)} = \frac{A}{s} + \frac{B}{s+1/\tau}$
+% 로 두고 양변에 $s$ 를 곱한 뒤 $s=0$ 을 넣으면 $A = 1$,
+% 양변에 $s+1/\tau$ 를 곱한 뒤 $s=-1/\tau$ 를 넣으면 $B = -1$ 입니다.
+%
+% $$Y(s) = \frac{1}{s} - \frac{1}{s + \frac{1}{\tau}}$$
+%
+% 역변환표의 두 줄 $\frac{1}{s} \leftrightarrow 1$ 과
+% $\frac{1}{s+a} \leftrightarrow e^{-at}$ 을 그대로 쓰면
+%
+% $$y(t) = 1 - e^{-t/\tau}$$
+%
+% 2단계와 **글자 하나까지 같습니다.**
+%
+% **4단계 — 이 해에서 극점이 어떻게 드러나는가**
+%
+% 극점은 $s = -1/\tau$ 였습니다. 해의 지수항을 그 극점으로 다시 적으면
+%
+% $$y(t) = 1 - e^{\,p\,t}, \qquad p = -\frac{1}{\tau}$$
+%
+% **극점이 지수의 어깨에 그대로 들어갑니다.** 이것이 "극점이 속도를 정한다" 의
+% 정확한 뜻입니다. 극점이 실축 왼쪽으로 멀어지면 $\left|p\right|$ 가 커지고,
+% $e^{pt}$ 가 더 빨리 $0$ 으로 갑니다.
+%
+% | 극점 $p = -1/\tau$ | 남은 오차 $e^{pt}$ 가 절반이 되는 시각 | 해석 |
+% |---|---|---|
+% | $-2$ ($\tau=0.5$) | $\ln 2 / 2 = 0.347$ s | 가장 왼쪽. 가장 빠르다 |
+% | $-1$ ($\tau=1$) | $\ln 2 / 1 = 0.693$ s | 중간 |
+% | $-0.5$ ($\tau=2$) | $\ln 2 / 0.5 = 1.386$ s | 원점에 가장 가깝다. 가장 느리다 |
+%
+% **5단계 — 앞 절의 어림값이 전부 이 해에서 나온다**
+%
+% $t = \tau$ 를 넣으면 $y = 1 - e^{-1} = 0.632$ 입니다.
+% $63.2\%$ 라는 숫자는 측정값이 아니라 **$e^{-1}$ 그 자체**입니다.
+%
+% | 시각 | $y(t) = 1 - e^{-t/\tau}$ | 값 | 앞 절에서 부른 이름 |
+% |---|---|---|---|
+% | $t=\tau$ | $1 - e^{-1}$ | $0.6321$ | $63\%$ 도달 |
+% | $t=2\tau$ | $1 - e^{-2}$ | $0.8647$ | — |
+% | $t=3\tau$ | $1 - e^{-3}$ | $0.9502$ | $5\%$ 기준 정착 |
+% | $t=4\tau$ | $1 - e^{-4}$ | $0.9817$ | 정착시간 $\approx 4\tau$ ($2\%$ 기준) |
+%
+% 상승시간도 같은 식에서 나옵니다. $10\%$ 와 $90\%$ 에 닿는 시각을 각각 풀면
+% $t_{10} = \tau\ln(1/0.9) = 0.105\tau$, $t_{90} = \tau\ln 10 = 2.303\tau$ 이므로
+%
+% $$t_r = t_{90} - t_{10} = \tau\,(2.303 - 0.105) = 2.197\,\tau \approx 2.2\,\tau$$
+%
+% **6단계 — 초기 기울기도 $\tau$ 하나가 정한다**
+%
+% 해를 미분하면 $\dot{y}(t) = \frac{1}{\tau}e^{-t/\tau}$ 이므로 $\dot{y}(0) = 1/\tau$ 입니다.
+% 출발할 때의 기울기가 $1/\tau$ 라는 뜻이고, 그 기울기를 그대로 연장한 직선은
+% $t=\tau$ 에서 목표값 $1$ 에 닿습니다. 아래 그림의 점선이 그것입니다.
+%
+% 이제 손으로 구한 해와 MATLAB 의 `step` 이 같은지 숫자로 대조합니다.
+fprintf('=== 1차 시스템 : 손으로 푼 해 y(t) = 1 - exp(-t/tau) 와 step 의 대조 ===\n');
+fprintf('  tau    극점      y(tau)    t63(계산)  tr(2.2tau)  ts(4tau)   최대오차\n');
+fprintf('  ----  --------  --------  ---------  ----------  --------  ----------\n');
+t1 = (0:0.001:15)';
+for tau = [0.5 1 2]
+    y_hand = 1 - exp(-t1/tau);              % 손으로 푼 해
+    y_ml   = step(1/(tau*s+1), t1);         % MATLAB 이 구한 해
+    fprintf('  %4.1f  %8.2f  %8.4f  %9.3f  %10.3f  %8.2f  %10.2e\n', ...
+            tau, -1/tau, 1-exp(-1), tau, 2.197*tau, 4*tau, max(abs(y_hand - y_ml)));
+end
+fprintf('  --> 최대오차가 수치 오차 수준입니다. 두 해는 같은 식입니다.\n\n');
+% 해와 초기 기울기 접선을 함께 그린다
+tau = 1;
+y1  = 1 - exp(-t1/tau);
+plot(t1, y1, 'LineWidth', 2.5); hold on; grid on
+plot(t1, t1/tau, 'm--', 'LineWidth', 1.5)          % 초기 기울기 1/tau 의 접선
+yline(1, 'k:', 'LineWidth', 1.5)
+yline(1-exp(-1), 'r:', 'LineWidth', 1.5)
+xline(tau, 'r:', 'LineWidth', 1.5)
+plot(tau, 1-exp(-1), 'o', 'MarkerSize', 10, 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'k')
+axis([0 6 0 1.4])
+xlabel('시간 [s]'); ylabel('출력')
+title('\tau = 1 : 초기 기울기 1/\tau 의 접선은 t = \tau 에서 목표값에 닿는다')
+legend('y(t) = 1 - e^{-t/\tau}', '초기 기울기 접선 t/\tau', '목표값 1', ...
+       '63.2 %', 't = \tau', '두 선이 만나는 점', 'Location', 'southeast')
 %% 3. 2차 시스템 — 숫자 두 개
 % 표준형입니다.
 %
@@ -466,29 +601,105 @@ end
 %
 % **1단계 — 계단응답을 적는다**
 %
-% 2차 표준형에 계단을 넣고 역라플라스 변환하면 이렇게 됩니다
+% 계단 입력은 $R(s) = 1/s$ 이므로 출력은 이렇게 시작합니다
 % (부족감쇠 $0 < \zeta < 1$ 인 경우).
+%
+% $$Y(s) = \frac{\omega_n^2}{s^2 + 2\zeta\omega_n s + \omega_n^2}\cdot\frac{1}{s}$$
+%
+% 부분분수로 가릅니다. $\frac{A}{s}$ 의 계수는 양변에 $s$ 를 곱하고 $s=0$ 을 넣어
+% $A = 1$ 이고, 나머지는 분자가 1차식이므로
+%
+% $$Y(s) = \frac{1}{s} - \frac{s + 2\zeta\omega_n}{s^2 + 2\zeta\omega_n s + \omega_n^2}$$
+%
+% 두 항을 통분해 보면 분자가 $\omega_n^2$ 으로 정리되어 원래 식과 같아집니다.
+%
+% 이제 분모를 **완전제곱**으로 만듭니다. 역변환표를 쓰려면 이 모양이어야 합니다.
+%
+% $$s^2 + 2\zeta\omega_n s + \omega_n^2
+%   = \left(s + \zeta\omega_n\right)^2 + \omega_n^2 - \zeta^2\omega_n^2
+%   = \left(s + \zeta\omega_n\right)^2 + \omega_d^2,
+%   \qquad \omega_d \equiv \omega_n\sqrt{1-\zeta^2}$$
+%
+% $\omega_d$ 를 **감쇠 진동수**라 하며, 3-0-1 절에서 구한 극점의 허수부입니다.
+% 분자도 같은 $s+\zeta\omega_n$ 이 보이도록 쪼갭니다.
+%
+% $$s + 2\zeta\omega_n = \left(s + \zeta\omega_n\right) + \zeta\omega_n$$
+%
+% 그러면 두 조각이 각각 표의 한 줄에 정확히 대응합니다.
+%
+% | 라플라스 영역 | 시간 영역 | 이 식에서 |
+% |---|---|---|
+% | $\frac{1}{s}$ | $1$ | 최종값 |
+% | $\frac{s+a}{(s+a)^2+\omega_d^2}$ | $e^{-at}\cos\omega_d t$ | $a = \zeta\omega_n$ |
+% | $\frac{\omega_d}{(s+a)^2+\omega_d^2}$ | $e^{-at}\sin\omega_d t$ | $\zeta\omega_n$ 조각을 $\omega_d$ 로 맞춰 쓴다 |
+%
+% 셋째 줄을 쓰려고 $\zeta\omega_n = \frac{\zeta\omega_n}{\omega_d}\cdot\omega_d$ 로
+% 바꾸면, $\frac{\zeta\omega_n}{\omega_d} = \frac{\zeta}{\sqrt{1-\zeta^2}}$ 이므로
+%
+% $$y(t) = 1 - e^{-\zeta\omega_n t}\left(\cos\omega_d t
+%          + \frac{\zeta}{\sqrt{1-\zeta^2}}\sin\omega_d t\right)$$
+%
+% 괄호 안의 두 항은 **하나의 사인으로 합칠 수 있습니다.**
+% $A\cos\theta + B\sin\theta = \sqrt{A^2+B^2}\,\sin(\theta + \phi)$,
+% $\tan\phi = A/B$ 를 쓰면 $A=1$, $B=\frac{\zeta}{\sqrt{1-\zeta^2}}$ 이므로
+%
+% $$\sqrt{A^2+B^2} = \sqrt{1 + \frac{\zeta^2}{1-\zeta^2}} = \frac{1}{\sqrt{1-\zeta^2}},
+%   \qquad \tan\phi = \frac{\sqrt{1-\zeta^2}}{\zeta}
+%   \;\Rightarrow\; \phi = \arccos\zeta$$
+%
+% 그래서 계단응답은 이렇게 정리됩니다.
 %
 % $$y(t) = 1 - \frac{e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^2}}\,
 %          \sin\left(\omega_d t + \phi\right), \qquad
 %   \omega_d = \omega_n\sqrt{1-\zeta^2}$$
 %
-% 여기서 $\phi = \arccos\zeta$ 입니다.
 % 눈여겨볼 것은 **$e^{-\zeta\omega_n t}$ 가 점점 작아지는 봉투** 라는 점입니다.
-% 진동이 그 봉투 안에서 잦아듭니다.
+% 진동이 그 봉투 안에서 감쇠합니다.
 %
 % **2단계 — 언제 가장 높은가**
 %
-% $y(t)$ 를 미분해서 $0$ 이 되는 첫 시각을 찾으면
+% 꼭짓점은 기울기가 $0$ 인 곳입니다. 곱의 미분으로 $y(t)$ 를 미분합니다.
+% $u = \frac{e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^2}}$, $v = \sin(\omega_d t + \phi)$ 로 두면
 %
-% $$\frac{dy}{dt} = 0 \qquad \Rightarrow \qquad
-%   t = T_p = \frac{\pi}{\omega_d}$$
+% $$\dot{y} = -\left(\dot{u}v + u\dot{v}\right)
+%   = \frac{\zeta\omega_n e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^2}}\sin(\omega_d t+\phi) -
+%   \frac{\omega_d e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^2}}\cos(\omega_d t+\phi)$$
+%
+% 공통인자 $\frac{e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^2}}$ 를 묶고
+% $\omega_d = \omega_n\sqrt{1-\zeta^2}$ 를 넣습니다.
+%
+% $$\dot{y} = \frac{\omega_n e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^2}}
+%   \left[\,\zeta\sin(\omega_d t+\phi) - \sqrt{1-\zeta^2}\cos(\omega_d t+\phi)\,\right]$$
+%
+% 대괄호 안이 핵심입니다. $\cos\phi = \zeta$, $\sin\phi = \sqrt{1-\zeta^2}$ 이므로
+% 대괄호는 $\sin(\omega_d t + \phi)\cos\phi - \cos(\omega_d t+\phi)\sin\phi$ 이고,
+% 이것은 사인의 뺄셈공식 그대로 **$\sin(\omega_d t)$ 로 지워집니다.**
+%
+% $$\dot{y}(t) = \frac{\omega_n\,e^{-\zeta\omega_n t}}{\sqrt{1-\zeta^2}}\,\sin(\omega_d t)$$
+%
+% 앞의 계수는 절대로 $0$ 이 되지 않으므로, 기울기가 $0$ 이 되는 조건은
+% $\sin(\omega_d t) = 0$, 즉 $\omega_d t = 0,\ \pi,\ 2\pi,\ \ldots$ 입니다.
+% $t=0$ 은 출발점이므로 **첫 꼭짓점은 두 번째 해**입니다.
+%
+% $$\omega_d T_p = \pi \qquad \Rightarrow \qquad
+%   T_p = \frac{\pi}{\omega_d} = \frac{\pi}{\omega_n\sqrt{1-\zeta^2}}$$
 %
 % 즉 **첨두시간은 진동 반주기**입니다. 한 번 올라갔다가 꼭대기에 닿는 시각입니다.
 %
 % **3단계 — 그때 값이 얼마인가**
 %
-% $t = T_p$ 를 1단계 식에 넣으면 $\sin$ 항이 정리되어
+% $t = T_p$ 를 1단계 식에 넣습니다. 사인의 각이 $\omega_d T_p + \phi = \pi + \phi$ 가
+% 되는데, $\sin(\pi + \phi) = -\sin\phi = -\sqrt{1-\zeta^2}$ 이므로
+%
+% $$y(T_p) = 1 - \frac{e^{-\zeta\omega_n T_p}}{\sqrt{1-\zeta^2}}
+%            \cdot\left(-\sqrt{1-\zeta^2}\right)
+%          = 1 + e^{-\zeta\omega_n T_p}$$
+%
+% 여기에 $T_p = \frac{\pi}{\omega_n\sqrt{1-\zeta^2}}$ 를 넣으면 지수의 어깨에서
+% $\omega_n$ 이 약분됩니다.
+%
+% $$\zeta\omega_n T_p = \zeta\omega_n\cdot\frac{\pi}{\omega_n\sqrt{1-\zeta^2}}
+%                     = \frac{\zeta\pi}{\sqrt{1-\zeta^2}}$$
 %
 % $$y(T_p) = 1 + e^{-\zeta\pi/\sqrt{1-\zeta^2}}$$
 %
@@ -535,6 +746,74 @@ xlabel('시간 [s]'); ylabel('출력');
 legend('계단응답', '봉투 1 \pm e^{-\zeta\omega_n t}/\sqrt{1-\zeta^2}', ...
        '최종값', '첨두점 (공식으로 예측한 위치)', 'Location','northeast');
 title('진동은 지수 봉투 안에서 잦아든다');
+%% 4-1-2. 설계용 역공식은 어떻게 나오는가 (유도)
+% 4-1 절의 식은 **$\zeta$ 를 알 때 오버슈트를 구하는** 방향입니다.
+% 그런데 설계에서는 반대로 갑니다. 사양이 "오버슈트 $10\%$ 이하" 로 주어지고,
+% 그것을 만족하는 $\zeta$ 를 구해야 합니다. 그래서 식을 뒤집습니다.
+%
+% **1단계 — 양변에 로그를 취한다**
+%
+% $$\%OS = 100\,e^{-\zeta\pi/\sqrt{1-\zeta^2}}
+%   \qquad\Rightarrow\qquad
+%   \frac{\%OS}{100} = e^{-\zeta\pi/\sqrt{1-\zeta^2}}$$
+%
+% 지수를 없애는 방법은 로그뿐입니다. 양변에 자연로그를 취합니다.
+%
+% $$\ln\left(\frac{\%OS}{100}\right) = \frac{-\zeta\pi}{\sqrt{1-\zeta^2}}$$
+%
+% 여기서 $\%OS < 100$ 이면 왼쪽은 **음수**입니다. 오른쪽도 음수이므로 부호가 맞습니다.
+% 이제 표기를 줄이기 위해 $L \equiv \ln(\%OS/100)$ 로 둡니다.
+%
+% **2단계 — 제곱해서 근호를 없앤다**
+%
+% $$L = \frac{-\zeta\pi}{\sqrt{1-\zeta^2}}
+%   \qquad\Rightarrow\qquad
+%   L^2 = \frac{\zeta^2\pi^2}{1-\zeta^2}$$
+%
+% **3단계 — $\zeta$ 에 대해 푼다**
+%
+% 분모를 넘깁니다.
+%
+% $$L^2\,(1-\zeta^2) = \zeta^2\pi^2
+%   \qquad\Rightarrow\qquad
+%   L^2 - L^2\zeta^2 = \zeta^2\pi^2$$
+%
+% $\zeta^2$ 이 있는 항을 한쪽으로 모읍니다. **이 한 걸음이 분모를 만듭니다.**
+%
+% $$L^2 = \zeta^2\pi^2 + L^2\zeta^2 = \zeta^2\left(\pi^2 + L^2\right)$$
+%
+% $$\zeta^2 = \frac{L^2}{\pi^2 + L^2}
+%   \qquad\Rightarrow\qquad
+%   \zeta = \frac{\left|L\right|}{\sqrt{\pi^2 + L^2}}$$
+%
+% **4단계 — 절댓값을 없앤다**
+%
+% $\%OS < 100$ 이면 $L$ 이 음수이므로 $\left|L\right| = -L$ 입니다.
+% 그래서 교재에 실리는 형태는 이렇습니다.
+%
+% $$\zeta = \frac{-\ln(\%OS/100)}{\sqrt{\pi^2 + \ln^2(\%OS/100)}}$$
+%
+% **주의 두 가지**
+%
+% - 제곱은 **정보를 버리는 연산**입니다. 2단계에서 제곱했으므로 원래 음수였다는
+%   사실이 사라지고, 그래서 4단계에서 부호를 되돌려 주어야 합니다
+% - $\%OS \rightarrow 0$ 이면 $L \rightarrow -\infty$ 이고 $\zeta \rightarrow 1$ 입니다.
+%   오버슈트를 완전히 없애려면 임계감쇠가 되어야 한다는 3-0-1 절의 결론과 같습니다
+%
+% **왕복 검산** — 사양에서 $\zeta$ 를 구하고, 그 $\zeta$ 로 다시 오버슈트를 구해
+% 원래 사양으로 돌아오는지 봅니다. 마지막 열은 실제로 시스템을 만들어 잰 값입니다.
+fprintf('=== 역공식 왕복 검산 : %%OS -> zeta -> %%OS ===\n');
+fprintf('  사양 %%OS   구한 zeta   되돌린 %%OS   stepinfo 실측\n');
+fprintf('  --------  ----------  -----------  -------------\n');
+for os_spec = [2 5 10 20 40]
+    L      = log(os_spec/100);
+    z_req  = -L/sqrt(pi^2 + L^2);                       % 유도한 역공식
+    os_back = 100*exp(-z_req*pi/sqrt(1-z_req^2));       % 4-1 절의 정공식
+    Gx     = 4/(s^2 + 2*z_req*2*s + 4);                 % wn = 2 로 만든 2차 시스템
+    fprintf('  %8.1f  %10.4f  %11.2f  %13.2f\n', ...
+            os_spec, z_req, os_back, stepinfo(Gx).Overshoot);
+end
+fprintf('  --> 네 열이 모두 같습니다. 유도가 맞고, 설계에 그대로 쓸 수 있습니다.\n\n');
 %% 4-2. 공식 둘 — 정착시간은 실수부만으로 정해진다
 % $$t_s \approx \frac{4}{\zeta\omega_n}$$
 %
@@ -835,6 +1114,105 @@ legend('2차 (기준)','먼 극점 s = -10','가까운 극점 s = -1','Location'
 % 들어갑니다.
 %
 % 모델은 모델을 열고 `Ctrl+T` 로 실행해도 됩니다.
+%% 7-0. 이 블록선도가 표준 2차 시스템인 이유 — 그림에서 식을 세운다
+% 위 그림을 보고 "그런가 보다" 하고 넘어가면 안 됩니다.
+% **그림에서 전달함수를 직접 세워** 3절의 표준형과 같은지 확인합니다.
+% 절차는 1주차부터 쓰던 네 단계 그대로입니다.
+%
+% **1단계 — 신호를 이름 붙여 따라간다**
+%
+% 그림의 화살표를 왼쪽에서 오른쪽으로 읽으며 식을 하나씩 적습니다.
+%
+% | 그림의 자리 | 식 | 읽는 법 |
+% |---|---|---|
+% | 맨 앞 합산점 ($+$, $-$) | $e = r - y$ | 지령에서 출력을 뺀 오차 |
+% | 주황 상자 $\omega_n^2$ | $\omega_n^2\,e$ | 오차를 이 이득으로 민다 |
+% | 초록 상자 $2\zeta\omega_n$ | $2\zeta\omega_n\,\dot{y}$ | 속도에 비례하는 제동력 |
+% | 둘째 합산점 ($+$, $-$) | $\ddot{y} = \omega_n^2 e - 2\zeta\omega_n \dot{y}$ | 두 힘의 합이 가속도 |
+% | 첫 적분기 $1/s$ | $\ddot{y} \rightarrow \dot{y}$ | 가속도를 적분하면 속도 |
+% | 둘째 적분기 $1/s$ | $\dot{y} \rightarrow y$ | 속도를 적분하면 위치 |
+%
+% 두 식을 합치면 그림 전체가 한 줄로 적힙니다.
+%
+% $$\ddot{y} = \omega_n^2\,(r - y) - 2\zeta\omega_n\,\dot{y}$$
+%
+% **2단계 — 라플라스 변환한다**
+%
+% 초기조건을 $0$ 으로 두면 미분은 $s$ 곱하기이고, 2계 미분은 $s^2$ 곱하기입니다.
+%
+% $$s^2 Y(s) = \omega_n^2\,\left(R(s) - Y(s)\right) - 2\zeta\omega_n\,s\,Y(s)$$
+%
+% **3단계 — $Y$ 를 한쪽으로 모은다**
+%
+% 오른쪽의 $Y$ 항 두 개를 왼쪽으로 옮깁니다. **이 한 걸음에서 분모가 생깁니다.**
+%
+% $$s^2 Y(s) + 2\zeta\omega_n s\,Y(s) + \omega_n^2 Y(s) = \omega_n^2 R(s)$$
+%
+% $$\left(s^2 + 2\zeta\omega_n s + \omega_n^2\right) Y(s) = \omega_n^2 R(s)$$
+%
+% **4단계 — 나눈다**
+%
+% $$\frac{Y(s)}{R(s)} = \frac{\omega_n^2}{s^2 + 2\zeta\omega_n s + \omega_n^2}$$
+%
+% 3절의 표준형과 **글자 하나까지 같습니다.** 그림이 표준형인 이유가 이것입니다.
+%
+% **분자와 분모가 그림의 어디인가**
+%
+% | 이름 | 그림에서 | 식에서 |
+% |---|---|---|
+% | 전방경로 | 주황 상자 $\rightarrow$ 적분기 두 개 | $\frac{\omega_n^2}{s^2}$ |
+% | 루프이득 | 전방경로 $\rightarrow$ 두 되먹임 선 (속도와 위치) | $\frac{2\zeta\omega_n s + \omega_n^2}{s^2}$ |
+% | 폐루프 | 전체 | $\frac{\text{전방경로}}{1 + \text{루프이득}}$ |
+%
+% 실제로 $\frac{\omega_n^2/s^2}{1 + (2\zeta\omega_n s + \omega_n^2)/s^2}$ 의 분자와
+% 분모에 $s^2$ 을 곱하면 4단계의 결과가 그대로 나옵니다.
+%
+% **루프를 하나씩 닫아도 답은 같다**
+%
+% 같은 답을 다른 길로 구해 봅니다. 안쪽 속도 루프를 먼저 닫습니다.
+% 가속도에서 속도까지는 적분기 하나이고, 거기에 $2\zeta\omega_n$ 되먹임이 걸려 있으므로
+%
+% $$\frac{\dot{Y}}{(\text{가속도 지령})}
+%   = \frac{1/s}{1 + 2\zeta\omega_n \cdot \frac{1}{s}}
+%   = \frac{1}{s + 2\zeta\omega_n}$$
+%
+% 여기에 앞의 $\omega_n^2$ 과 뒤의 적분기 $1/s$ 를 붙이면 열린 루프가 됩니다.
+%
+% $$L(s) = \omega_n^2 \cdot \frac{1}{s + 2\zeta\omega_n} \cdot \frac{1}{s}
+%        = \frac{\omega_n^2}{s\,(s + 2\zeta\omega_n)}$$
+%
+% 마지막으로 바깥 위치 루프를 닫습니다.
+%
+% $$\frac{L}{1+L} = \frac{\omega_n^2}{s(s+2\zeta\omega_n) + \omega_n^2}
+%                 = \frac{\omega_n^2}{s^2 + 2\zeta\omega_n s + \omega_n^2}$$
+%
+% **세 가지 방법이 모두 같은 식을 줍니다.** 그림을 통째로 읽든, 루프를 하나씩
+% 닫든 결과가 같아야 하고, 실제로 같습니다.
+%
+% **$\zeta = 0$ 이면 왜 영원히 진동하는가**
+%
+% 초록 상자를 $0$ 으로 두면 분모가 $s^2 + \omega_n^2$ 이 되어 극점이
+% $s = \pm j\omega_n$ 입니다. 실수부가 $0$ 이므로 3-0-1 절의 $e^{-\zeta\omega_n t}$ 가
+% $e^0 = 1$ 이 되어 **줄어들지 않습니다.** 감쇠가 속도 되먹임이라는 말의 뜻이
+% 여기서 분명해집니다.
+%
+% 아래에서 두 방법을 MATLAB 으로 실제로 계산해 계수를 대조합니다.
+fprintf('=== 블록선도에서 세운 식과 표준형의 대조 ===\n');
+fprintf('  zeta   wn    표준형 분모            루프를 하나씩 닫은 분모    계수 최대차이\n');
+fprintf('  ----  ----  ---------------------  ---------------------  ------------\n');
+for z = [0 0.3 0.707 1]
+    for w = 2
+        G_std = w^2/(s^2 + 2*z*w*s + w^2);              % 3절의 표준형
+        G_in  = 1/(s + 2*z*w);                          % 안쪽 속도 루프를 닫은 것
+        G_blk = minreal(feedback(w^2*G_in*(1/s), 1));   % 바깥 위치 루프까지 닫은 것
+        d1 = G_std.Denominator{1}/G_std.Denominator{1}(1);
+        d2 = G_blk.Denominator{1}/G_blk.Denominator{1}(1);
+        fprintf('  %4.2f  %4.1f  s^2 %+7.3f s %+7.3f  s^2 %+7.3f s %+7.3f  %12.2e\n', ...
+                z, w, d1(2), d1(3), d2(2), d2(3), max(abs(d1 - d2)));
+    end
+end
+fprintf('  --> 계수가 같습니다. 그림과 표준형은 같은 시스템입니다.\n');
+fprintf('  --> zeta = 0 인 첫 줄은 분모가 s^2 + 4 이므로 극점이 +-2j, 즉 영원히 진동합니다.\n\n');
 %% 7-1. 스크립트에서 Simulink 를 반복 실행하기
 % 이번 주에 새로 배우는 기법입니다.
 %
