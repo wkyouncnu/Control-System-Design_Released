@@ -139,8 +139,9 @@ title('상태 하나짜리 : 부호가 운명을 정한다');
 %
 % 학생들이 가장 많이 틀리는 지점입니다. 반드시 `m` 을 붙이십시오.
 A0 = [0 1; -2 -3];
-fprintf('exp(A)  = %s   <- 틀린 것\n', mat2str(round(exp(A0), 4)));
-fprintf('expm(A) = %s   <- 맞는 것\n', mat2str(round(expm(A0), 4)));
+
+exp(A0)         % 원소마다 지수를 취한 것. 이것은 틀린 계산이다
+expm(A0)        % 행렬 지수. 이것이 맞는 계산이다
 %% 2-1. 상태천이행렬의 성질 세 가지
 % 외울 것은 셋뿐이고, 전부 스칼라 지수함수에서 그대로 옮겨 온 것입니다.
 %
@@ -261,13 +262,13 @@ for kk = 1:25
     Tk = Tk * (Ad*td) / kk;
     E_ser = E_ser + Tk;
 end
-fprintf('=== e^{At} 를 세 방법으로 (t = %.1f) ===\n', td);
-fprintf('  expm      : %s\n', mat2str(round(E_expm(:).', 6)));
-fprintf('  급수 25항  : %s\n', mat2str(round(E_ser(:).', 6)));
-fprintf('  고유분해   : %s\n', mat2str(round(E_eigen(:).', 6)));
-fprintf('  최대 차이  : expm-급수 %.2e,  expm-고유분해 %.2e\n', ...
-        max(abs(E_expm(:)-E_ser(:))), max(abs(E_expm(:)-E_eigen(:))));
-fprintf('  --> 세 방법이 같은 답을 줍니다. 정의·급수·분해가 모두 같은 것입니다.\n\n');
+E_expm            % MATLAB 의 expm
+E_ser             % 급수를 25 항까지 더한 것
+E_eigen           % 고유분해로 구한 것
+%%
+max_difference = max(abs(E_expm(:) - E_ser(:)))
+%%
+% 세 방법이 같은 답을 줍니다. 정의·급수·분해가 모두 같은 것입니다.
 %%
 % 지금 한 일을 한 장으로 묶으면 이렇습니다.
 %
@@ -330,22 +331,23 @@ fprintf('  --> 세 방법이 같은 답을 줍니다. 정의·급수·분해가 
 % - 13주차에서 `poly([-8 -10 -12])` 처럼 **원하는 극점으로 특성다항식을 만들 때**
 %   다시 씁니다
 A_ex = [0 1; -2 -3];
-fprintf('=== 세 명령이 같은 답을 준다 ===\n');
-fprintf('  eig(A)            : %s\n', mat2str(round(eig(A_ex).', 4)));
-fprintf('  poly(A)           : %s   <- s^2 + 3s + 2 의 계수\n', ...
-        mat2str(round(poly(A_ex), 4)));
-fprintf('  roots(poly(A))    : %s\n', mat2str(round(sort(roots(poly(A_ex))).', 4)));
-fprintf('  전달함수의 극점   : %s\n', ...
-        mat2str(round(sort(pole(tf(ss(A_ex,[0;1],[1 0],0)))).', 4)));
-fprintf('  --> 넷이 같습니다. **고유값 = 극점** 이 이렇게 확인됩니다.\n\n');
-fprintf('=== 반대로도 됩니다 (13주차에서 씁니다) ===\n');
-fprintf('  poly([-8 -10 -12]) : %s\n', mat2str(poly([-8 -10 -12])));
-fprintf('  즉 (s+8)(s+10)(s+12) = s^3 + 30s^2 + 296s + 960\n');
+
+eig(A_ex)'                                  % 고유값
+poly(A_ex)                                  % 특성다항식 s^2 + 3s + 2 의 계수
+roots(poly(A_ex))'                          % 그 다항식의 근
+pole(tf(ss(A_ex, [0;1], [1 0], 0)))'        % 전달함수의 극점
+%%
+% 넷이 같습니다. **고유값 $=$ 극점** 이 이렇게 확인됩니다.
+% 반대로 원하는 극점에서 계수를 만들 수도 있습니다 (13주차에서 씁니다).
+poly([-8 -10 -12])        % (s+8)(s+10)(s+12) 의 계수
+%%
 [V0, D0] = eig(A0);
-fprintf('고유값   : %s\n', mat2str(round(diag(D0).', 4)));
-fprintf('고유벡터 : %s\n', mat2str(round(V0, 4)));
-fprintf('V*expm(D*1)*inv(V) 와 expm(A*1) 의 차이 : %.2e\n', ...
-        max(max(abs(V0*expm(D0*1)/V0 - expm(A0*1)))));
+
+diag(D0)'                 % 고유값
+V0                        % 고유벡터 (열마다 하나)
+%%
+% 고유분해로 만든 $V e^{Dt} V^{-1}$ 와 `expm` 이 같은지 봅니다.
+max(max(abs(V0*expm(D0)/V0 - expm(A0))))
 %% 4. 모드 — 고유값 하나가 만드는 응답 조각
 % 위 식을 풀어 쓰면 이렇게 됩니다.
 %
@@ -505,12 +507,11 @@ fprintf('V*expm(D*1)*inv(V) 와 expm(A*1) 의 차이 : %.2e\n', ...
 sys1 = ss(pm.A, pm.B, pm.C, pm.D);
 T = [1 1; 0 2];
 sys2 = ss(T\pm.A*T, T\pm.B, pm.C*T, pm.D);
-fprintf('원래 A   : %s,  고유값 %s\n', mat2str(round(pm.A,3)), ...
-        mat2str(round(eig(pm.A).', 3)));
-fprintf('바꾼 A   : %s,  고유값 %s\n', mat2str(round(sys2.A,3)), ...
-        mat2str(round(eig(sys2.A).', 3)));
-fprintf('두 전달함수의 극점 차이 : %.2e\n', ...
-        max(abs(sort(pole(tf(sys1))) - sort(pole(tf(sys2))))));
+sys1.A                    % 원래 A
+sys2.A                    % 좌표를 바꾼 A. 모양이 전혀 다르다
+%%
+eig(sys1.A)'              % 그런데 고유값은
+eig(sys2.A)'              % 똑같다
 %% 7. 가제어성 — 입력으로 모든 상태를 움직일 수 있는가
 % 이제 오늘의 두 번째 큰 주제입니다.
 %
@@ -583,12 +584,9 @@ fprintf('두 전달함수의 극점 차이 : %.2e\n', ...
 %
 % 예제 — 대각행렬이라 두 상태가 서로 무관한 시스템에서
 Ac = [-1 0; 0 -2];
-for B = {[1;1], [1;0]}
-    r = rank(ctrb(Ac, B{1}));
-    fprintf('B = %-8s : ctrb = %-14s rank = %d -> %s\n', ...
-            mat2str(B{1}.'), mat2str(ctrb(Ac, B{1})), r, ...
-            string(r == 2).replace("true","가제어").replace("false","가제어 아님"));
-end
+
+rank(ctrb(Ac, [1;1]))     % 두 상태 모두 입력이 닿는다 -> 2, 가제어
+rank(ctrb(Ac, [1;0]))     % 둘째 상태에 입력이 안 닿는다 -> 1, 가제어가 아니다
 %% 8. 가제어가 아니면 실제로 무슨 일이 생기는가
 % 판정만 하면 와닿지 않으니 직접 돌려 봅니다.
 % 같은 계단 입력을 넣고 상태 두 개를 모두 그린 것입니다.
@@ -625,14 +623,14 @@ end
 % 상태는 둘입니다 — 각도와 각속도. 입력은 하나 — 축에 거는 토크.
 %
 % 토크 하나로 각도와 각속도를 **둘 다** 원하는 대로 만들 수 있는가?
-[sysUp, pUp] = plant_pendulum(pi);
-fprintf('=== 거꾸로 선 진자 ===\n');
-fprintf('  A = %s\n', mat2str(round(pUp.A, 3)));
-fprintf('  B = %s\n', mat2str(round(pUp.B, 3)));
-fprintf('  고유값 : %s   <- 하나가 양수. 개루프 불안정\n', ...
-        mat2str(round(eig(pUp.A).', 3)));
-fprintf('  ctrb   = %s\n', mat2str(round(ctrb(pUp.A, pUp.B), 3)));
-fprintf('  rank   = %d / 2  ->  가제어\n', rank(ctrb(pUp.A, pUp.B)));
+[sysUp, pUp] = plant_pendulum(pi);    % 거꾸로 선 진자
+
+pUp.A
+pUp.B
+%%
+eig(pUp.A)'                       % 하나가 양수. 개루프 불안정이다
+%%
+rank(ctrb(pUp.A, pUp.B))          % 2 이면 가제어. 13주차에서 세울 수 있다
 %% 9-1. 왜 가제어인가 — 손으로 확인
 % 진자의 $A$ 와 $B$ 는 이렇게 생겼습니다.
 %
@@ -726,15 +724,11 @@ fprintf('  rank   = %d / 2  ->  가제어\n', rank(ctrb(pUp.A, pUp.B)));
 % - 둘 다 — $C = I$
 %
 % 하나씩 판정해 봅니다.
-Cs = { '각도만  C = [1 0]',  [1 0]
-       '각속도만 C = [0 1]', [0 1]
-       '둘 다   C = eye(2)', eye(2) };
-fprintf('=== 센서 선택별 가관측성 ===\n');
-for k = 1:3
-    r = rank(obsv(pUp.A, Cs{k,2}));
-    fprintf('  %-20s rank = %d / 2  ->  %s\n', Cs{k,1}, r, ...
-            string(r == 2).replace("true","가관측").replace("false","가관측 아님"));
-end
+rank(obsv(pUp.A, [1 0]))      % 각도만 잰다
+rank(obsv(pUp.A, [0 1]))      % 각속도만 잰다
+rank(obsv(pUp.A, eye(2)))     % 둘 다 잰다
+%%
+% 값이 $2$ 이면 가관측입니다.
 %%
 % 셋 다 가관측입니다. **각도 하나만 재도 됩니다.**
 %

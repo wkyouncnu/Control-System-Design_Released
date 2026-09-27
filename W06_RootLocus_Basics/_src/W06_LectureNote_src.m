@@ -143,13 +143,18 @@ title('그 점들을 이은 것이 근궤적이다');
 % - 이득을 키우면 둘이 서로 다가와 $-2$ 에서 만난다
 % - 더 키우면 위아래로 갈라져 **세로로** 올라간다
 % - 실수부가 $-2$ 에서 변하지 않으므로 **아무리 키워도 안정**하다
-fprintf('=== 가장 작은 예 ===\n');
-fprintf('     K    폐루프 극점\n');
-fprintf('  ------  --------------------------\n');
-for K = [0 1 4 16]
-    fprintf('  %6.1f  %s\n', K, mat2str(round(roots([1 4 3+K]).', 3)));
+K = [0 1 4 16]';
+pole1 = zeros(size(K));   pole2 = zeros(size(K));
+for i = 1:numel(K)
+    r = roots([1 4 3+K(i)]);       % 특성방정식 s^2 + 4s + (3+K) = 0
+    pole1(i) = r(1);
+    pole2(i) = r(2);
 end
-fprintf('  --> 실수부가 -2 로 고정되어 결코 우반면으로 못 갑니다\n\n');
+
+table(K, pole1, pole2)
+%%
+% $K$ 가 커지면 두 극점이 만나 복소수가 되지만, **실수부는 $-2$ 로 고정**입니다.
+% 그래서 이 시스템은 이득을 아무리 키워도 우반면으로 가지 않습니다.
 %% 1. 근궤적이란
 % 폐루프 특성방정식은 이것입니다.
 %
@@ -209,12 +214,10 @@ fprintf('  --> 실수부가 -2 로 고정되어 결코 우반면으로 못 갑�
 %
 % 확인해 봅니다. 두 방법이 같은 답을 주어야 합니다.
 G1 = 1/((s+1)*(s+3));
-Ktest = 5;
-fprintf('=== 같은 답인지 확인 ===\n');
-fprintf('feedback 으로 만든 폐루프 극점 : %s\n', ...
-        mat2str(round(pole(feedback(Ktest*G1, 1)).', 4)));
-fprintf('특성방정식 1+KL=0 의 근        : %s\n', ...
-        mat2str(round(roots([1 4 3+Ktest]).', 4)));
+K  = 5;
+
+pole(feedback(K*G1, 1))'     % feedback 으로 만든 폐루프 극점
+roots([1 4 3+K])'            % 특성방정식 1 + KL = 0 의 근
 %% 1-2. 어떤 점이 궤적 위에 있는지 확인하는 법 — 각도 조건
 % **여기가 근궤적의 뿌리입니다.** 이 절만 이해하면 뒤의 규칙은 전부 따라 나옵니다.
 %
@@ -270,20 +273,15 @@ fprintf('특성방정식 1+KL=0 의 근        : %s\n', ...
 %
 % 각도 조건이 통과한 점에서 크기 조건으로 구한 $K=5$ 가 정말 맞는지
 % 폐루프 극점으로 확인합니다.
-s_test = -2 + 2i;
-th1 = rad2deg(angle(s_test - (-1)));
-th2 = rad2deg(angle(s_test - (-3)));
-K_from_mag = abs(s_test + 1) * abs(s_test + 3);
+s_test = -2 + 2i;                              % 궤적 위에 있는지 볼 시험점
 
-fprintf('=== 각도 조건과 크기 조건 ===\n');
-fprintf('시험점 s = %s\n', num2str(s_test));
-fprintf('  극점 -1 에서 온 각 : %.2f 도\n', th1);
-fprintf('  극점 -3 에서 온 각 : %.2f 도\n', th2);
-fprintf('  합                : %.2f 도  -> 180 도이면 궤적 위\n', th1 + th2);
-fprintf('  크기 조건이 준 K   : %.4f\n', K_from_mag);
-fprintf('  그 K 의 폐루프 극점 : %s\n', ...
-        mat2str(round(roots([1 4 3+K_from_mag]).', 4)));
-fprintf('  --> 시험점과 같으면 성공입니다.\n\n');
+angle_from_pole1 = rad2deg(angle(s_test + 1))  % 극점 -1 에서 온 각 [도]
+angle_from_pole2 = rad2deg(angle(s_test + 3))  % 극점 -3 에서 온 각 [도]
+angle_sum = angle_from_pole1 + angle_from_pole2   % 180 도이면 궤적 위
+%%
+K_from_magnitude = abs(s_test + 1)*abs(s_test + 3)   % 크기 조건이 준 K
+%%
+roots([1 4 3+K_from_magnitude])'     % 그 K 의 폐루프 극점. 시험점과 같아야 한다
 %% 2. `rlocus` — 근궤적 그리기
 % - **하는 일** — $1 + KL(s) = 0$ 의 근을 $K=0$ 부터 무한대까지 추적해 그린다
 % - **입력** — 개루프 전달함수 $L$. **$K$ 는 빼고** 넣는다
@@ -396,20 +394,16 @@ title('DC 모터 위치제어의 근궤적')
 % | 오른쪽 그림의 실축 부분 | 왼쪽 굵은 구간과 정확히 같다 | 손으로 센 결과를 MATLAB 이 확인해 준다 |
 %
 % 아래 코드는 이 세기를 그대로 옮긴 것입니다.
-pz_all = [-1 -3 -5 -2];              % 극점 셋 + 영점 하나
-edges  = sort(pz_all);
-fprintf('=== 실축 규칙 손으로 세기 ===\n');
-fprintf('  %-16s %-8s %s\n', '구간', '오른쪽 개수', '궤적인가');
-for i = 1:numel(edges)-1
-    mid = (edges(i) + edges(i+1))/2;
-    cnt = sum(pz_all > mid);
-    fprintf('  %-16s %-8d %s\n', ...
-        sprintf('%.0f ~ %.0f', edges(i), edges(i+1)), cnt, ...
-        string(mod(cnt,2)==1));
+pz   = [-1 -3 -5 -2]';                  % 극점 셋 + 영점 하나
+test = [-6; -4; -2.5; -1.5; -0.5];      % 구간마다 시험점 하나
+
+count_right = zeros(size(test));        % 시험점 오른쪽에 있는 극·영의 개수
+for i = 1:numel(test)
+    count_right(i) = sum(pz > test(i));
 end
-fprintf('  %-16s %-8d %s\n', '-1 ~ 0', sum(pz_all > -0.5), ...
-        string(mod(sum(pz_all > -0.5),2)==1));
-fprintf('\n');
+on_locus = mod(count_right, 2) == 1;    % 홀수이면 궤적 위
+
+table(test, count_right, on_locus)
 %% 3-2. 가지는 왜 $n$ 개이고, 왜 실축에 대칭인가
 % 앞 절에서 궤적의 출발점과 도착점을 정했습니다.
 % 그러면 **가지가 몇 개**이고 **전체 모양이 어떤 제약을 받는지**도
@@ -565,16 +559,15 @@ pole(feedback(10*L_br,  1))'   % K = 10
 %
 % 아래에서 손계산과 MATLAB 을 대조합니다.
 La = 1/(s*(s+1)*(s+3));
-pa = pole(La);  za = zero(La);
-nma = numel(pa) - numel(za);
-sig_hand = (sum(pa) - sum(za))/nma;
-th_hand  = (2*(0:nma-1)+1)*180/nma;
-fprintf('=== 점근선 손계산 ===\n');
-fprintf('  극점 %s,  영점 %s\n', mat2str(round(pa.',3)), mat2str(za.'));
-fprintf('  n-m = %d\n', nma);
-fprintf('  중심 sigma = (%.3f - 0) / %d = %.4f\n', sum(pa), nma, sig_hand);
-fprintf('  각도 = (2q+1)*180/%d = %s 도\n', nma, mat2str(th_hand));
-fprintf('  --> 4-1절 그림의 빨간 점선과 대조해 보십시오.\n\n');
+p  = pole(La);
+z  = zero(La);
+
+n_minus_m = numel(p) - numel(z)                       % 무한대로 가는 가지 수
+%%
+sigma = (sum(p) - sum(z))/n_minus_m                   % 점근선 중심 (규칙 6)
+theta = (2*(0:n_minus_m-1) + 1)*180/n_minus_m         % 점근선 각도 [도] (규칙 5)
+%%
+% 4-1 절 그림의 빨간 점선과 대조해 보십시오. 같은 자리, 같은 각도입니다.
 %
 % 정리하면 이렇습니다.
 %
@@ -650,19 +643,16 @@ sgtitle('n-m 이 클수록 점근선이 오른쪽으로 눕는다', 'FontSize', 
 %
 % 반대로 **영점을 하나 더하면 $n-m$ 이 하나 줄어듭니다.**
 % 그것이 다음 절에서 볼 PD 제어의 원리입니다.
-fprintf('=== 점근선 각도 확인 ===\n');
-fprintf('  n-m   점근선 각도            불안정해질 수 있는가\n');
-fprintf('  ---  --------------------  --------------------\n');
+n_minus_m  = zeros(4,1);       % 네 예제의 n-m
+first_angle = zeros(4,1);      % 첫 번째 점근선 각도 [도]
 for i = 1:4
     L = demo{i,2};
-    nm = numel(pole(L)) - numel(zero(L));
-    th = (2*(0:(nm-1))+1)*180/nm;
-    if nm >= 3, v = '예 (오른쪽으로 휜다)'; else, v = '아니오'; end
-    fprintf('  %3d  ', nm);
-    fprintf('%.0f ', th);
-    fprintf('%s %s\n', repmat(' ', 1, max(0, 20-4*nm)), v);
+    n_minus_m(i)  = numel(pole(L)) - numel(zero(L));
+    first_angle(i) = 180/n_minus_m(i);
 end
-fprintf('\n');
+can_go_unstable = n_minus_m >= 3;    % 각이 90 도보다 작으면 오른쪽으로 휜다
+
+table(n_minus_m, first_angle, can_go_unstable)
 %% 4-2. 이탈점 — 궤적은 어디서 실축을 떠나는가
 % 0-1절의 그림에서 두 극점이 $-2$ 에서 만나 위아래로 갈라졌습니다.
 % **왜 하필 $-2$ 인가**에 답합니다.
@@ -712,16 +702,16 @@ fprintf('\n');
 % **이탈점은 중근이 생기는 자리**이기도 합니다.
 % $K=1$ 에서 특성방정식은 $s^2+4s+4 = (s+2)^2$ 이 되어 근이 $-2$ 로 겹칩니다.
 % 4주차의 말로 하면 **임계감쇠**($\zeta=1$)가 되는 이득입니다.
-sig = linspace(-2.999, -1.001, 4001);
-Ksig = -(sig+1).*(sig+3);
-[Kbrk, ib] = max(Ksig);
-fprintf('=== 이탈점 ===\n');
-fprintf('  수치로 찾은 이탈점 : sigma = %.4f, K = %.4f\n', sig(ib), Kbrk);
-fprintf('  손계산             : sigma = -2, K = 1\n');
-r_brk = roots([1 4 3+Kbrk]);
-fprintf('  그 K 의 폐루프 극점 : %s  (중근)\n', mat2str(round(r_brk.', 4)));
-fprintf('  그때의 감쇠비       : %.4f  (임계감쇠)\n\n', ...
-        -real(r_brk(1))/abs(r_brk(1)));
+sigma = linspace(-2.999, -1.001, 4001);
+K_sigma = -(sigma+1).*(sigma+3);        % 실축 위의 각 점을 지나는 데 필요한 K
+[K_max, i_max] = max(K_sigma);          % 봉우리가 이탈점
+
+breakaway = sigma(i_max)                % 손계산은 -2
+K_at_breakaway = K_max                  % 손계산은 1
+%%
+r = roots([1 4 3+K_max])'               % 그 K 의 폐루프 극점. 중근이어야 한다
+%%
+zeta = -real(r(1))/abs(r(1))            % 감쇠비 1 = 임계감쇠
 %% 4-3. 허수축을 넘는 자리 — 임계 이득을 손으로 구한다
 % 5주차에서 라우스 표로 구했던 **임계 이득**을 근궤적에서도 구할 수 있습니다.
 % 방법이 더 간단합니다.
@@ -771,18 +761,15 @@ fprintf('  그때의 감쇠비       : %.4f  (임계감쇠)\n\n', ...
 %
 % 노란 곡선의 주기를 자로 재면 $\omega$ 가 나옵니다.
 % **손계산 · 근궤적 · 시간응답 세 가지가 같은 숫자를 가리키는 것**을 확인하십시오.
-w_hand = sqrt(3);  K_hand = 4*w_hand^2;
+w_hand = sqrt(3);            % 손으로 푼 교차 주파수 [rad/s]
+K_hand = 4*w_hand^2          % 손으로 푼 임계 이득
+%%
 L3 = 1/(s*(s+1)*(s+3));
-fprintf('=== 허수축 교차 ===\n');
-fprintf('  손계산 : K = %.4f, omega = %.4f, 주기 = %.4f s\n', ...
-        K_hand, w_hand, 2*pi/w_hand);
-fprintf('  그 K 의 폐루프 극점 : %s\n', ...
-        mat2str(round(pole(feedback(K_hand*L3,1)).', 4)));
-fprintf('  실수부가 0 이면 정확히 허수축 위입니다.\n');
-fprintf('  K = 11.5 일 때 극점 : %s (안정)\n', ...
-        mat2str(round(pole(feedback(11.5*L3,1)).', 4)));
-fprintf('  K = 12.5 일 때 극점 : %s (불안정)\n\n', ...
-        mat2str(round(pole(feedback(12.5*L3,1)).', 4)));
+
+pole(feedback(K_hand*L3, 1))'   % 임계 이득에서. 실수부가 0 이면 허수축 위다
+%%
+pole(feedback(11.5*L3, 1))'     % 조금 작으면 안정 (실수부가 음수)
+pole(feedback(12.5*L3, 1))'     % 조금 크면 불안정 (실수부가 양수)
 %% 4-3-1. 복소극점에서는 어느 방향으로 출발하는가 — 출발각
 % 실축 위의 극점에서는 궤적이 실축을 따라 움직이므로 방향을 고민할 일이 없습니다.
 % 그런데 **복소극점**에서는 궤적이 어느 쪽으로 떠나는지 알 수 없으면
@@ -867,18 +854,27 @@ Lchk = 1/(s*(s+1)*(s+3));
 pz   = [pole(Lchk).' zero(Lchk).'];
 nmk  = numel(pole(Lchk)) - numel(zero(Lchk));
 
-fprintf('=== 다섯 단계 검산 ===\n');
-fprintf('1) 극점 %s,  영점 %s\n', ...
-        mat2str(round(pole(Lchk).',3)), mat2str(zero(Lchk).'));
-fprintf('2) 실축 궤적 구간 : -1 ~ 0 과 -3 아래쪽 (오른쪽 개수가 홀수인 곳)\n');
-fprintf('3) n-m = %d  ->  점근선 각도 %s 도,  중심 %.4f\n', nmk, ...
-        mat2str((2*(0:nmk-1)+1)*180/nmk), sum(pole(Lchk))/nmk);
-sig2 = linspace(-0.999, -0.001, 4001);
-K2   = -1./real(arrayfun(@(x) evalfr(Lchk, x), sig2));
-[Kb2, ib2] = max(K2);
-fprintf('4) 이탈점 sigma = %.4f  (그때 K = %.4f)\n', sig2(ib2), Kb2);
-fprintf('5) 허수축 교차 K = %.4f, omega = %.4f\n', 12, sqrt(3));
-fprintf('   -> rlocus(Lchk) 를 그려 눈으로 대조하십시오.\n\n');
+% 1단계 — 극점과 영점
+pole(Lchk)'
+zero(Lchk)'
+%%
+% 3단계 — 점근선 (2단계 실축 구간은 앞 절에서 손으로 세었습니다)
+asymptote_angle  = (2*(0:nmk-1) + 1)*180/nmk      % [도]
+asymptote_center = sum(pole(Lchk))/nmk
+%%
+% 4단계 — 이탈점. K(sigma) 가 가장 큰 자리를 찾습니다.
+sigma = linspace(-0.999, -0.001, 4001);
+K_sigma = zeros(size(sigma));
+for i = 1:numel(sigma)
+    K_sigma(i) = -1/real(evalfr(Lchk, sigma(i)));
+end
+[K_break, i_break] = max(K_sigma);
+
+breakaway = sigma(i_break)
+K_break
+%%
+% 5단계 — 허수축 교차는 앞 절에서 구한 $K = 12$, $\omega = \sqrt{3}$ 입니다.
+% `rlocus(Lchk)` 를 그려 다섯 단계를 눈으로 대조하십시오.
 %% 5. 오늘의 핵심 — 극과 영을 추가하면
 % 제어기를 설계한다는 것은 결국 **극이나 영을 추가하는 일**입니다.
 %

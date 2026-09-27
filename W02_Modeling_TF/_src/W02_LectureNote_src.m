@@ -115,9 +115,9 @@ s = tf('s');
 % 이 전달함수의 극점은 $s = -1$ 하나뿐입니다.
 % 극점이 하나면 응답도 아주 단순합니다. 단조롭게 올라가 멈춥니다.
 G_tiny = 1/(s+1);
-fprintf('가장 작은 예 : G(s) = 1/(s+1)\n');
-fprintf('  극점    : %.1f\n', pole(G_tiny));
-fprintf('  DC 이득 : %.1f  (천천히 넣으면 그대로 나온다)\n', dcgain(G_tiny));
+
+pole(G_tiny)         % 극점 하나
+dcgain(G_tiny)       % DC 이득. 천천히 넣으면 그대로 나온다
 t0 = (0:0.02:6)';
 plot(t0, step(G_tiny, t0), 'LineWidth', 2); hold on;
 yline(1, 'k--'); grid on;
@@ -272,10 +272,10 @@ legend('Location','southeast');
 % - 이 식은 $x$ 에 대한 **2계** 미분방정식이다 (가장 높은 미분이 $\ddot{x}$)
 % - 뉴턴 법칙에 가속도가 들어 있으니 당연한 결과다
 % - 그리고 이 "2계" 라는 사실이 곧 **극점이 두 개** 라는 뜻이 된다
-m = 1.0; b = 0.2; k = 1.0;
-fprintf('=== 세운 미분방정식 ===\n');
-fprintf('  %.1f x'''' + %.1f x'' + %.1f x = F\n', m, b, k);
-fprintf('  가장 높은 미분이 2계 -> 극점이 2 개\n\n');
+m = 1.0;   b = 0.2;   k = 1.0;    % 질량 [kg], 감쇠 [N s/m], 스프링 [N/m]
+%
+% 세운 식은 $m\ddot{x} + b\dot{x} + kx = F$ 이고,
+% 가장 높은 미분이 2계이므로 **극점이 2 개**입니다.
 %% 4. 3단계 — 라플라스 변환
 % 미분방정식은 그대로는 풀기 까다롭습니다.
 % 라플라스 변환을 하면 **미분이 곱셈으로 바뀝니다.** 그것이 전부입니다.
@@ -366,12 +366,10 @@ fprintf('  가장 높은 미분이 2계 -> 극점이 2 개\n\n');
 % - **분모**를 $0$ 으로 놓은 것이 특성방정식 $\rightarrow$ 그 근이 **극점**
 % - 극점이 응답의 모양(빠르기, 진동)을 정한다
 % - **분자**의 근이 **영점**. 여기서는 분자가 상수라 영점이 없다
-G = plant_msd(m, b, k);
-G
-fprintf('=== 얻은 전달함수 ===\n');
-fprintf('  극점 : %s\n', mat2str(round(pole(G).', 4)));
-fprintf('  영점 : 없음 (분자가 상수)\n');
-fprintf('  DC 이득 : %.3f\n\n', dcgain(G));
+G = plant_msd(m, b, k)
+%%
+pole(G)'        % 극점 두 개. 영점은 분자가 상수라 없다
+dcgain(G)       % DC 이득 = 1/k
 %% 5-1. 네 단계를 한 장으로
 % 지금 한 것을 다시 정리하면 이렇습니다.
 %
@@ -410,17 +408,15 @@ fprintf('  DC 이득 : %.3f\n\n', dcgain(G));
 %   극점을 눈으로 확인할 때 이 형태가 훨씬 읽기 좋습니다
 %
 % 세 방법이 정말 같은 것을 만드는지 확인해 봅니다.
-G_way1 = tf(1, [m b k]);
-G_way2 = 1/(m*s^2 + b*s + k);
-G_way3 = zpk([], roots([m b k]).', 1/m);
-fprintf('=== 같은 전달함수를 세 방법으로 ===\n');
-fprintf('  tf(계수)   극점 : %s\n', mat2str(round(sort(pole(G_way1)).', 4)));
-fprintf('  s 연산자   극점 : %s\n', mat2str(round(sort(pole(G_way2)).', 4)));
-fprintf('  zpk        극점 : %s\n', mat2str(round(sort(pole(G_way3)).', 4)));
-fprintf('  DC 이득 : %.4f / %.4f / %.4f\n\n', ...
-        dcgain(G_way1), dcgain(G_way2), dcgain(G_way3));
-fprintf('=== zpk 로 보면 극영점이 바로 보입니다 ===\n');
-zpk(G_way1)
+G_way1 = tf(1, [m b k]);              % 계수를 그대로 적는 방법
+G_way2 = 1/(m*s^2 + b*s + k);         % s 연산자로 쓰는 방법
+G_way3 = zpk([], roots([m b k]).', 1/m);   % 극점과 영점으로 쓰는 방법
+
+pole(G_way1)'
+pole(G_way2)'
+pole(G_way3)'
+%%
+zpk(G_way1)          % zpk 로 보면 극점과 영점이 바로 보인다
 %% 5-1-0-1. `zero` — 영점을 꺼내는 명령
 % 극점을 꺼내는 `pole` 은 1주차에서 배웠습니다. 짝이 되는 명령이 있습니다.
 %
@@ -434,11 +430,11 @@ zpk(G_way1)
 %   오류가 아닙니다
 % - `zeros(2,3)` (0 으로 채운 행렬을 만드는 명령) 과 **이름이 비슷하니 주의**하십시오.
 %   `zero` 는 제어 명령, `zeros` 는 일반 행렬 명령입니다
-fprintf('=== 영점 확인 ===\n');
-fprintf('  MSD 의 영점 개수 : %d 개 (분자가 상수라 없습니다)\n', numel(zero(G)));
+numel(zero(G))            % MSD 의 영점 개수. 분자가 상수라 0 개
+%%
 G_withzero = (s + 2)*G;
-fprintf('  분자에 (s+2) 를 곱하면 영점 : %s\n', ...
-        mat2str(round(zero(G_withzero).', 4)));
+
+zero(G_withzero)'         % 분자에 (s+2) 를 곱하면 영점이 하나 생긴다
 %% 5-1-1. 극점을 손으로 구해 보기 — 근의 공식이면 끝
 % 분모를 $0$ 으로 놓은 것이 특성방정식입니다.
 %
@@ -457,19 +453,20 @@ fprintf('  분자에 (s+2) 를 곱하면 영점 : %s\n', ...
 % | $b^2 > 4mk$ | 실수 두 개 | 진동 없이, 느리게 | 과감쇠 |
 %
 % $m = 1$, $k = 1$ 이면 경계는 $b = 2$ 입니다. 숫자로 확인해 봅니다.
-fprintf('=== 근의 공식으로 극점 구하기 (m = 1, k = 1) ===\n');
-fprintf('    b     판별식 b^2-4mk    극점                        상태\n');
-fprintf('  -----  --------------  --------------------------  ----------\n');
-for bb = [0.2 1.0 2.0 3.0]
-    disc = bb^2 - 4*1*1;
-    rr = roots([1 bb 1]);
-    if     disc < -1e-9, st = '부족감쇠';
-    elseif abs(disc) < 1e-9, st = '임계감쇠';
-    else,  st = '과감쇠';
-    end
-    fprintf('  %5.1f  %14.2f  %-26s  %s\n', bb, disc, mat2str(round(rr.',3)), st);
+b_list = [0.2 1.0 2.0 3.0]';          % 감쇠를 바꿔 본다 (m = k = 1)
+discriminant = b_list.^2 - 4;         % 판별식 b^2 - 4mk
+
+pole1 = zeros(size(b_list));  pole2 = pole1;
+for i = 1:numel(b_list)
+    r = roots([1 b_list(i) 1]);
+    pole1(i) = r(1);
+    pole2(i) = r(2);
 end
-fprintf('\n');
+
+table(b_list, discriminant, pole1, pole2)
+%%
+% 판별식이 음수이면 부족감쇠(복소수 극점), $0$ 이면 임계감쇠,
+% 양수이면 과감쇠(실수 극점 둘)입니다.
 %% 5-1-2. 겉모습이 달라도 식이 같으면 같은 시스템입니다
 % 질량-스프링-댐퍼와 RLC 회로는 생김새가 전혀 다른데 **식이 똑같습니다.**
 %
@@ -525,10 +522,10 @@ fprintf('\n');
 % 그네가 흔들리는 것도 같은 이유입니다. 위치에너지와 운동에너지가 서로 주고받습니다.
 %
 % $$L\,\frac{d^2 q}{dt^2} + R\,\frac{dq}{dt} + \frac{1}{C}\,q = V(t)$$
-L_ = 1; R_ = 0.4; Cc_ = 1;
+L_ = 1;   R_ = 0.4;   Cc_ = 1;        % 인덕턴스, 저항, 커패시턴스
 G_rlc = tf(1, [L_ R_ 1/Cc_]);
-fprintf('=== RLC 회로 (L = %.1f, R = %.1f, C = %.1f) ===\n', L_, R_, Cc_);
-fprintf('  극점 : %s   <- 복소수. 즉 진동합니다\n\n', mat2str(round(pole(G_rlc).', 3)));
+
+pole(G_rlc)'          % 복소수. 즉 진동한다
 t_rlc = (0:0.02:25)';
 plot(t_rlc, step(G_rlc, t_rlc), 'LineWidth', 2); hold on;
 plot(t_rlc, step(tf(1,[1 1]), t_rlc), '--', 'LineWidth', 2);
@@ -571,12 +568,11 @@ title('저장하는 곳이 둘이면 진동한다');
 %
 % 미분이 한 번뿐이라 **1계** 미분방정식이고, 따라서 **극점이 하나**입니다.
 % $\tau = RC$ 를 시정수라고 부릅니다.
-R_ = 1e3; C_ = 100e-6;
-G_rc = tf(1, [R_*C_ 1]);
-fprintf('=== RC 회로 ===\n');
-G_rc
-fprintf('  시정수 tau = R*C = %.3f s\n', R_*C_);
-fprintf('  극점 = -1/tau = %.3f\n\n', pole(G_rc));
+R_ = 1e3;   C_ = 100e-6;              % 저항 [ohm], 커패시턴스 [F]
+G_rc = tf(1, [R_*C_ 1])
+%%
+tau = R_*C_           % 시정수 [s]
+pole(G_rc)            % 극점 = -1/tau
 t_rc = (0:0.001:0.6)';
 plot(t_rc, step(G_rc, t_rc), 'LineWidth', 2); hold on;
 yline(1, 'k--'); yline(0.632, 'r:'); xline(R_*C_, 'r:');
