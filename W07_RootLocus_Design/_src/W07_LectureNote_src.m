@@ -1672,3 +1672,34 @@ table(controller, overshoot, settling, error_ss)
 %
 % 근궤적과 주파수응답은 같은 것을 다른 각도에서 보는 두 도구입니다.
 % 둘 다 할 줄 알아야 실무에서 상황에 맞게 골라 쓸 수 있습니다.
+%% 13. 오늘 내용을 다른 설명으로 한 번 더
+% 보상기 설계는 절차가 길어서 한 번에 안 붙습니다.
+% 같은 설계를 **다른 사람이 처음부터 끝까지 해 보이는 것**을 한 번 보십시오.
+% 아래는 이 강의노트를 만들 때 실제로 참고한 자료입니다.
+%
+% **담당교수 강의 녹화** — [2025 제어시스템설계 재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvIGroZ5rgn7x08F7C79d9WZ)
+%
+% **Brian Douglas** (영어, 자동 한글 자막 있음) —
+% [The Root Locus Method](https://youtube.com/playlist?list=PLUMWjy5jgHK3-ca6GP6PL0AgcNGHqn33f)
+% · [Lead/Lag Compensators](https://youtube.com/playlist?list=PLUMWjy5jgHK0WzmjRViTYtlSVSE_zP6yR)
+%
+% | 영상 | 길이 | 이 강의노트의 어디 |
+% |---|---|---|
+% | [근궤적으로 Lead 설계하기](https://www.youtube.com/watch?v=NMpmb0ihoFo) | 14 분 | 1-1절 (설계 6단계), 2-0절 (각도로 영점 위치 정하기), 6절 (Lead) |
+% | [근궤적으로 Lag 설계하기](https://www.youtube.com/watch?v=vXwOzDs5xKY) | 12 분 | **7-1절 전체.** 영점을 허수축 가까이 놓는 이유와 그 대가 |
+% | [MATLAB 으로 근궤적 보기](https://www.youtube.com/watch?v=pG3_b7wuweQ) | 13 분 | 4-3절 (`controlSystemDesigner`) |
+% | [근궤적 스케치 2부](https://www.youtube.com/watch?v=jb_FiP5tKig) | 16 분 | 2절 (영점을 더하면 궤적이 왼쪽으로), 8-1절 (극·영 배치) |
+%
+% 영상에서 특히 눈여겨볼 대목
+%
+% - Lead 영상의 **지배극점(dominant pole)** 설명 — 왜 극점이 셋 이상이어도
+%   두 개만 보고 사양을 따지는가. 2-3절의 "감쇠비만 보면 안 된다" 와 이어집니다
+% - Lead 영상의 **크기 조건으로 $K$ 를 구하는 대목** — 2-0절의 5단계와 같습니다
+% - Lag 영상의 "영점을 허수축 쪽으로 아주 가까이" — 7-1-1절에서 유도한
+%   각도 조건 $\left| \Delta\phi \right| < 5^\circ$ 를 말로 설명한 것입니다
+% - Lag 영상의 "Lead 와 함께 쓸 때는 나중에 붙인다" — 7-1-4절 마지막 문단
+%
+% **CTMS (University of Michigan · MathWorks)** —
+% [Introduction: Root Locus Controller Design](https://ctms.engin.umich.edu/CTMS/index.php?example=Introduction&section=ControlRootLocus)
+% · 6주차 10-2절이 이 페이지의 예제를 따라간 것이고,
+% 같은 페이지 뒷부분이 오늘의 보상기 설계와 겹칩니다.

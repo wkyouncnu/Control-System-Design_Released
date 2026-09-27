@@ -1533,3 +1533,32 @@ table(K_two, GM, Re, ts, OS)
 % - **Lag 보상기** — PI 의 느린 응답 문제를 고친 실용 버전
 %
 % 그리고 `controlSystemDesigner` 앱으로 이 모든 것을 마우스로 해 봅니다.
+%% 13. 오늘 내용을 다른 설명으로 한 번 더
+% 근궤적은 한 번 들어서는 잘 안 붙습니다. **같은 내용을 다른 사람의 설명으로
+% 한 번 더 듣는 것**이 가장 빠릅니다. 아래는 이 강의노트를 만들 때 실제로
+% 참고한 자료이고, 절 번호까지 짝을 지어 두었습니다.
+%
+% **담당교수 강의 녹화** — [2025 제어시스템설계 재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvIGroZ5rgn7x08F7C79d9WZ)
+%
+% **Brian Douglas, The Root Locus Method** (영어, 자동 한글 자막 있음) —
+% [재생목록](https://youtube.com/playlist?list=PLUMWjy5jgHK3-ca6GP6PL0AgcNGHqn33f)
+%
+% | 영상 | 길이 | 이 강의노트의 어디 |
+% |---|---|---|
+% | [근궤적법 소개](https://www.youtube.com/watch?v=CRvVDoQJjYI) | 14 분 | 1절, 그리고 **10-3절** (이득을 $90\%$ ~ $110\%$ 로 흔들어 보는 부분) |
+% | [근궤적 스케치 1부](https://www.youtube.com/watch?v=eTVddYCeiKI) | 10 분 | 1-1절 ($1+KL=0$ 이 폐루프 분모라는 것), 3절 (출발점) |
+% | [근궤적 스케치 2부](https://www.youtube.com/watch?v=jb_FiP5tKig) | 16 분 | 3-1절 (실축 규칙), 4-2절 (이탈점), 5절 (극·영을 더하면) |
+% | [자주 나오는 질문과 답](https://www.youtube.com/watch?v=WLBszzT0jp4) | 17 분 | 6절 (감쇠비 직선), 4-2-1절 (직각으로 떠나는 것) |
+% | [MATLAB 으로 근궤적 보기](https://www.youtube.com/watch?v=pG3_b7wuweQ) | 13 분 | 2절 (`rlocus`), 그리고 7주차의 `controlSystemDesigner` |
+%
+% **CTMS (University of Michigan · MathWorks)** —
+% [Introduction: Root Locus Controller Design](https://ctms.engin.umich.edu/CTMS/index.php?example=Introduction&section=ControlRootLocus)
+% · 10-2절이 이 페이지의 예제를 그대로 따라간 것입니다.
+% 같은 내용이 이 과목 폴더의 `Interactive Live Script Control Tutorials .../
+% Introduction_ControlRootLocus.mlx` 에도 있습니다.
+%
+% **보는 순서 추천**
+%
+% - 수업 전 — 소개 영상 하나만 (14 분). 개념이 잡힙니다
+% - 수업 후 — 스케치 1·2부. 손작도가 손에 붙습니다
+% - 시험 전 — 질문과 답 영상. 헷갈리는 것만 골라 보면 됩니다
