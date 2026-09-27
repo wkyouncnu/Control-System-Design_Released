@@ -110,19 +110,25 @@ s = tf('s');
 % 이득을 키워 가며 두 가지만 봅니다.
 % **정상상태 오차**와 **극점의 위치**입니다.
 G0 = 1/(s*(s+1)*(s+3));
-fprintf('=== 이득을 키우면 ===\n');
-fprintf('     K    가장 오른쪽 극점 실수부   오버슈트[%%]   판정\n');
-fprintf('  ------  ----------------------  -----------  --------\n');
-for K = [1 5 10 12 14]
-    T  = feedback(K*G0, 1);
-    mx = max(real(pole(T)));
-    if mx < 0
-        v = '안정';  os = getfield(stepinfo(T), 'Overshoot'); %#ok<GFLD>
+
+K_list = [1 5 10 12 14]';
+max_Re = zeros(5,1);   OS = max_Re;   verdict = strings(5,1);
+
+for i = 1:5
+    T = feedback(K_list(i)*G0, 1);
+    max_Re(i) = max(real(pole(T)));          % 가장 오른쪽 극점의 실수부
+
+    if max_Re(i) < 0
+        verdict(i) = "안정";
+        OS(i)      = stepinfo(T).Overshoot;
     else
-        v = '불안정'; os = NaN;
+        verdict(i) = "불안정";
+        OS(i)      = NaN;                    % 발산하므로 오버슈트가 없다
     end
-    fprintf('  %6.1f  %22.4f  %11.1f  %s\n', K, mx, os, v);
 end
+
+table(K_list, max_Re, OS, verdict)
+%%
 t0 = (0:0.05:30)';
 figure;
 hold on; grid on;
@@ -207,8 +213,9 @@ title('이득을 키우면 빨라지지만 점점 흔들린다');
 [Gs, ps] = plant_dcmotor('speed');
 [Gp, pp] = plant_dcmotor('position');
 Gs
-fprintf('속도 모델 극점 : ');  fprintf('%+.3f ', pole(Gs)); fprintf('\n');
-fprintf('위치 모델 극점 : ');  fprintf('%+.3f ', pole(Gp)); fprintf('\n');
+%%
+pole(Gs)'                    % 속도 모델의 극점
+pole(Gp)'                    % 위치 모델의 극점. 원점 극점이 하나 더 있다
 %% 2. 안정도 — 얼마까지 키울 수 있는가
 % 안정하다는 것의 정의는 2주차에서 배웠습니다.
 %
@@ -239,8 +246,7 @@ fprintf('위치 모델 극점 : ');  fprintf('%+.3f ', pole(Gp)); fprintf('\n');
 % - $K$ 가 바뀌면 계수가 바뀌므로 매번 근을 다시 구해야 한다
 % - `feedback` 을 쓰고 `pole` 을 불러도 되지만, 계수를 직접 만지면
 %   $K$ 가 어디에 들어가는지 눈에 보인다
-fprintf('roots 예시 : s^2 + 3s + 2 = 0 의 근\n');
-disp(roots([1 3 2]))
+roots([1 3 2])'              % s^2 + 3s + 2 = 0 의 근. -1 과 -2 여야 한다
 %% 2-2. $K$ 를 키우면 극점이 어디로 가는가
 % 위치 모델(3차)에 대해 $K$ 를 $0$ 부터 $300$ 까지 키우며 극점을 추적합니다.
 %
@@ -302,9 +308,11 @@ xlim([-15 5]); ylim([-8 8])
 % 모르고 외우면 4차 이상에서 아무것도 못 합니다. 다음 절에서 만들어 봅니다.
 %
 % 우리 시스템에 적용하면
-a3 = denP(1); a2 = denP(2); a1 = denP(3); b0 = numP(end);
-fprintf('특성방정식 : %.4f s^3 + %.4f s^2 + %.4f s + %.4f K = 0\n', a3,a2,a1,b0);
-fprintf('조건 : a2*a1 > a3*b0*K  ->  K < %.2f\n', (a2*a1)/(a3*b0));
+a3 = denP(1);   a2 = denP(2);   a1 = denP(3);   b0 = numP(end);
+
+[a3 a2 a1 b0]                % 특성방정식 a3*s^3 + a2*s^2 + a1*s + b0*K = 0 의 계수
+%%
+K_limit = (a2*a1)/(a3*b0)    % a2*a1 > a3*b0*K 에서 나온 상한
 %% 2-3-1. 그 조건은 어디서 나왔는가 — 라우스 표
 % 3학년 제어공학에서 배운 **라우스 표**입니다. 다시 세워 봅니다.
 % 표를 만드는 규칙은 두 줄뿐입니다.
@@ -340,13 +348,12 @@ fprintf('조건 : a2*a1 > a3*b0*K  ->  K < %.2f\n', (a2*a1)/(a3*b0));
 %   = \frac{0.006006 - 0.00005\,K}{0.06}$$
 %
 % 이것이 양수여야 하므로 $K < 0.006006/0.00005 = 120.12$ 입니다.
-routh3 = [a3, a1; a2, b0];      % K 를 곱하기 전의 상수항 계수
-fprintf('\n=== 라우스 표 (3차) ===\n');
-fprintf('  s^3 |  %10.6f  %10.6f\n', a3, a1);
-fprintf('  s^2 |  %10.6f  %10.6f K\n', a2, b0);
-fprintf('  s^1 |  (%.6f - %.6f K) / %.4f\n', a2*a1, a3*b0, a2);
-fprintf('  s^0 |  %10.6f K\n', b0);
-fprintf('  --> 첫째 열이 모두 양수 :  0 < K < %.4f\n\n', (a2*a1)/(a3*b0));
+% 표의 숫자를 그대로 확인해 봅니다.
+s1_numerator = a2*a1 - a3*b0*120      % K = 120 일 때. 양수면 안정
+%%
+s1_numerator = a2*a1 - a3*b0*121      % K = 121 일 때. 음수면 불안정
+%%
+K_routh = (a2*a1)/(a3*b0)             % 부호가 바뀌는 자리 = 임계이득
 %% 2-3-2. 4차는 표를 한 줄 더 만들면 된다
 % 3차만 외우면 4차에서 막힙니다. 규칙은 똑같으니 한 번 더 해 봅니다.
 %
@@ -366,14 +373,14 @@ fprintf('  --> 첫째 열이 모두 양수 :  0 < K < %.4f\n\n', (a2*a1)/(a3*b0)
 % - $4 - 2K > 0 \;\Rightarrow\; K < 2$
 %
 % 즉 $0 < K < 2$ 입니다. `roots` 로 확인해 보면 정확히 맞습니다.
-fprintf('=== 4차 예제 : s^4 + 2s^3 + 3s^2 + 4s + K ===\n');
-for Kt = [1.9 2.0 2.1]
-    rt = roots([1 2 3 4 Kt]);
-    if max(real(rt)) < -1e-9, st = '안정'; elseif max(real(rt)) > 1e-9, st = '불안정';
-    else, st = '임계'; end
-    fprintf('  K = %.1f  최대 실수부 %+.4f  -> %s\n', Kt, max(real(rt)), st);
+K4     = [1.9 2.0 2.1]';
+max_Re = zeros(3,1);
+
+for i = 1:3
+    max_Re(i) = max(real(roots([1 2 3 4 K4(i)])));
 end
-fprintf('  --> 라우스가 예측한 경계 K = 2 와 정확히 같습니다.\n\n');
+
+table(K4, max_Re)            % K = 2 에서 실수부가 0 을 지난다
 %% 2-3-3. 같은 임계이득을 세 가지 방법으로
 % 임계이득을 구하는 방법이 이 과목에 셋 있습니다.
 % **답이 같아야 하고, 같은지 확인하는 것 자체가 검증입니다.**
@@ -392,20 +399,28 @@ fprintf('  --> 라우스가 예측한 경계 K = 2 와 정확히 같습니다.\n
 %
 % **라우스는 $K$ 만 주지만, 이 방법은 그때의 진동 주파수 $\omega$ 도 줍니다.**
 % 임계이득에서 시스템이 어떤 주기로 떨리는지까지 알 수 있다는 뜻입니다.
-w_c   = sqrt(a1/a3);
-K_jw  = a2*w_c^2/b0;
-K_rou = (a2*a1)/(a3*b0);
+% 방법 2 : s = jw 대입
+w_c  = sqrt(a1/a3)                    % 임계이득에서의 진동 주파수 [rad/s]
+T_c  = 2*pi/w_c                       % 그 주기 [s]
+K_jw = a2*w_c^2/b0
+%%
+% 방법 3 : K 를 촘촘히 키우며 근을 본다
 Ksweep = linspace(100, 140, 40001);
-idx = find(arrayfun(@(K) max(real(roots(denP + [0 0 0 K*b0]))) > 0, Ksweep), 1);
+max_Re = zeros(size(Ksweep));
 
-fprintf('=== 세 가지 방법 대조 ===\n');
-fprintf('  라우스 표     : K = %.4f\n', K_rou);
-fprintf('  s = jw 대입   : K = %.4f  (w = %.4f rad/s, 주기 %.3f s)\n', ...
-        K_jw, w_c, 2*pi/w_c);
-fprintf('  roots 훑기    : K = %.4f\n', Ksweep(idx));
-fprintf('  그 K 의 극점  : %s\n', ...
-        mat2str(round(roots(denP + [0 0 0 K_rou*b0]).', 4)));
-fprintf('  --> 실수부가 0 인 극점 한 쌍. 세 방법이 모두 같습니다.\n\n');
+for i = 1:numel(Ksweep)
+    max_Re(i) = max(real(roots(denP + [0 0 0 Ksweep(i)*b0])));
+end
+
+K_sweep = Ksweep(find(max_Re > 0, 1))     % 처음으로 우반면에 들어간 K
+%%
+% 세 방법을 나란히
+method = ["라우스 표"; "s = jw 대입"; "roots 훑기"];
+K_crit = [K_routh; K_jw; K_sweep];
+
+table(method, K_crit)
+%%
+roots(denP + [0 0 0 K_routh*b0])'     % 그 K 의 극점. 실수부 0 인 한 쌍이 있다
 %% 2-4. 속도 모델은 왜 불안정해지지 않는가
 % 같은 실험을 속도 모델로 하면 $K$ 를 아무리 키워도 안정합니다.
 %
@@ -747,12 +762,16 @@ e_measured = t(end) - y(end)                    % 끝에서 지령과 출력의 
 % | 오른쪽 표 셋째 줄 | $K_a$ 는 $s$ 를 **$2$ 개** | 포물선 입력용 |
 % | 곱하는 $s$ 의 개수 | 입력 차수와 같다 | 외울 것은 이 한 줄뿐이다 |
 K = 50;
-Ls = {K*Gs, K*Gp, K*Gp/s};
-nm = {'타입 0','타입 1','타입 2'};
-for i=1:3
-    fprintf('%s : Kp=%8.3f  Kv=%8.3f  Ka=%8.3f\n', nm{i}, ...
-            dcgain(Ls{i}), dcgain(s*Ls{i}), dcgain(s^2*Ls{i}));
-end
+L0 = K*Gs;                   % 타입 0 : 속도 모델
+L1 = K*Gp;                   % 타입 1 : 위치 모델 (원점 극점 하나)
+L2 = K*Gp/s;                 % 타입 2 : 적분기를 하나 더 붙인 것
+
+type = ["타입 0"; "타입 1"; "타입 2"];
+Kp = [dcgain(L0);     dcgain(L1);     dcgain(L2)];
+Kv = [dcgain(s*L0);   dcgain(s*L1);   dcgain(s*L2)];
+Ka = [dcgain(s^2*L0); dcgain(s^2*L1); dcgain(s^2*L2)];
+
+table(type, Kp, Kv, Ka)
 %% 6. 타입과 입력의 대응 — 규칙 하나
 % 표를 외울 필요는 없습니다. 규칙 하나면 됩니다.
 %
@@ -954,12 +973,16 @@ sgtitle('타입이 높을수록, 입력 차수가 낮을수록 잘 따라간다'
 % 왼쪽은 **끝까지 어긋난 채로 남고**, 오른쪽은 **잠깐 어긋났다가 돌아옵니다.**
 % 이 차이 하나가 되먹임을 쓰는 이유 전부입니다.
 K2 = 30;
-Kr = 1/dcgain(feedback(K2*Gs,1));
-fprintf('모델이 30 %% 틀렸을 때 (목표 1)\n');
-fprintf('  Kr 보정 : 정상상태 %.4f (오차 %+.4f)\n', ...
-        dcgain(Kr*feedback(K2*Gs*1.3,1)), 1-dcgain(Kr*feedback(K2*Gs*1.3,1)));
-fprintf('  적분기  : 정상상태 %.4f (오차 %+.4f)\n', ...
-        dcgain(feedback(K2*Gp*1.3,1)), 1-dcgain(feedback(K2*Gp*1.3,1)));
+Kr = 1/dcgain(feedback(K2*Gs, 1));       % 모델이 맞다고 믿고 구한 보정 상수
+
+y_Kr  = dcgain(Kr*feedback(K2*Gs*1.3, 1));   % 실제 플랜트가 30 % 크다면
+y_int = dcgain(feedback(K2*Gp*1.3, 1));      % 적분기가 있는 경우
+
+way    = ["Kr 보정"; "적분기"];
+y_ss   = [y_Kr; y_int];
+err_ss = 1 - y_ss;                            % 목표는 1
+
+table(way, y_ss, err_ss)
 %% 10. Simulink 로 확인하기
 % 모델 `W05_SteadyStateError.slx` 는 DC 모터 속도제어에 **PI 제어기**를 붙인 것입니다.
 %
@@ -1020,19 +1043,22 @@ s = tf('s');
 [Gm_, ~] = plant_dcmotor('position');
 L = 100 * Gm_;
 
-nType = sum(abs(pole(L)) < 1e-9);
-fprintf('시스템 타입 : %d\n', nType);
-fprintf('Kp = %8.4g  -> 계단 오차 1/(1+Kp) = %.4g\n', dcgain(L),      1/(1+dcgain(L)));
-fprintf('Kv = %8.4g  -> 램프 오차 1/Kv     = %.4g\n', dcgain(s*L),    1/dcgain(s*L));
-fprintf('Ka = %8.4g  -> 포물선 오차 1/Ka   = %.4g\n', dcgain(s^2*L),  1/dcgain(s^2*L));
+nType = sum(abs(pole(L)) < 1e-9)          % 시스템 타입 = 원점 극점의 개수
+%%
+input_type = ["계단"; "램프"; "포물선"];
+constant   = [dcgain(L); dcgain(s*L); dcgain(s^2*L)];
+ess        = [1/(1 + dcgain(L)); 1/dcgain(s*L); 1/dcgain(s^2*L)];
 
-% 이론값이 실제로 맞는지 램프 응답으로 확인한다
+table(input_type, constant, ess)
+%%
+% 이론값이 실제로 맞는지 램프 응답으로 확인합니다.
 T  = feedback(L, 1);
 tr = (0:0.005:60)';
 yr = lsim(T, tr, tr);
-fprintf('\n램프 입력 실측 오차 : t=20 s 에서 %.4f, t=60 s 에서 %.4f\n', ...
-        tr(4001)-yr(4001), tr(end)-yr(end));
-fprintf('이론값 1/Kv = %.4f  -> 충분히 기다려야 이론값에 닿습니다.\n', 1/dcgain(s*L));
+
+err_20s = tr(4001) - yr(4001)             % t = 20 s 에서의 오차
+err_60s = tr(end)  - yr(end)              % t = 60 s 에서의 오차
+ess_theory = 1/dcgain(s*L)                % 이론값. 충분히 기다려야 닿는다
 %% 11. 오늘의 정리
 % - 안정하다 $=$ 폐루프 극점이 전부 좌반면에 있다
 % - $K$ 를 키우면 극점이 움직인다. 임계이득을 넘으면 불안정

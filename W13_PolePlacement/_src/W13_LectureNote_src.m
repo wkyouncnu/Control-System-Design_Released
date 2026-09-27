@@ -165,10 +165,14 @@ title('되먹임 이득 하나로 고유값의 부호를 뒤집는다');
 sys = ss(p.A, p.B, p.C, p.D);
 p_des = [-8 -10 -12];
 K = place(p.A, p.B, p_des);
-fprintf('개루프 고유값 : %s\n', mat2str(round(eig(p.A).', 4)));
-fprintf('원하는 특성다항식 계수 : %s\n', mat2str(round(poly(p_des), 4)));
-fprintf('place 로 구한 K = %s\n', mat2str(round(K, 4)));
-fprintf('검증 eig(A-BK) = %s\n', mat2str(round(sort(eig(p.A-p.B*K)).', 4)));
+
+eig(p.A)'                    % 개루프 고유값
+%%
+poly(p_des)                  % 원하는 특성다항식의 계수
+%%
+K                            % place 가 구해 준 상태궤환 이득
+%%
+sort(eig(p.A - p.B*K))'      % 검증 : 원한 -8, -10, -12 가 나와야 한다
 %% 2-1. 계수비교를 **직접** 해 본다 — 가장 작은 예
 % 위에서는 절차만 말하고 `place` 에 맡겼습니다.
 % 그러면 무슨 일이 일어나는지 안 보이므로, 상태가 둘뿐인 예로 손으로 풉니다.
@@ -225,15 +229,15 @@ fprintf('검증 eig(A-BK) = %s\n', mat2str(round(sort(eig(p.A-p.B*K)).', 4)));
 % ③ 에 $k_1$ 이나 $k_2$ 가 **아예 나타나지 않는 경우**가 있습니다.
 % 그러면 ④ 를 풀 수 없습니다. 그것이 **가제어가 아닌 경우**입니다.
 % 12주차의 판정이 여기서 쓰입니다.
-A2 = [0 1; -2 -3];  B2 = [0; 1];
-K2_hand  = [18 6];
-K2_place = place(A2, B2, [-4 -5]);
-fprintf('\n=== 계수비교법 손계산 확인 ===\n');
-fprintf('  손으로 푼 K   : %s\n', mat2str(K2_hand));
-fprintf('  place 가 준 K : %s\n', mat2str(round(K2_place, 4)));
-fprintf('  A-BK 특성다항식 : %s   (원하는 것 : %s)\n', ...
-        mat2str(round(poly(A2 - B2*K2_hand), 4)), mat2str(poly([-4 -5])));
-fprintf('  eig(A-BK) = %s\n', mat2str(round(sort(eig(A2 - B2*K2_hand)).', 4)));
+A2 = [0 1; -2 -3];   B2 = [0; 1];
+
+K2_hand  = [18 6]                        % 손으로 푼 것
+K2_place = place(A2, B2, [-4 -5])        % place 가 준 것
+%%
+poly(A2 - B2*K2_hand)                    % A-BK 의 특성다항식
+poly([-4 -5])                            % 원하는 특성다항식
+%%
+sort(eig(A2 - B2*K2_hand))'              % 고유값이 -5, -4 로 옮겨졌다
 %% 2-2. 3차에서는 기호 계산으로 맡긴다
 % 상태가 셋이 되면 손으로 전개하기가 번거롭습니다.
 % 그래도 **원리는 똑같다**는 것을 확인하기 위해 기호로 풀어 봅니다.
@@ -263,19 +267,19 @@ if hasSym
     wpoly = expand(poly2sym(poly(p_des), sv));
     sol   = solve(coeffs(cpoly - wpoly, sv, 'All') == 0, [k1 k2 k3]);
     K_hand3 = double([sol.k1 sol.k2 sol.k3]);
-
-    fprintf('\n=== 3차도 같은 방법으로 ===\n');
-    fprintf('  계수비교로 푼 K : %s\n', mat2str(round(K_hand3, 4)));
-    fprintf('  place 가 준 K   : %s\n', mat2str(round(K, 4)));
-    fprintf('  두 결과의 차이   : %.2e\n', max(abs(K_hand3 - K)));
 else
-    fprintf('\n=== 3차도 같은 방법으로 ===\n');
-    fprintf('  Symbolic Math Toolbox 가 없어 기호 계산은 건너뜁니다.\n');
-    fprintf('  계수만 대조해도 같은 확인이 됩니다.\n');
-    fprintf('  원하는 특성다항식 : %s\n', mat2str(round(poly(p_des), 4)));
-    fprintf('  A-BK 의 특성다항식 : %s\n', mat2str(round(poly(p.A - p.B*K), 4)));
+    K_hand3 = K;             % 툴박스가 없으면 계수 대조만 한다
+    disp('Symbolic Math Toolbox 가 없어 기호 계산은 건너뜁니다.')
 end
-fprintf('  --> `place` 는 이 연립방정식을 수치적으로 푸는 명령일 뿐입니다.\n');
+
+K_hand3                      % 계수비교로 푼 것
+K                            % place 가 준 것
+%%
+poly(p.A - p.B*K)            % A-BK 의 특성다항식
+poly(p_des)                  % 원하는 특성다항식. 같아야 한다
+%%
+% 세 결과가 같습니다. 그러므로 `place` 는 **이 연립방정식을 수치적으로 푸는
+% 명령일 뿐입니다.** 새로운 이론이 아닙니다.
 %% 3. `place` 와 `acker` — 오늘의 새 명령 둘
 % 둘 다 같은 일을 합니다. 그런데 쓰는 자리가 다릅니다.
 %
@@ -298,11 +302,13 @@ fprintf('  --> `place` 는 이 연립방정식을 수치적으로 푸는 명령�
 try
     K2 = place(p.A, p.B, [-10 -10 -10]);
 catch ME
-    fprintf('place([-10 -10 -10]) : 오류!\n  %s\n\n', ME.message);
+    disp('place 에 중근을 주면 오류가 납니다 :')
+    disp(ME.message)
 end
-K2 = acker(p.A, p.B, [-10 -10 -10]);
-fprintf('acker([-10 -10 -10]) : K = %s\n', mat2str(round(K2, 3)));
-fprintf('  검증 eig = %s\n', mat2str(round(sort(eig(p.A-p.B*K2)).', 3)));
+%%
+K2 = acker(p.A, p.B, [-10 -10 -10])      % acker 로는 된다
+%%
+sort(eig(p.A - p.B*K2))'                 % 검증 : -10 이 세 개
 %% 4. 근궤적과 무엇이 다른가 — 오늘의 핵심
 % 6~7주차에서는 이득 $K$ **하나**를 바꿨습니다. 자유도가 하나뿐이라
 % 극점이 **정해진 길** 위를 움직였습니다.
@@ -403,10 +409,9 @@ fprintf('  검증 eig = %s\n', mat2str(round(sort(eig(p.A-p.B*K2)).', 3)));
 %       = \frac{1}{\mathrm{dcgain}(A-BK,\,B,\,C,\,D)}$$
 %
 % MATLAB 에서는 한 줄입니다.
-Kr = 1/dcgain(ss(p.A - p.B*K, p.B, p.C, p.D));
-fprintf('Kr = %.2f\n', Kr);
-fprintf('보정 후 직류이득 = %.6f\n', ...
-        dcgain(ss(p.A - p.B*K, p.B*Kr, p.C, p.D)));
+Kr = 1/dcgain(ss(p.A - p.B*K, p.B, p.C, p.D))
+%%
+dcgain(ss(p.A - p.B*K, p.B*Kr, p.C, p.D))   % 보정 후 직류이득. 1 이어야 한다
 %% 8. $K_r$ 의 약점과 적분 상태
 % $K_r$ 은 **모델을 믿고 미리 계산한 값**입니다.
 % 1주차와 5주차에서 본 그 문제가 그대로 돌아옵니다.
@@ -645,26 +650,25 @@ fprintf('보정 후 직류이득 = %.6f\n', ...
 Ap = pB.A;  Bp = pB.B;
 p_want = [-8 -10 -12];
 
-K_place = place(Ap, Bp, p_want);
-K_acker = acker(Ap, Bp, p_want);
-fprintf('place : %s\n', mat2str(round(K_place, 4)));
-fprintf('acker : %s\n', mat2str(round(K_acker, 4)));
-fprintf('두 결과의 최대 차이 : %.2e  (같습니다)\n', max(abs(K_place - K_acker)));
-
+K_place = place(Ap, Bp, p_want)
+K_acker = acker(Ap, Bp, p_want)
+%%
+max(abs(K_place - K_acker))              % 두 결과의 차이. 0 이면 같다
+%%
 % 정말 원하는 자리에 갔는지 반드시 확인한다
-fprintf('\n원한 극점 : %s\n', mat2str(p_want));
-fprintf('실제 극점 : %s\n', mat2str(round(sort(eig(Ap - Bp*K_place)).', 4)));
-
+p_want
+sort(eig(Ap - Bp*K_place))'
+%%
 % 중근을 요구하면 place 는 거부한다
 try
     place(Ap, Bp, [-10 -10 -12]);
 catch ME
-    fprintf('\nplace 에 중근을 주면 : %s\n', ME.message);
+    disp(ME.message)
 end
-K_rep = acker(Ap, Bp, [-10 -10 -12]);
-fprintf('acker 로는 됩니다 : %s\n', mat2str(round(K_rep, 4)));
-fprintf('대신 이득이 %.0f %% 커졌습니다. 극을 왼쪽으로 모은 대가입니다.\n', ...
-        100*(K_rep(1)/K_place(1) - 1));
+%%
+K_rep = acker(Ap, Bp, [-10 -10 -12])     % acker 로는 된다
+%%
+gain_up = 100*(K_rep(1)/K_place(1) - 1)  % 이득이 몇 % 커졌나. 극을 모은 대가
 %% 13. 오늘의 정리
 % - 상태궤환 $u = -Kx$ 는 $A$ 를 $A - BK$ 로 바꾼다
 % - 가제어이기만 하면 극점 $n$ 개를 **원하는 자리에 정확히** 놓을 수 있다

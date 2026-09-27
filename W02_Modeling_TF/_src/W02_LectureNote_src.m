@@ -1076,19 +1076,15 @@ C_hand = [1 0];
 D_hand = 0;
 sys_ss = ss(A_hand, B_hand, C_hand, D_hand);
 
-fprintf('=== 손으로 만든 상태공간 ===\n');
-fprintf('  m = %.1f, b = %.1f, k = %.1f\n', m, b, k);
-disp('A ='); disp(A_hand);
-disp('B ='); disp(B_hand);
-fprintf('C = %s ,  D = %g\n\n', mat2str(C_hand), D_hand);
-
-fprintf('=== 전달함수로 되돌리면 ===\n');
-tf(sys_ss)
-fprintf('  오늘 4단계에서 구한 G(s) 의 극점 : %s\n', ...
-        mat2str(round(sort(pole(G)).', 4)));
-fprintf('  상태공간에서 되돌린 것의 극점    : %s\n', ...
-        mat2str(round(sort(pole(tf(sys_ss))).', 4)));
-fprintf('  --> 같은 시스템입니다. 표현만 다릅니다.\n');
+A_hand
+B_hand
+C_hand
+D_hand
+%%
+tf(sys_ss)                   % 상태공간을 전달함수로 되돌린 것
+%%
+sort(pole(G))'               % 4단계에서 구한 G(s) 의 극점
+sort(pole(tf(sys_ss)))'      % 상태공간에서 되돌린 것의 극점. 같아야 한다
 %% 12-4. 이제 아까 그 질문에 답할 수 있습니다
 % **"물체를 $0.5\,\mathrm{m}$ 당겨 놓고 힘 없이 놓았다. 어떻게 되는가?"**
 %
@@ -1192,33 +1188,41 @@ s = tf('s');
 Ga = tf(4, [1 0.8 4]);
 Gb = zpk([], roots([1 0.8 4]).', 4);
 Gc = 4/(s^2 + 0.8*s + 4);
-fprintf('tf 대 s 연산자 : %.2e,   tf 대 zpk : %.2e\n', ...
-        norm(Ga-Gc, inf), norm(tf(Gb)-Gc, inf));
 
+norm(Ga - Gc, inf)           % tf 대 s 연산자
+norm(tf(Gb) - Gc, inf)       % tf 대 zpk
+%%
 % (2) 값을 꺼내는 세 가지 명령
 [zz, pp_, kk] = zpkdata(Gc, 'v');
-[nn, dd]      = tfdata(Gc, 'v');
-fprintf('zpkdata : 영점 %s, 극점 %s, 이득 %.4g\n', ...
-        mat2str(round(zz.',3)), mat2str(round(pp_.',3)), kk);
-fprintf('tfdata  : 분자 %s, 분모 %s\n', mat2str(nn), mat2str(dd));
 
+zz'                          % 영점 (없으면 빈 것)
+pp_'                         % 극점
+kk                           % 이득
+%%
+[nn, dd] = tfdata(Gc, 'v');
+
+nn                           % 분자 계수
+dd                           % 분모 계수
+%%
 % (3) 극영점 상쇄가 있으면 minreal 이 정리해 준다
 Gcancel = (s+2)/((s+1)*(s+2));
-fprintf('상쇄 전 극점 %s -> minreal 뒤 %s\n', ...
-        mat2str(round(pole(Gcancel).',3)), ...
-        mat2str(round(pole(minreal(Gcancel, 1e-6)).',3)));
 
+pole(Gcancel)'                       % 상쇄 전
+pole(minreal(Gcancel, 1e-6))'        % minreal 뒤
+%%
 % (4) 임펄스응답은 계단응답의 미분이다
 tt = (0:0.001:15)';
-ys = step(Gc, tt);  yi = impulse(Gc, tt);
-fprintf('impulse 와 계단응답의 수치미분 차이 : %.3e (미분 오차)\n', ...
-        max(abs(yi(2:end) - diff(ys)/0.001)));
+ys = step(Gc, tt);
+yi = impulse(Gc, tt);
 
+max(abs(yi(2:end) - diff(ys)/0.001))   % 두 방법의 차이 (수치미분 오차)
+%%
 % (5) 전달함수로는 못 하고 상태공간으로만 되는 일
 Gss = ss([0 1; -4 -0.8], [0; 4], [1 0], 0);   % 물리 상태 : 위치와 속도
 y_ini = initial(Gss, [0.5; 0], tt);
-fprintf('초기 위치 0.5 에서 놓았을 때 : 시작 %.3f -> 끝 %.4f\n', ...
-        y_ini(1), y_ini(end));
+
+y_ini(1)                     % 시작. 초기 위치 0.5 에서 놓았다
+y_ini(end)                   % 끝. 0 으로 돌아온다
 %% 14. 오늘의 정리
 % - 모델링은 **물리법칙 → 미분방정식 → 라플라스 변환 → 전달함수** 네 단계다.
 %   어떤 시스템이든 절차는 같고 바뀌는 것은 1단계의 물리 법칙뿐이다

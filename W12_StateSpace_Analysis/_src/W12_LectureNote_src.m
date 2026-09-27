@@ -783,12 +783,15 @@ rank(obsv(pUp.A, eye(2)))     % 둘 다 잰다
 % MATLAB 의 `minreal` 이 하는 일이 바로 그 사라진 부분을 떼어내는 것입니다.
 % 떼어낸 만큼이 **가제어도 가관측도 아닌 부분**입니다.
 sys_full = ss([-1 0; 0 -2], [1;1], [1 0], 0);
-fprintf('원래 상태 %d 개, 고유값 %s\n', size(sys_full.A,1), ...
-        mat2str(round(eig(sys_full.A).', 3)));
-fprintf('전달함수의 극점 : %s\n', mat2str(round(pole(tf(sys_full)).', 3)));
+
+eig(sys_full.A)'             % 상태가 둘이므로 고유값도 둘
+%%
+pole(tf(sys_full))'          % 전달함수의 극점은 하나뿐이다
+%%
 sys_min = minreal(sys_full);
-fprintf('minreal 후 상태 %d 개  -> %d 개가 숨어 있었다\n', ...
-        size(sys_min.A,1), size(sys_full.A,1) - size(sys_min.A,1));
+
+size(sys_full.A, 1)          % 원래 상태 개수
+size(sys_min.A,  1)          % minreal 이 남긴 상태 개수. 하나가 숨어 있었다
 %% 13. 오늘 판정한 것이 다음 두 주의 입장권이다
 % 오늘 배운 두 판정이 왜 중요한지 정리합니다.
 %
@@ -867,24 +870,24 @@ fprintf('minreal 후 상태 %d 개  -> %d 개가 숨어 있었다\n', ...
 Am = pA.A;  Bm = pA.B;  Cm = pA.C;
 
 [Vm, Dm] = eig(Am);
-fprintf('고유값 : %s\n', mat2str(round(diag(Dm).', 4)));
 
+diag(Dm)'                    % 고유값
+%%
 % expm 이 정말 고유분해와 같은지 확인
 tq = 0.1;
 E_direct = expm(Am*tq);
 E_eigen  = real(Vm * diag(exp(diag(Dm)*tq)) / Vm);
-fprintf('expm 과 고유분해의 최대 차이 : %.2e\n', max(abs(E_direct(:) - E_eigen(:))));
 
+max(abs(E_direct(:) - E_eigen(:)))     % 0 이면 같다
+%%
 % 특성다항식으로 돌아가도 같은 고유값이 나온다
-fprintf('poly(A) = %s\n', mat2str(round(poly(Am), 4)));
-fprintf('roots(poly(A)) 와 eig(A) 의 차이 : %.2e\n', ...
-        max(abs(sort(roots(poly(Am))) - sort(eig(Am)))));
-
+poly(Am)                                       % 특성다항식의 계수
+max(abs(sort(roots(poly(Am))) - sort(eig(Am))))   % roots 와 eig 의 차이
+%%
 % 판정은 언제나 rank 로
-fprintf('\nrank(ctrb) = %d / %d  -> %s\n', rank(ctrb(Am,Bm)), size(Am,1), ...
-        string(rank(ctrb(Am,Bm))==size(Am,1)) + " (가제어)");
-fprintf('rank(obsv) = %d / %d  -> %s\n', rank(obsv(Am,Cm)), size(Am,1), ...
-        string(rank(obsv(Am,Cm))==size(Am,1)) + " (가관측)");
+n = size(Am, 1)              % 상태 개수
+rank(ctrb(Am, Bm))           % 같으면 가제어
+rank(obsv(Am, Cm))           % 같으면 가관측
 %% 15. 오늘의 정리
 % - 상태방정식의 해는 $x(t) = e^{At}x(0) + \int e^{A(t-\tau)}Bu\,d\tau$
 % - `expm` 과 `exp` 는 다르다. 반드시 **m 을 붙일 것**

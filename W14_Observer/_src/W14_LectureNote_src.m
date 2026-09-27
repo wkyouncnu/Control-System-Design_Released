@@ -222,10 +222,14 @@ s = tf('s');
 A = p.A; B = p.B; C = p.C; D = p.D;
 p_obs = [-30 -34 -38];
 L = place(A', C', p_obs)';
-fprintf('C = %s  ->  각도만 잰다\n', mat2str(C));
-fprintf('rank(obsv) = %d / %d  ->  가관측\n', rank(obsv(A,C)), size(A,1));
-fprintf('L = %s  (열벡터)\n', mat2str(round(L.', 2)));
-fprintf('eig(A - L*C) = %s\n', mat2str(round(sort(eig(A-L*C)).', 3)));
+
+C                            % 각도만 잰다
+%%
+rank(obsv(A,C))              % 상태 개수와 같으면 가관측
+%%
+L                            % 관측기 이득. 열벡터다
+%%
+sort(eig(A - L*C))'          % 원한 -38, -34, -30 이 나와야 한다
 %% 4. 관측기가 정말 따라잡는가
 % 실제 플랜트는 초기값이 있고, 관측기는 **아무것도 모르니 $0$ 에서 출발**합니다.
 % 그런데도 따라잡습니다.
@@ -606,17 +610,21 @@ Ad = Ao.';  Bd = Co.';
 Kd = place(Ad, Bd, p_obs);
 Lo = Kd.';
 
-fprintf('1) Ad 크기 %s,  Bd 크기 %s\n', mat2str(size(Ad)), mat2str(size(Bd)));
-fprintf('2) Kd 크기 %s  (행벡터)\n', mat2str(size(Kd)));
-fprintf('3) L  크기 %s  (열벡터여야 합니다)\n', mat2str(size(Lo)));
-fprintf('4) L = %s\n', mat2str(round(Lo.', 2)));
-
-fprintf('\n원한 관측기 극 : %s\n', mat2str(p_obs));
-fprintf('eig(A - L*C)   : %s\n', mat2str(round(sort(eig(Ao - Lo*Co)).', 4)));
-
+size(Ad)                     % 1) 전치한 A
+size(Bd)                     %    전치한 C. 열벡터가 되었다
+%%
+size(Kd)                     % 2) place 의 결과는 행벡터
+size(Lo)                     % 3) 다시 전치하면 열벡터. 이 크기여야 한다
+%%
+Lo                           % 4) 관측기 이득
+%%
+p_obs                        % 원한 관측기 극
+sort(eig(Ao - Lo*Co))'       % 실제로 간 자리
+%%
 % 한 줄로 쓴 것과 같은지 확인
 L_one = place(Ao.', Co.', p_obs).';
-fprintf('한 줄로 쓴 결과와의 차이 : %.2e\n', max(abs(Lo - L_one)));
+
+max(abs(Lo - L_one))         % 0 이면 같다
 %% 13. 오늘의 정리
 % - 관측기는 **같은 모델을 컴퓨터에서 함께 돌리고, 출력 차이를 보고 고치는 것**
 % - 추정오차는 $\dot{e} = (A - LC)e$ 를 따른다. **입력과 무관하다**

@@ -329,7 +329,8 @@ title('step 으로 구한 계단응답')
 % - `y = step(5*G, t)`
 y1 = 5 * step(G_ex, t);
 y2 = step(5*G_ex, t);
-fprintf('두 방법의 최대 차이: %.2e (같습니다)\n', max(abs(y1-y2)));
+
+max(abs(y1 - y2))            % 두 방법의 차이. 0 이면 같다
 %% 1-5. `dcgain` — 천천히 넣으면 몇 배로 나오나
 % - **하는 일** — 전달함수에 $s=0$ 을 대입한다. 그게 전부다
 % - **입력** — 전달함수
@@ -350,9 +351,10 @@ fprintf('두 방법의 최대 차이: %.2e (같습니다)\n', max(abs(y1-y2)));
 % - 정상상태 오차 계산
 % - 목표가 $1$ 인데 $G(0)=0.8$ 이면 $20\%$ 모자란다는 뜻
 y_long = step(G_ex, 0:0.01:200);
-fprintf('dcgain(G)          = %.4f\n', dcgain(G_ex));
-fprintf('t = 20 s 에서의 값   = %.4f   (아직 진동이 남아 조금 어긋남)\n', y(end));
-fprintf('t = 200 s 에서의 값  = %.4f   (충분히 기다리니 딱 맞음)\n', y_long(end));
+
+dcgain(G_ex)                 % s = 0 을 대입한 값
+y(end)                       % t = 20 s. 아직 진동이 남아 조금 어긋난다
+y_long(end)                  % t = 200 s. 충분히 기다리니 딱 맞는다
 %% 1-6. `feedback` — 되먹임 루프 닫기
 % **오늘 가장 중요한 명령입니다.** 이 명령이 계산해 주는 것이 아래 그림입니다.
 % ![센서 H(s) 가 있는 비단위 피드백](loop_sensor.png)
@@ -445,9 +447,12 @@ fprintf('t = 200 s 에서의 값  = %.4f   (충분히 기다리니 딱 맞음)\n
 %   극점이 쓸데없이 늘어난다. 아래에서 확인
 T_cmd  = feedback(G_ex, 1);
 T_hand = G_ex / (1 + G_ex);
-fprintf('feedback 명령의 극점 개수 : %d\n', numel(pole(T_cmd)));
-fprintf('손으로 나눈 것의 극점 개수 : %d   <- 약분이 안 되어 늘어남\n', numel(pole(T_hand)));
-fprintf('응답 자체는 같은가? 최대 차이 %.2e\n', max(abs(step(T_cmd,t) - step(T_hand,t))));
+
+pole(T_cmd)'                 % feedback 명령
+%%
+pole(T_hand)'                % 손으로 나눈 것. 약분이 안 되어 극점이 늘어났다
+%%
+max(abs(step(T_cmd,t) - step(T_hand,t)))   % 응답 자체는 같다
 %% 1-6-1. `feedback` 을 눈으로 확인하기
 % - `feedback(K*G, 1)` 은 앞으로 가는 경로가 $KG$ 인 폐루프를 만든다
 % - $K$ 를 키우면 빨라지지만 진동이 심해진다
@@ -513,9 +518,11 @@ info = stepinfo(feedback(5*G_ex, 1))
 %% 1-7-1. 필요한 항목만 골라 쓰기
 % - 구조체이므로 점을 찍어 꺼내 쓴다
 % - 보고서에는 이렇게 정리해서 쓰는 것이 좋다
-fprintf('오버슈트  : %.1f %%\n', info.Overshoot);
-fprintf('상승시간  : %.2f s\n',  info.RiseTime);
-fprintf('정착시간  : %.2f s\n',  info.SettlingTime);
+OS = info.Overshoot;
+tr = info.RiseTime;
+ts = info.SettlingTime;
+
+table(OS, tr, ts)
 %% 1-8. `lsim` — 아무 입력이나 넣어 보기
 % - `step` 은 계단입력만 넣는다
 % - 실제로는 램프, 사인파, 그리고 오늘 다룰 **중간에 갑자기 끼어드는 외란**이 들어온다
@@ -575,28 +582,29 @@ Gd = 4/(s^2 + 0.8*s + 4);                 % zeta = 0.2, wn = 2
 % (1) 만드는 방법 세 가지가 같은 것을 주는지 확인
 Ga = tf(4, [1 0.8 4]);
 Gb = zpk([], roots([1 0.8 4]).', 4);
-fprintf('tf 와 s 연산자의 차이 : %.2e\n', norm(Ga - Gd, inf));
-fprintf('tf 와 zpk 의 차이     : %.2e\n', norm(tf(Gb) - Gd, inf));
 
+norm(Ga - Gd, inf)           % tf 와 s 연산자의 차이
+norm(tf(Gb) - Gd, inf)       % tf 와 zpk 의 차이
+%%
 % (2) damp 를 표로 볼 때와 변수로 받을 때
 damp(Gd)
+%%
 [wn_v, z_v] = damp(Gd);
-fprintf('변수로 받으면 wn = %.3f, zeta = %.3f\n', wn_v(1), z_v(1));
 
+wn_v(1)
+z_v(1)
+%%
 % (3) 정착시간 기준을 바꾸면 값이 달라진다
-i2 = stepinfo(Gd);
-i5 = stepinfo(Gd, 'SettlingTimeThreshold', 0.05);
-fprintf('정착시간 : 2%% 기준 %.3f s,  5%% 기준 %.3f s\n', ...
-        i2.SettlingTime, i5.SettlingTime);
-
+ts_2 = stepinfo(Gd).SettlingTime                                       % 2 % 기준
+ts_5 = stepinfo(Gd, 'SettlingTimeThreshold', 0.05).SettlingTime         % 5 % 기준
+%%
 % (4) 되먹임 부호를 틀리면 어떻게 되는가
 %     이득이 2 배인 플랜트로 보면 차이가 뚜렷합니다.
 G2 = 2*Gd;
-T_neg = feedback(G2, 1);
-T_pos = feedback(G2, 1, +1);
-fprintf('음되먹임 극점 : %s\n', mat2str(round(pole(T_neg).', 3)));
-fprintf('양되먹임 극점 : %s\n', mat2str(round(pole(T_pos).', 3)));
-fprintf('   양되먹임 쪽에 실수부가 양수인 극점이 있습니다 -> 발산합니다.\n');
+
+pole(feedback(G2, 1))'       % 음되먹임 (기본)
+%%
+pole(feedback(G2, 1, +1))'   % 양되먹임. 실수부가 양수인 극점이 있다 -> 발산
 %% 1-8-2. 여러 시스템을 한 그림에 겹치는 세 가지 방법
 % 이 과목에서 가장 자주 하는 일이 **여러 설정의 응답을 겹쳐 보는 것**입니다.
 % 방법이 세 가지 있고, 쓰는 자리가 다릅니다.
@@ -703,8 +711,10 @@ title('같은 \omega_n, 다른 \zeta — 값을 받아 직접 그린 경우');
 % `plant_msd` 는 이 과목에서 준비해 둔 함수로, 전달함수와 파라미터 구조체를 돌려줍니다.
 [G, p] = plant_msd();
 G
-fprintf('고유진동수 = %.2f rad/s,  감쇠비 = %.2f,  DC 이득 = %.2f\n', ...
-        p.wn, p.zeta, dcgain(G));
+%%
+wn   = p.wn
+zeta = p.zeta
+K_dc = dcgain(G)
 %% 2-3. 아무 제어도 하지 않으면
 % - 제어기 없이 힘 $1\,\mathrm{N}$ 을 그대로 넣어 본다
 % - $\zeta = 0.1$ 로 작아서 한참 출렁이다가 겨우 자리를 잡는다
@@ -831,16 +841,24 @@ legend('개루프 출력', '목표값 r', 'Location','southeast'); ylim([0 2])
 % 하나를 얻으려면 하나를 내줘야 합니다.
 % 4주차에서 이 맞바꿈을 숫자로 적는 법을 배우고,
 % 6주차부터는 그 숫자를 보고 $K$ 를 고릅니다.
-for K = [1 3 9]
-    T = feedback(K*G, 1);
+K_list = [1 3 9]';
+y_ss   = zeros(3,1);   y_theory = y_ss;   err_pct = y_ss;
+
+for i = 1:3
+    T = feedback(K_list(i)*G, 1);
     plot(t, step(r*T, t), 'LineWidth', 2); hold on
-    fprintf('K = %d : 정상상태 %.4f (이론 %.4f), 오차 %.1f %%\n', ...
-            K, dcgain(r*T), K/(1+K), 100*(1 - K/(1+K)));
+
+    y_ss(i)     = dcgain(r*T);
+    y_theory(i) = K_list(i)/(1 + K_list(i));
+    err_pct(i)  = 100*(1 - y_theory(i));
 end
+
 yline(r, 'k--', 'LineWidth', 1.5); grid on
 xlabel('시간 [s]'); ylabel('변위 x [m]')
 title('비례제어: K 를 키우면 오차는 줄지만 진동이 심해진다')
 legend('K = 1','K = 3','K = 9','목표값 r', 'Location','southeast'); ylim([0 2])
+%%
+table(K_list, y_ss, y_theory, err_pct)
 %% 4-1. 이대로면 개루프의 완승입니다
 % - 개루프는 오차가 $0$
 % - 폐루프는 $10\sim50\%$ 나 틀리고 진동까지 심함
@@ -1028,10 +1046,11 @@ legend('개루프', '폐루프', '목표값 r', '외란 유입', 'Location','sou
 % - 외란 억제비의 이론값은 $\frac{1}{1+KG(0)}$
 % - $K=9$, $G(0)=1$ 이므로 $\frac{1}{10}$
 % - 즉 오차가 **10분의 1** 로 줄어야 한다
-fprintf('개루프 최종 오차 : %+.4f m\n', r - y_open_d(end));
-fprintf('폐루프 최종 오차 : %+.4f m\n', r - y_close_d(end));
-fprintf('줄어든 비율      : %.1f 배   (이론값 %.0f)\n', ...
-        abs((r-y_open_d(end))/(r-y_close_d(end))), 1+K*dcgain(G));
+err_open  = r - y_open_d(end)         % 개루프 최종 오차 [m]
+err_close = r - y_close_d(end)        % 폐루프 최종 오차 [m]
+%%
+ratio_num    = abs(err_open/err_close)     % 실제로 몇 배 줄었나
+ratio_theory = 1 + K*dcgain(G)             % 이론값 1 + K*G(0)
 %% 7. 결정적 장면 둘 — 모델이 틀렸을 때
 % 이번에는 외란을 완전히 없애고, 대신 **우리가 아는 모델 자체를 틀리게** 만듭니다.
 %
@@ -1243,21 +1262,20 @@ To_now = dcgain(Kff_s*G_design);
 To_new = dcgain(Kff_s*G_pert);
 So_num = ((To_new - To_now)/To_now) / dG_rel;
 
-fprintf('=== 상대감도를 수치로 확인 ===\n');
-fprintf('  폐루프 : 수치 %.6f   이론 1/(1+KG(0)) = %.6f\n', ...
-        S_num, 1/(1+K*dcgain(G_design)));
-fprintf('  개루프 : 수치 %.6f   이론 1\n', So_num);
-fprintf('  --> G 가 1 %% 틀리면 폐루프 출력은 %.1f %% 만 틀립니다.\n', 100*S_num*0.01);
+loop    = ["폐루프"; "개루프"];
+S_numeric = [S_num; So_num];                          % 수치로 재 본 것
+S_theory  = [1/(1+K*dcgain(G_design)); 1];            % 유도한 식
+
+table(loop, S_numeric, S_theory)
 %
 % 앞으로의 연결
 %
 % - 이 $S$ 를 **감도**(sensitivity)라 한다
 % - 11주차 주파수영역 설계에서 주인공으로 다시 만난다
 % - 오늘은 $\frac{1}{1+\text{루프이득}}$ 이라는 형태만 기억할 것
-L0 = K*dcgain(G_design);
-fprintf('루프이득 K*G(0) = %.1f\n', L0);
-fprintf('감도 S = 1/(1+L) = %.3f\n', 1/(1+L0));
-fprintf('즉 외란도 모델 오차도 약 %.0f 배 줄어듭니다.\n', 1+L0);
+L0 = K*dcgain(G_design)      % 루프이득 K*G(0)
+S0 = 1/(1 + L0)              % 감도
+reduction = 1 + L0           % 외란도 모델 오차도 이만큼 줄어든다
 
 %% 8-C. 두 장면을 나란히 놓고 보기
 % 말로만 하면 잘 안 믿깁니다. 두 장면을 한 장에 놓고 보겠습니다.
@@ -1344,15 +1362,12 @@ fprintf('즉 외란도 모델 오차도 약 %.0f 배 줄어듭니다.\n', 1+L0);
 % 오른쪽 그림은 이 값을 주파수별로 그린 것입니다. 지금은 "저주파에서 작다" 정도만
 % 보면 됩니다. **10주차에서 이 그림이 다시 나옵니다.**
 
-fprintf('\n=== 감도 S = 1/(1+K*G(0)) 를 이득별로 ===\n');
-fprintf('      K     루프이득 K*G(0)    S       외란·모델오차가 줄어드는 배수\n');
-fprintf('   ------  ---------------  -------  ------------------------------\n');
-for Kq = [1 5 20 50 100]
-    Lq = Kq*dcgain(G_design);
-    fprintf('   %6d  %15.1f  %7.4f  %26.1f 배\n', Kq, Lq, 1/(1+Lq), 1+Lq);
-end
-fprintf('   --> K 를 5 배 키우면 오차도 대략 5 배 줄어듭니다.\n');
-fprintf('       다만 공짜가 아닙니다. 바로 다음 절에서 봅니다.\n\n');
+K_list = [1 5 20 50 100]';
+L_loop = K_list*dcgain(G_design);      % 루프이득 K*G(0)
+S      = 1./(1 + L_loop);              % 감도
+reduction = 1 + L_loop;                % 오차가 줄어드는 배수
+
+table(K_list, L_loop, S, reduction)
 %% 8-E. 그러면 $K$ 를 무한히 키우면 되는가
 % 좋은 질문이고, 답은 **안 된다**입니다.
 %

@@ -104,10 +104,10 @@ dg_arrow(b2.R, [9.2 1.3], 'y');
 %%
 G1 = 1/(s+1);
 G2 = 2/(s+2);
-fprintf('직렬로 이으면\n');
-minreal(G1*G2)
-fprintf('  극점 : %s   (두 시스템의 극점이 그대로 모입니다)\n\n', ...
-        mat2str(round(pole(G1*G2).', 3)));
+
+minreal(G1*G2)               % 직렬로 이으면 곱이 된다
+%%
+pole(G1*G2)'                 % 두 시스템의 극점이 그대로 모인다
 %% 1. 블록선도 — 외울 것은 세 줄뿐
 % 실제 시스템은 제어기, 모터, 기계, 센서가 줄줄이 이어져 있습니다.
 % 이걸 하나로 합치는 규칙은 딱 세 개입니다.
@@ -398,15 +398,12 @@ disp('전달함수의 극점:'); disp(pole(G_msd))
 % **$C$ 는 "무엇을 볼 수 있는가" 를 적는 자리**일 뿐입니다.
 %
 % 값을 넣어 확인해 봅니다.
-fprintf('=== 손으로 만든 상태공간 ===\n');
-fprintf('  m = %.1f, b = %.1f, k = %.1f\n\n', p.m, p.b, p.k);
-A_hand = [0 1; -p.k/p.m, -p.b/p.m];
-B_hand = [0; 1/p.m];
-C_hand = [1 0];
-D_hand = 0;
-disp('A ='); disp(A_hand);
-disp('B ='); disp(B_hand);
-fprintf('C = %s ,  D = %g\n\n', mat2str(C_hand), D_hand);
+[p.m p.b p.k]                % 질량, 감쇠, 스프링 상수
+%%
+A_hand = [0 1; -p.k/p.m, -p.b/p.m]
+B_hand = [0; 1/p.m]
+C_hand = [1 0]
+D_hand = 0
 %% 5-6. 정말 같은 시스템인가
 % 상태공간에서 전달함수로 되돌아가는 공식이 있습니다.
 %
@@ -424,13 +421,10 @@ fprintf('C = %s ,  D = %g\n\n', mat2str(C_hand), D_hand);
 % $$Y(s) = \left[\,C (sI-A)^{-1} B + D\,\right] U(s)$$
 %
 % MATLAB 에서는 `tf(ss(A,B,C,D))` 한 줄이면 됩니다. 2주차 결과와 비교해 봅니다.
-sys_hand = ss(A_hand, B_hand, C_hand, D_hand);
-G_from_ss = tf(sys_hand);
-fprintf('=== 상태공간에서 되돌린 전달함수 ===\n');
-G_from_ss
-fprintf('  2주차에서 직접 구한 것과 극점 차이 : %.2e\n', ...
-        max(abs(sort(pole(G_from_ss)) - sort(pole(G_msd)))));
-fprintf('  --> 같은 시스템의 두 표현일 뿐입니다\n\n');
+sys_hand  = ss(A_hand, B_hand, C_hand, D_hand);
+G_from_ss = tf(sys_hand)
+%%
+max(abs(sort(pole(G_from_ss)) - sort(pole(G_msd))))   % 2주차 결과와의 극점 차이
 t_cmp = (0:0.02:30)';
 plot(t_cmp, step(G_from_ss, t_cmp), 'LineWidth', 2.5); hold on;
 plot(t_cmp, step(G_msd, t_cmp), '--', 'LineWidth', 1.8);
@@ -603,11 +597,13 @@ legend('sin(x)  진짜 곡선','x  직선 근사','Location','southeast')
 % | 막대 높이가 오른쪽으로 갈수록 급해지는 모양 | 선형이 아니라 곡선으로 늘어난다 | 오차는 대략 $\theta^2$ 에 비례한다 |
 %
 % 외울 숫자는 하나입니다 — **$14^\circ$**. 이 안쪽이면 마음 놓고 선형 모델을 씁니다.
-for dg = [1 5 10 20 30 45 60 90]
-    th = deg2rad(dg);
-    fprintf('%4d도 : sin=%.4f, theta=%.4f, 오차 %.1f %%\n', ...
-            dg, sin(th), th, abs(th-sin(th))/sin(th)*100);
-end
+deg   = [1 5 10 20 30 45 60 90]';
+theta = deg2rad(deg);
+
+sin_theta = sin(theta);
+err_pct   = abs(theta - sin_theta)./sin_theta*100;
+
+table(deg, sin_theta, theta, err_pct)
 %% 9-1. 선형화의 근거 — 테일러 급수
 % 앞 절까지는 "$\sin\theta$ 를 $\theta$ 로 바꾼다" 를 **그림으로만** 정당화했습니다.
 % 이제 근거를 식으로 적습니다. 근거는 테일러 급수 하나뿐입니다.
@@ -948,8 +944,10 @@ legend('비선형 (진짜)','선형 근사','Location','northeast')
 % 벗어나서도 계속 계산한 결과**입니다. 이것이 14절에서 말할 "반드시 비선형
 % 모델로 되돌아가 검증하라" 의 이유입니다.
 [~, pUp] = plant_pendulum(pi);
-fprintf('매달린 자세 고유값 : %s\n', mat2str(round(eig(pp.A),2)));
-fprintf('거꾸로 자세 고유값 : %s\n', mat2str(round(eig(pUp.A),2)));
+
+eig(pp.A)'                   % 매달린 자세. 실수부가 음수 또는 0
+%%
+eig(pUp.A)'                  % 거꾸로 자세. 양수가 하나 있다 -> 불안정
 %% 13. Simulink 로 보면 더 확실합니다
 % 모델 `W03_Pendulum_NonlinVsLin.slx` 를 열어 보십시오.
 %

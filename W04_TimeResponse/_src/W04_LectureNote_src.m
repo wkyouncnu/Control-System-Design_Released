@@ -901,11 +901,17 @@ xlabel('Real'); ylabel('Imag'); title('그때의 극점 위치')
 %
 % - 오버슈트가 $5\%$ 아래로 작으면서 정착시간이 짧다
 % - 주파수응답에서 **공진 피크가 사라지는 경계**이기도 하다 (10주차에서 다시 만남)
-for z = zl
-    info = stepinfo(wn^2/(s^2+2*z*wn*s+wn^2));
-    fprintf('zeta = %.3f : 오버슈트 %5.1f %%, 상승시간 %.2f s, 정착시간 %5.2f s\n', ...
-            z, info.Overshoot, info.RiseTime, info.SettlingTime);
+zeta = zl';
+OS = zeros(numel(zl),1);   tr = OS;   ts = OS;
+
+for i = 1:numel(zl)
+    info = stepinfo(wn^2/(s^2 + 2*zeta(i)*wn*s + wn^2));
+    OS(i) = info.Overshoot;
+    tr(i) = info.RiseTime;
+    ts(i) = info.SettlingTime;
 end
+
+table(zeta, OS, tr, ts)
 %% 4. 오늘의 핵심 — 사양과 극점을 잇는 두 공식
 % 이 두 공식이 4주차의 전부이고, 6주차 설계의 출발점입니다.
 %% 4-1. 공식 하나 — 오버슈트는 감쇠비만으로 정해진다
@@ -1065,20 +1071,21 @@ end
 % **빠르기는 바뀌어도 모양은 안 바뀐다** 는 뜻입니다.
 %
 % 숫자로 확인해 봅니다.
-fprintf('=== 유도한 공식이 맞는지 확인 ===\n');
-fprintf('  zeta   %%OS(공식)   %%OS(실측)   Tp(공식)   Tp(실측)\n');
-fprintf('  ----  ----------  ----------  ---------  ---------\n');
-for z = [0.2 0.4 0.6 0.8]
-    for w = 2
-        Gx  = w^2/(s^2 + 2*z*w*s + w^2);
-        ix  = stepinfo(Gx);
-        os_f = 100*exp(-z*pi/sqrt(1-z^2));
-        Tp_f = pi/(w*sqrt(1-z^2));
-        fprintf('  %4.1f  %10.2f  %10.2f  %9.3f  %9.3f\n', ...
-                z, os_f, ix.Overshoot, Tp_f, ix.PeakTime);
-    end
+zeta = [0.2 0.4 0.6 0.8]';
+w = 2;
+
+OS_formula = 100*exp(-zeta*pi./sqrt(1 - zeta.^2));   % 유도한 공식
+Tp_formula = pi./(w*sqrt(1 - zeta.^2));
+
+OS_measured = zeros(4,1);   Tp_measured = OS_measured;
+for i = 1:4
+    info = stepinfo(w^2/(s^2 + 2*zeta(i)*w*s + w^2));
+    OS_measured(i) = info.Overshoot;
+    Tp_measured(i) = info.PeakTime;
 end
-fprintf('  --> 공식과 실측이 거의 같습니다\n\n');
+
+table(zeta, OS_formula, OS_measured, Tp_formula, Tp_measured)
+%%
 % 봉투와 응답을 함께 그려 본다
 z = 0.3; w = 2;
 Gx = w^2/(s^2 + 2*z*w*s + w^2);
@@ -1292,15 +1299,16 @@ stepinfo(G_ts).SettlingTime      % 실측. 공식보다 짧게 나온다
 % - **출력** — 필요한 $\zeta$ 최솟값, 필요한 $\omega_n$ 최솟값, 목표 극점
 %
 % 아래에서 요구를 넣고 확인해 봅니다.
-P_OS = 10;  ts = 2;
-[zeta_min, wn_min, s_target] = spec2pole(P_OS, ts);
-fprintf('요구 : 오버슈트 %.0f %% 이하, 정착시간 %.1f s 이하\n', P_OS, ts);
-fprintf('필요 : zeta >= %.4f,  wn >= %.4f rad/s\n', zeta_min, wn_min);
-fprintf('목표 극점 : %.3f +- %.3fj  (실축과 %.1f 도)\n', ...
-        real(s_target), imag(s_target), rad2deg(acos(zeta_min)));
-info_t = stepinfo(wn_min^2/(s^2+2*zeta_min*wn_min*s+wn_min^2));
-fprintf('확인 : 실제 오버슈트 %.2f %%, 실제 정착시간 %.2f s\n', ...
-        info_t.Overshoot, info_t.SettlingTime);
+P_OS = 10;   ts = 2;                     % 요구 : 오버슈트 10 % 이하, 정착 2 s 이하
+
+[zeta_min, wn_min, s_target] = spec2pole(P_OS, ts)
+%%
+theta = rad2deg(acos(zeta_min))          % 목표 극점이 실축과 이루는 각 [도]
+%%
+info_t = stepinfo(wn_min^2/(s^2 + 2*zeta_min*wn_min*s + wn_min^2));
+
+OS_check = info_t.Overshoot              % 실제 오버슈트. 10 % 이하여야 한다
+ts_check = info_t.SettlingTime           % 실제 정착시간. 2 s 이하여야 한다
 %% 5. 사양을 $s$ 평면의 영역으로 그리기
 % 이제 한 걸음 더 나갑니다. 두 조건을 **그림**으로 그립니다.
 %
@@ -1436,17 +1444,26 @@ legend('만족 영역','오버슈트 경계','정착시간 경계','목표 극�
 %% 5-4. 영역이 맞는지 확인
 % 영역 안의 점과 밖의 점을 골라 실제 응답을 확인합니다.
 % 안이면 합격, 밖이면 불합격이 나와야 합니다.
-cand = {-2.0+2.7j,'영역 안 (경계)'; -3.0+2.0j,'영역 안 (여유)';
-        -1.0+2.0j,'영역 밖 (느림)'; -2.0+5.0j,'영역 밖 (진동)'};
+p_cand = [-2.0+2.7j; -3.0+2.0j; -1.0+2.0j; -2.0+5.0j];
+note   = ["영역 안 (경계)"; "영역 안 (여유)"; "영역 밖 (느림)"; "영역 밖 (진동)"];
+
+OS = zeros(4,1);   ts_c = OS;   verdict = strings(4,1);
+
 for i = 1:4
-    p = cand{i,1};
-    Gc = abs(p)^2/(s^2 - 2*real(p)*s + abs(p)^2);
-    inf_c = stepinfo(Gc);
-    if inf_c.Overshoot <= P_OS+0.5 && inf_c.SettlingTime <= ts+0.05
-        mk = '합격'; else, mk = '불합격'; end
-    fprintf('%+.1f%+.1fj  %-16s 오버슈트 %5.1f %%, 정착시간 %.2f s -> %s\n', ...
-            real(p), imag(p), cand{i,2}, inf_c.Overshoot, inf_c.SettlingTime, mk);
+    p  = p_cand(i);
+    Gc = abs(p)^2/(s^2 - 2*real(p)*s + abs(p)^2);   % 그 극점을 갖는 2차 시스템
+
+    OS(i)   = stepinfo(Gc).Overshoot;
+    ts_c(i) = stepinfo(Gc).SettlingTime;
+
+    if OS(i) <= P_OS + 0.5 && ts_c(i) <= ts + 0.05
+        verdict(i) = "합격";
+    else
+        verdict(i) = "불합격";
+    end
 end
+
+table(p_cand, note, OS, ts_c, verdict)
 %% 6. 공식의 한계 — 극점이 셋 이상이면
 % 두 공식은 **극점 두 개, 영점 없음**이라는 가정에서 나왔습니다.
 % 현실의 시스템은 대개 그렇지 않습니다.
@@ -1623,22 +1640,30 @@ legend('2차 (기준)','먼 극점 s = -10','가까운 극점 s = -1','Location'
 % 여기서 분명해집니다.
 %
 % 아래에서 두 방법을 MATLAB 으로 실제로 계산해 계수를 대조합니다.
-fprintf('=== 블록선도에서 세운 식과 표준형의 대조 ===\n');
-fprintf('  zeta   wn    표준형 분모            루프를 하나씩 닫은 분모    계수 최대차이\n');
-fprintf('  ----  ----  ---------------------  ---------------------  ------------\n');
-for z = [0 0.3 0.707 1]
-    for w = 2
-        G_std = w^2/(s^2 + 2*z*w*s + w^2);              % 3절의 표준형
-        G_in  = 1/(s + 2*z*w);                          % 안쪽 속도 루프를 닫은 것
-        G_blk = minreal(feedback(w^2*G_in*(1/s), 1));   % 바깥 위치 루프까지 닫은 것
-        d1 = G_std.Denominator{1}/G_std.Denominator{1}(1);
-        d2 = G_blk.Denominator{1}/G_blk.Denominator{1}(1);
-        fprintf('  %4.2f  %4.1f  s^2 %+7.3f s %+7.3f  s^2 %+7.3f s %+7.3f  %12.2e\n', ...
-                z, w, d1(2), d1(3), d2(2), d2(3), max(abs(d1 - d2)));
-    end
+zeta = [0 0.3 0.707 1]';
+w = 2;
+
+std_s1 = zeros(4,1);   std_s0 = std_s1;      % 표준형 분모의 s 항과 상수항
+blk_s1 = std_s1;       blk_s0 = std_s1;      % 루프를 하나씩 닫아 얻은 분모
+
+for i = 1:4
+    z = zeta(i);
+    G_std = w^2/(s^2 + 2*z*w*s + w^2);              % 3절의 표준형
+    G_in  = 1/(s + 2*z*w);                          % 안쪽 속도 루프를 닫은 것
+    G_blk = minreal(feedback(w^2*G_in*(1/s), 1));   % 바깥 위치 루프까지 닫은 것
+
+    d1 = G_std.Denominator{1}/G_std.Denominator{1}(1);
+    d2 = G_blk.Denominator{1}/G_blk.Denominator{1}(1);
+
+    std_s1(i) = d1(2);   std_s0(i) = d1(3);
+    blk_s1(i) = d2(2);   blk_s0(i) = d2(3);
 end
-fprintf('  --> 계수가 같습니다. 그림과 표준형은 같은 시스템입니다.\n');
-fprintf('  --> zeta = 0 인 첫 줄은 분모가 s^2 + 4 이므로 극점이 +-2j, 즉 영원히 진동합니다.\n\n');
+
+table(zeta, std_s1, std_s0, blk_s1, blk_s0)
+%%
+% 계수가 같습니다. **그림과 표준형은 같은 시스템입니다.**
+% 그리고 $\zeta = 0$ 인 첫 줄은 분모가 $s^2 + 4$ 이므로 극점이 $\pm 2j$,
+% 즉 영원히 진동합니다.
 %% 7-1. 스크립트에서 Simulink 를 반복 실행하기
 % 이번 주에 새로 배우는 기법입니다.
 %
@@ -1691,16 +1716,14 @@ iData = stepinfo(yy, tt);
 i010  = stepinfo(Gz, 'RiseTimeLimits', [0 1]);
 i05   = stepinfo(Gz, 'SettlingTimeThreshold', 0.05);
 
-fprintf('시스템에서   : Tr %.3f s, Ts %.3f s, OS %.1f %%\n', ...
-        iSys.RiseTime, iSys.SettlingTime, iSys.Overshoot);
-fprintf('데이터에서   : Tr %.3f s, Ts %.3f s, OS %.1f %%\n', ...
-        iData.RiseTime, iData.SettlingTime, iData.Overshoot);
-fprintf('상승시간 기준: 10~90%% -> %.3f s,  0~100%% -> %.3f s\n', ...
-        iSys.RiseTime, i010.RiseTime);
-fprintf('정착시간 기준: 2%% -> %.3f s,  5%% -> %.3f s\n', ...
-        iSys.SettlingTime, i05.SettlingTime);
-fprintf('\n같은 응답인데 기준만 바꿔도 정착시간이 %.1f 배 차이 납니다.\n', ...
-        iSys.SettlingTime / i05.SettlingTime);
+how = ["시스템에서"; "데이터에서"; "상승시간 0~100 %"; "정착시간 5 % 기준"];
+tr  = [iSys.RiseTime;     iData.RiseTime;     i010.RiseTime;     i05.RiseTime];
+ts  = [iSys.SettlingTime; iData.SettlingTime; i010.SettlingTime; i05.SettlingTime];
+OS  = [iSys.Overshoot;    iData.Overshoot;    i010.Overshoot;    i05.Overshoot];
+
+table(how, tr, ts, OS)
+%%
+iSys.SettlingTime / i05.SettlingTime     % 기준만 바꿔도 정착시간이 몇 배 차이 나나
 %% 8. 오늘의 정리
 % - 성능은 네 숫자로 요약한다. 그중 **오버슈트와 정착시간**이 사양으로 많이 쓰인다
 % - 1차 시스템은 $\tau$ 하나. 오버슈트는 항상 $0$
