@@ -133,9 +133,9 @@ s = tf('s');
 G0 = 1/(s+1);
 w0 = 1;
 G0jw = freqresp(G0, w0);
-fprintf('=== 손계산과 대조 ===\n');
-fprintf('  손계산  : 크기 %.4f , 위상 %.1f 도\n', 1/sqrt(2), -45);
-fprintf('  MATLAB  : 크기 %.4f , 위상 %.1f 도\n\n', abs(G0jw), rad2deg(angle(G0jw)));
+mag_hand = 1/sqrt(2)                 % 손계산한 크기
+mag_matlab = abs(G0jw)               % MATLAB 이 구한 크기
+phase_matlab = rad2deg(angle(G0jw))  % 위상 [도]
 t = (0:0.02:20)';
 u = sin(w0*t);
 y = lsim(G0, u, t);
@@ -154,13 +154,10 @@ title('0.707 배로 줄고 45도 늦는다');
 %
 % **주의할 점** — 같은 위상이라도 주파수가 다르면 시간지연이 다릅니다.
 % 주파수가 두 배면 같은 각도라도 지연은 절반입니다.
-fprintf('=== 같은 45도라도 주파수에 따라 다르다 ===\n');
-fprintf('     w[rad s^-1]    45도가 뜻하는 시간지연[s]\n');
-fprintf('    ------------  --------------------------\n');
-for wq = [0.5 1 2 10]
-    fprintf('    %12.1f  %26.4f\n', wq, (pi/4)/wq);
-end
-fprintf('\n');
+w = [0.5 1 2 10]';          % 주파수 [rad/s]
+delay = (pi/4)./w;          % 45 도가 뜻하는 시간 지연 [s]
+
+table(w, delay)
 %% 1. 왜 사인인가
 % 계단이나 임펄스가 아니라 왜 하필 사인인가.
 %
@@ -266,15 +263,13 @@ fprintf('\n');
 G1 = 10/(s*(s+1));
 [mg, pg, wg] = bode(G1);
 mg = squeeze(mg);  pg = squeeze(pg);
-fprintf('=== bode 의 출력 ===\n');
-fprintf('  주파수 점 %d 개\n', numel(wg));
-fprintf('     w[rad s^-1]    mag(배율)    dB       위상[도]\n');
-fprintf('    ------------  -----------  -------  ---------\n');
-for i = round(linspace(1, numel(wg), 6))
-    fprintf('    %12.4f  %11.4f  %7.2f  %9.2f\n', ...
-            wg(i), mg(i), 20*log10(mg(i)), pg(i));
-end
-fprintf('\n');
+pick = round(linspace(1, numel(wg), 6));   % 촘촘한 주파수 점 가운데 여섯 개만 본다
+w_bode   = wg(pick);
+mag_bode = mg(pick);
+dB_bode  = 20*log10(mag_bode);
+ph_bode  = pg(pick);
+
+table(w_bode, mag_bode, dB_bode, ph_bode)
 bode(G1); grid on;
 title('bode 로 그린 주파수응답');
 %% 4. 왜 dB 이고 왜 로그축인가
@@ -292,15 +287,10 @@ title('bode 로 그린 주파수응답');
 %
 % 크기가 $1000$ 배 차이 나도 dB 로는 $60$ 차이일 뿐입니다.
 % 주파수도 마찬가지라서 로그축을 씁니다.
-fprintf('=== 외워 두면 편한 dB 값 ===\n');
-tbl = {0.01,'백분의 일'; 0.1,'십분의 일'; 0.5,'절반'; ...
-       1/sqrt(2),'1/sqrt(2)'; 1,'그대로'; 2,'두 배'; 10,'열 배'; 100,'백 배'};
-fprintf('     배율        dB      설명\n');
-fprintf('    --------  --------  ----------\n');
-for i = 1:size(tbl,1)
-    fprintf('    %8.4f  %8.2f  %s\n', tbl{i,1}, 20*log10(tbl{i,1}), tbl{i,2});
-end
-fprintf('\n');
+ratio = [0.01 0.1 0.5 1/sqrt(2) 1 2 10 100]';   % 배율
+dB    = 20*log10(ratio);                        % 데시벨
+
+table(ratio, dB)
 %% 4-1. 기울기의 단위 — dB per decade
 % 데케이드(decade)는 **주파수가 10 배가 되는 구간**입니다.
 %
@@ -338,13 +328,10 @@ fprintf('\n');
 % 이것을 빠뜨리면 그림 전체가 위아래로 어긋납니다.
 %
 % 정리해 보면
-fprintf('=== 시정수 꼴로 정리하기 ===\n');
 Gx = 50/((s+10)*(s+2));
-fprintf('  원래   : 50 / ((s+10)(s+2))\n');
-fprintf('  정리   : 50/(10*2) * 1/((0.1s+1)(0.5s+1))\n');
-fprintf('         = %.3f * 1/((0.1s+1)(0.5s+1))\n', 50/20);
-fprintf('  저주파 크기 (w -> 0) : %.4f = %.2f dB\n', dcgain(Gx), 20*log10(dcgain(Gx)));
-fprintf('  꺾임주파수 : %.1f 과 %.1f rad s^-1\n\n', 2, 10);
+
+dc_gain = dcgain(Gx)          % 저주파 크기 (w -> 0). 50/(10*2) = 2.5 와 같아야 한다
+dc_dB   = 20*log10(dc_gain)   % 데시벨로는 약 8 dB
 %% 5-2. 조각을 더하면 전체가 된다
 % 아래는 $L(s) = \frac{10}{s(s+1)(0.1s+1)}$ 을 네 조각으로 나눠 그린 뒤
 % 세로로 더한 결과입니다.
@@ -395,16 +382,12 @@ xline(1, ':'); xline(10, ':');
 xlabel('주파수 [rad s^{-1}]'); ylabel('크기 [dB]'); ylim([-120 40]);
 legend('점근선의 합', '실제 곡선', 'Location','southwest');
 title('점근선을 더하면 실제와 거의 같다');
-fprintf('=== 점근선과 실제의 차이 ===\n');
-fprintf('     w[rad s^-1]   점근선[dB]   실제[dB]   차이[dB]\n');
-fprintf('    ------------  -----------  ---------  ---------\n');
-for wq = [0.1 1 2 10 100]
-    fprintf('    %12.2f  %11.2f  %9.2f  %9.2f\n', wq, ...
-            interp1(log(w), a_sum, log(wq)), ...
-            interp1(log(w), m_real, log(wq)), ...
-            interp1(log(w), m_real, log(wq)) - interp1(log(w), a_sum, log(wq)));
-end
-fprintf('\n');
+w_check  = [0.1 1 2 10 100]';
+asymptote = interp1(log(w), a_sum,  log(w_check));   % 점근선 [dB]
+actual    = interp1(log(w), m_real, log(w_check));   % 실제 곡선 [dB]
+gap       = actual - asymptote;                      % 차이 [dB]
+
+table(w_check, asymptote, actual, gap)
 %% 5-3. 위상도 점근선으로 그린다
 % 앞 절에서는 **크기**만 점근선으로 그렸습니다.
 % 그런데 10주차와 11주차에서 실제로 필요한 것은 **위상**입니다.
@@ -457,18 +440,18 @@ fprintf('\n');
 % | 어긋남의 부호가 번갈아 바뀌는 것 | $-6.3, +3.1, -5.7, 0, +5.7, \ldots$ | 꺾임점을 기준으로 **대칭**이라 평균적으로는 맞는다 |
 %
 % 아래 표에서 어긋남을 숫자로 확인하십시오.
-L5 = 10/(s*(s+1)*(0.1*s+1));
-fprintf('=== 위상 점근선과 실제 ===\n');
-fprintf('  %-10s %-10s %-10s %-10s %s\n', 'w', '적분기', '두 극점', '점근선 합', '실제[도]');
-for wq = [0.1 0.316 1 3.162 10 31.6 100]
-    pa1 = -45*min(max(log10(wq/0.1), 0), 2);      % 극점 s+1  (꺾임 1)
-    pa2 = -45*min(max(log10(wq/1  ), 0), 2);      % 극점 0.1s+1 (꺾임 10)
-    pas = -90 + pa1 + pa2;
-    [~, pt] = bode(L5, wq);
-    fprintf('  %-10.3f %-10.0f %-10.1f %-10.2f %.2f   (차이 %+.2f)\n', ...
-            wq, -90, pa1+pa2, pas, squeeze(pt), squeeze(pt) - pas);
-end
-fprintf('  --> 어긋남이 최대 6.3 도. 설계 초안에는 충분합니다.\n\n');
+L5  = 10/(s*(s+1)*(0.1*s+1));
+w   = [0.1 0.316 1 3.162 10 31.6 100]';
+
+ph_pole1 = -45*min(max(log10(w/0.1), 0), 2);   % 극점 s+1    (꺾임 1)
+ph_pole2 = -45*min(max(log10(w/1  ), 0), 2);   % 극점 0.1s+1 (꺾임 10)
+ph_asym  = -90 + ph_pole1 + ph_pole2;          % -90 은 적분기 몫
+
+[~, ph] = bode(L5, w);
+ph_real = squeeze(ph);
+gap     = ph_real - ph_asym;
+
+table(w, ph_asym, ph_real, gap)
 %% 5-4. 점근선만으로 교차주파수와 위상여유를 읽는다
 % **이 절이 손작도를 배우는 이유입니다.**
 % 지금까지 그린 두 점근선만 있으면 다음 두 숫자를 컴퓨터 없이 얻습니다.
@@ -521,13 +504,13 @@ fprintf('  --> 어긋남이 최대 6.3 도. 설계 초안에는 충분합니다.
 % 손으로 어림잡을 수 있으면 이상한 결과를 그대로 믿지 않게 됩니다.
 w_hand  = 10^0.5;
 ph_hand = -90 - 45*log10(w_hand/0.1) - 45*log10(w_hand/1);
-[~, pm_true, ~, wc_true] = margin(L5);
-fprintf('=== 손으로 읽은 값과 margin 대조 ===\n');
-fprintf('  교차주파수 : 손 %.3f  vs  margin %.3f rad/s   (차이 %.1f %%)\n', ...
-        w_hand, wc_true, 100*abs(w_hand-wc_true)/wc_true);
-fprintf('  위상여유   : 손 %.1f 도  vs  margin %.2f 도\n', 180+ph_hand, pm_true);
-fprintf('  --> 둘 다 "여유가 거의 없다" 는 같은 결론을 줍니다.\n');
-fprintf('      실제로 이 루프의 계단응답은 오래 진동합니다.\n\n');
+[~, pm_margin, ~, wc_margin] = margin(L5);
+
+wc_hand = w_hand              % 손으로 읽은 교차주파수 [rad/s]
+wc_margin                     % margin 이 구한 값
+%%
+pm_hand = 180 + ph_hand       % 손으로 읽은 위상여유 [도]
+pm_margin                     % margin 이 구한 값
 %% 6. 2차 항의 봉우리
 % 점근선만 그리면 놓치는 것이 하나 있습니다. **2차 항의 봉우리**입니다.
 %
@@ -583,20 +566,17 @@ fprintf('      실제로 이 루프의 계단응답은 오래 진동합니다.\n
 %
 % $\zeta \ge 0.707$ 이면 봉우리가 아예 없습니다.
 % 이 값이 실무에서 자주 쓰이는 이유입니다.
-fprintf('=== 감쇠비, 봉우리, 오버슈트 ===\n');
-fprintf('     zeta    봉우리 Mr[dB]   오버슈트[%%]\n');
-fprintf('    ------  --------------  ------------\n');
-for z = [0.1 0.2 0.3 0.5 0.707 1.0]
-    Tz = 1/(s^2 + 2*z*s + 1);
-    ii = stepinfo(Tz);
-    if z < 1/sqrt(2) - 1e-3
-        Mr = 1/(2*z*sqrt(1-z^2));
-        fprintf('    %6.3f  %14.2f  %12.2f\n', z, 20*log10(Mr), ii.Overshoot);
-    else
-        fprintf('    %6.3f  %14s  %12.2f\n', z, '없음', ii.Overshoot);
-    end
+zeta = [0.1 0.2 0.3 0.5 0.707 1.0]';
+
+Mr_dB = 20*log10(1./(2*zeta.*sqrt(1-zeta.^2)));   % 봉우리 높이 [dB]
+Mr_dB(zeta >= 1/sqrt(2)) = NaN;                   % 0.707 이상이면 봉우리가 없다
+
+OS = zeros(size(zeta));                           % 오버슈트 [%]
+for i = 1:numel(zeta)
+    OS(i) = stepinfo(1/(s^2 + 2*zeta(i)*s + 1)).Overshoot;
 end
-fprintf('\n');
+
+table(zeta, Mr_dB, OS)
 %% 7. 필터 — 주파수로 신호를 골라내기
 % 지금까지는 시스템을 "제어 대상" 으로만 봤습니다.
 % 그런데 같은 전달함수를 **신호를 골라내는 도구**로 쓸 수도 있습니다. 그것이 필터입니다.
@@ -719,20 +699,21 @@ fprintf('\n');
 % 이산 계수 $a$ 와 시정수의 관계는 이렇습니다.
 %
 % $$\tau = \frac{-\Delta t}{\ln a}$$
-fprintf('=== 강의자료의 이산 필터와 연속 필터 ===\n');
-dt_f = 0.001;
-fprintf('     a       tau[s]    w0[rad s^-1]   f0[Hz]\n');
-fprintf('   ------  ---------  -------------  --------\n');
-for a_f = [0.90 0.95 0.99 0.999]
-    tau_f = -dt_f/log(a_f);
-    fprintf('   %6.3f  %9.5f  %13.2f  %8.3f\n', ...
-            a_f, tau_f, 1/tau_f, 1/(2*pi*tau_f));
-end
-fprintf('\n');
-fprintf('  읽는 법\n');
-fprintf('    a 를 1 에 가깝게 할수록 시정수가 커집니다 = 더 매끄럽고 더 늦습니다.\n');
-fprintf('    a = 0.99 는 차단주파수 1.6 Hz 짜리 필터입니다.\n');
-fprintf('    같은 a 라도 **샘플 주기가 다르면 다른 필터**가 됩니다. 반드시 dt 와 함께 적으십시오.\n\n');
+dt  = 0.001;                  % 샘플 주기 [s]
+a   = [0.90 0.95 0.99 0.999]';
+
+tau = -dt./log(a);            % 연속 시정수 [s]
+w0  = 1./tau;                 % 차단주파수 [rad/s]
+f0  = w0/(2*pi);              % 차단주파수 [Hz]
+
+table(a, tau, w0, f0)
+%%
+% 읽는 법
+%
+% - $a$ 를 $1$ 에 가깝게 할수록 시정수가 커집니다. **더 매끄럽고 더 늦습니다**
+% - $a = 0.99$ 는 차단주파수 $1.6$ Hz 짜리 필터입니다
+% - 같은 $a$ 라도 **샘플 주기가 다르면 다른 필터**가 됩니다.
+%   반드시 $dt$ 와 함께 적으십시오
 %% 7-4. 시정수를 눈으로 읽는 법
 % 강의자료 17쪽의 그림입니다. 계단을 넣고 $\tau$ 를 바꿔 가며 본 것입니다.
 %
@@ -810,18 +791,22 @@ fprintf('    같은 a 라도 **샘플 주기가 다르면 다른 필터**가 됩
 %
 % **시간영역의 $\tau$ 와 주파수영역의 $\omega_0$ 는 같은 숫자의 앞뒷면입니다.**
 % $\tau$ 를 두 배로 하면 $\omega_0$ 가 절반이 되고, 응답은 두 배 느려집니다.
-fprintf('=== 시정수와 차단주파수는 같은 것의 앞뒷면 ===\n');
-s_f = tf('s');
-fprintf('     tau[s]   w0=1/tau   4*tau(정착)   실제 정착시간[s]   실제 대역폭\n');
-fprintf('   --------  ---------  -----------  ----------------  -----------\n');
-for tau_f = [0.1 0.2 0.5 1.0]
-    Gf = 1/(tau_f*s_f + 1);
-    ii = stepinfo(Gf);
-    fprintf('   %8.1f  %9.1f  %11.1f  %16.2f  %11.2f\n', ...
-            tau_f, 1/tau_f, 4*tau_f, ii.SettlingTime, bandwidth(Gf));
+tau = [0.1 0.2 0.5 1.0]';
+w0  = 1./tau;                 % 차단주파수 [rad/s]
+ts_approx = 4*tau;            % 4주차의 어림 정착시간 [s]
+
+ts_real = zeros(size(tau));   % 실제 정착시간
+bw      = zeros(size(tau));   % 실제 대역폭
+for i = 1:numel(tau)
+    G = 1/(tau(i)*s + 1);
+    ts_real(i) = stepinfo(G).SettlingTime;
+    bw(i)      = bandwidth(G);
 end
-fprintf('   --> 4*tau 어림과 실제 정착시간이 잘 맞습니다.\n');
-fprintf('       대역폭도 1/tau 와 거의 같습니다 (1차 시스템이므로).\n\n');
+
+table(tau, w0, ts_approx, ts_real, bw)
+%%
+% $4\tau$ 어림과 실제 정착시간이 잘 맞고, 대역폭도 $1/\tau$ 와 거의 같습니다.
+% 1차 시스템에서는 **시정수와 차단주파수가 같은 것의 앞뒷면**입니다.
 %% 7-6. 차단주파수를 어디에 둘 것인가 — 맞바꿈
 % 이것이 필터 설계의 전부입니다. **낮추면 조용하지만 느리고, 높이면 빠르지만 시끄럽습니다.**
 %
@@ -865,24 +850,25 @@ fprintf('       대역폭도 1/tau 와 거의 같습니다 (1차 시스템이므
 % **고르는 원칙 하나** — 참 신호의 최고 주파수보다는 위에, 잡음의 최저 주파수보다는 아래에.
 % 둘이 겹치면 필터로는 분리할 수 없습니다. 그때는 센서를 바꾸거나
 % 다른 정보를 함께 써야 합니다 (칼만 필터가 그 이야기입니다).
-fprintf('=== 차단주파수와 오차 ===\n');
-t_f2 = (0:0.001:4)';
-clean_f = sin(2*pi*0.5*t_f2);
+t     = (0:0.001:4)';
+clean = sin(2*pi*0.5*t);                                    % 참값 (0.5 Hz)
 rng(11);
-noisy_f = clean_f + 0.35*sin(2*pi*20*t_f2) + 0.12*randn(size(t_f2));
-fprintf('     차단[Hz]   참값과의 RMS 오차   0.5 Hz 에서의 지연[도]\n');
-fprintf('   ---------  ------------------  ----------------------\n');
-best_e = inf; best_f = NaN;
-for fc_f = [0.3 0.6 1 2 4 8 16 40]
-    Gf = (2*pi*fc_f)/(s_f + 2*pi*fc_f);
-    yf = lsim(Gf, noisy_f, t_f2);
-    e  = sqrt(mean((yf - clean_f).^2));
-    if e < best_e, best_e = e; best_f = fc_f; end
-    fprintf('   %9.1f  %18.4f  %22.1f\n', ...
-            fc_f, e, -rad2deg(angle(freqresp(Gf, 2*pi*0.5))));
+noisy = clean + 0.35*sin(2*pi*20*t) + 0.12*randn(size(t));  % 잡음이 섞인 신호
+
+fc = [0.3 0.6 1 2 4 8 16 40]';        % 필터의 차단주파수 [Hz]
+rms_error = zeros(size(fc));          % 참값과의 오차
+delay_deg = zeros(size(fc));          % 0.5 Hz 에서의 위상 지연
+for i = 1:numel(fc)
+    G = (2*pi*fc(i))/(s + 2*pi*fc(i));
+    y = lsim(G, noisy, t);
+    rms_error(i) = sqrt(mean((y - clean).^2));
+    delay_deg(i) = -rad2deg(angle(freqresp(G, 2*pi*0.5)));
 end
-fprintf('   --> 이 신호에서는 차단 %.0f Hz 근처가 가장 좋습니다 (RMS %.4f).\n\n', ...
-        best_f, best_e);
+
+table(fc, rms_error, delay_deg)
+%%
+% 오차가 가장 작은 줄이 **가장 좋은 차단주파수**입니다.
+% 너무 높으면 잡음이 남고, 너무 낮으면 참값까지 깎이면서 지연이 커집니다.
 %% 7-7. 고역통과 필터 — 반대로 하면
 % 같은 자리에 $s$ 를 올려놓으면 반대가 됩니다.
 %
@@ -1018,23 +1004,18 @@ fprintf('   --> 이 신호에서는 차단 %.0f Hz 근처가 가장 좋습니다
 % 6절에서 본 공진입니다. 필터로 쓸 생각이라면 감쇠비를 $0.707$ 이상으로 잡아야 합니다.
 Gm = plant_msd();
 Gd = plant_dcmotor('speed');
-fprintf('=== 이 과목의 플랜트를 필터로 보면 ===\n');
-fprintf('    시스템                대역폭[rad s^-1]   대역폭[Hz]   봉우리\n');
-fprintf('   ------------------  -----------------  -----------  --------\n');
-for c_f = {{'질량-스프링-댐퍼', Gm}, {'DC 모터 (속도)', Gd}}
-    nm_f = c_f{1}{1}; G_f = c_f{1}{2};
-    b_f  = bandwidth(G_f);
-    w_f  = logspace(-2, 2, 2000);
-    pk   = max(abs(squeeze(freqresp(G_f, w_f))))/abs(dcgain(G_f));
-    if pk > 1.05, pkStr = sprintf('%.2f 배', pk); else, pkStr = '없음'; end
-    fprintf('   %-18s  %17.3f  %11.3f  %8s\n', nm_f, b_f, b_f/(2*pi), pkStr);
-end
-fprintf('\n');
-fprintf('  읽는 법\n');
-fprintf('    대역폭보다 훨씬 빠른 지령은 아무리 넣어도 못 따라옵니다.\n');
-fprintf('    반대로 대역폭 안쪽의 잡음은 그대로 출력에 나옵니다.\n');
-fprintf('    그래서 대역폭을 넓히면 빨라지지만 잡음에 약해집니다.\n');
-fprintf('    11주차에서 이 맞바꿈을 설계에 그대로 씁니다 (Lead 는 넓히고 Lag 는 좁힌다).\n\n');
+plant   = ["질량-스프링-댐퍼"; "DC 모터 (속도)"];
+bw_rad  = [bandwidth(Gm); bandwidth(Gd)];     % 대역폭 [rad/s]
+bw_Hz   = bw_rad/(2*pi);                      % 대역폭 [Hz]
+
+table(plant, bw_rad, bw_Hz)
+%%
+% 읽는 법
+%
+% - 대역폭보다 훨씬 빠른 지령은 아무리 넣어도 **못 따라옵니다**
+% - 반대로 대역폭 안쪽의 잡음은 그대로 출력에 나옵니다
+% - 그래서 대역폭을 넓히면 빨라지지만 **잡음에 약해집니다**
+% - 11주차에서 이 맞바꿈을 설계에 그대로 씁니다 (Lead 는 넓히고 Lag 는 좁힌다)
 %% 7-10. 1차와 2차의 대역폭 — 강의자료 11~12쪽
 % 차수가 올라가면 어떻게 되는지도 강의자료에 있습니다.
 %
@@ -1067,23 +1048,23 @@ fprintf('    11주차에서 이 맞바꿈을 설계에 그대로 씁니다 (Lead
 % $t_r \approx 2/\omega_{BW}$ 정도로 봅니다. 10주차에서 이 대응을 더 다룹니다.
 %
 % 강의자료의 숫자와 대조해 보면
-fprintf('=== 강의자료 11~12쪽 숫자와 대조 ===\n');
-chk = { '1/(s+1)',         tf(1,[1 1]),     0.9976
-        '10/(s+10)',       tf(10,[1 10]),   9.9763
-        '1/(s^2+2s+1)',    tf(1,[1 2 1]),   0.6423
-        '5/(s^2+2s+5)',    tf(5,[1 2 5]),   2.9700 };
-fprintf('     전달함수            계산값     강의자료     차이\n');
-fprintf('   ----------------  ---------  ----------  ---------\n');
-for i_f = 1:4
-    b_f = bandwidth(chk{i_f,2});
-    fprintf('   %-16s  %9.4f  %10.4f  %9.2e\n', ...
-            chk{i_f,1}, b_f, chk{i_f,3}, abs(b_f - chk{i_f,3}));
-end
-fprintf('   --> 강의자료 값과 일치합니다.\n\n');
-fprintf('  읽을 것\n');
-fprintf('    1차는 차단 뒤 -20 dB/dec, 2차는 -40 dB/dec 로 더 가파르게 떨어집니다.\n');
-fprintf('    즉 **차수가 높을수록 잘 막습니다.** 대신 위상이 더 많이 깎입니다.\n');
-fprintf('    막는 능력과 위상 지연은 언제나 함께 갑니다. 공짜가 없습니다.\n\n');
+system_name = ["1/(s+1)"; "10/(s+10)"; "1/(s^2+2s+1)"; "5/(s^2+2s+5)"];
+bw_calc = [bandwidth(tf(1,[1 1]))
+           bandwidth(tf(10,[1 10]))
+           bandwidth(tf(1,[1 2 1]))
+           bandwidth(tf(5,[1 2 5]))];
+bw_slide = [0.9976; 9.9763; 0.6423; 2.9700];   % 강의자료 11~12 쪽의 값
+
+table(system_name, bw_calc, bw_slide)
+%%
+% 두 열이 소수점 넷째 자리까지 같습니다. 이 실습이 강의자료와 같은 것을
+% 계산하고 있다는 증거입니다.
+%
+% 읽을 것
+%
+% - 1차는 차단 뒤 $-20$ dB/dec, 2차는 $-40$ dB/dec 로 더 가파르게 떨어집니다
+% - 즉 **차수가 높을수록 잘 막습니다.** 대신 위상이 더 많이 깎입니다
+% - 막는 능력과 위상 지연은 언제나 함께 갑니다. 공짜가 없습니다
 
 %% 8. Simulink 로 직접 재 보기
 % 오늘의 마지막은 **실험**입니다.
@@ -1164,19 +1145,20 @@ Gb = 4/(s^2 + 0.8*s + 4);
 wq = [0.5 1 2 5];
 
 [mg, ph] = bode(Gb, wq);
-mg = squeeze(mg);  ph = squeeze(ph);
-fprintf('%-8s %-10s %-10s %-10s\n', 'w[rad/s]', '|G| 배수', '|G| dB', '위상[도]');
-for i = 1:numel(wq)
-    fprintf('%-8.2f %-10.4f %-10.2f %-10.1f\n', wq(i), mg(i), mag2db(mg(i)), ph(i));
-end
+w      = wq(:);
+mag    = squeeze(mg);        % 배수
+mag_dB = mag2db(mag);        % 데시벨
+phase  = squeeze(ph);        % 도
 
-% 같은 값을 복소수로 직접 얻기
-Gjw = evalfr(Gb, 1j*2);
-fprintf('\nevalfr(G, 2j) = %.4f %+.4fi\n', real(Gjw), imag(Gjw));
-fprintf('  크기 %.4f, 위상 %.1f 도  -> 위 표의 w=2 줄과 같습니다.\n', ...
-        abs(Gjw), rad2deg(angle(Gjw)));
-fprintf('freqresp 와의 차이 : %.2e\n', abs(freqresp(Gb,2) - Gjw));
-fprintf('\n대역폭 = %.4f rad/s  (여기서 이득이 -3 dB 로 떨어집니다)\n', bandwidth(Gb));
+table(w, mag, mag_dB, phase)
+%%
+% 같은 값을 복소수로 직접 얻을 수도 있습니다.
+Gjw = evalfr(Gb, 2i)          % w = 2 에서의 G(jw)
+%%
+mag_check   = abs(Gjw)                % 위 표의 w = 2 줄과 같다
+phase_check = rad2deg(angle(Gjw))
+%%
+bw = bandwidth(Gb)            % 이득이 -3 dB 로 떨어지는 주파수
 %% 9. 오늘의 정리
 % - 사인을 넣으면 **같은 주파수의 사인**이 나온다. 크기와 위상만 달라진다
 % - 그 크기비와 위상차가 곧 $G(j\omega)$ 다. $s$ 자리에 $j\omega$ 를 넣으면 끝이다

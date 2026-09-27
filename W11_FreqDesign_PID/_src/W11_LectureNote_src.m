@@ -121,13 +121,17 @@ s = tf('s');
 G0 = 1/(s*(s+1));
 K0 = 100;
 [~, pm00, ~, wcp00] = margin(K0*G0);
+
+pm00                    % 위상여유 [도] — 거의 없다
+wcp00                   % 교차주파수 [rad/s]
+%%
 ii00 = stepinfo(feedback(K0*G0, 1));
-fprintf('=== 가장 작은 예 ===\n');
-fprintf('  G = 1/(s(s+1)), K = %d\n', K0);
-fprintf('  위상여유 %.2f 도, 교차주파수 %.2f rad s^-1\n', pm00, wcp00);
-fprintf('  오버슈트 %.1f %%, 정착시간 %.2f s\n', ii00.Overshoot, ii00.SettlingTime);
-fprintf('  --> 정상상태는 만족하지만 **거의 진동합니다.**\n');
-fprintf('      위상여유를 벌어야 합니다. 그것이 오늘의 일입니다.\n\n');
+
+overshoot = ii00.Overshoot        % [%]
+settling  = ii00.SettlingTime     % [s]
+%%
+% 정상상태는 만족하지만 **거의 진동합니다.**
+% 위상여유를 벌어야 합니다. 그것이 오늘의 일입니다.
 t = (0:0.005:8)';
 plot(t, step(feedback(K0*G0,1), t), 'LineWidth', 2); hold on; grid on;
 yline(1, 'k--');
@@ -184,9 +188,8 @@ title(sprintf('위상여유 %.1f도 — 이대로는 쓸 수 없다', pm00));
 % $$e_{ss} = \frac{1}{K_v} \le 0.01 \qquad \Rightarrow \qquad K_v \ge 100$$
 %
 % $G = 1/(s(s+1))$ 은 타입 1 이고 $K_v = K$ 이므로 $K \ge 100$ 입니다.
-fprintf('=== 1단계 확인 ===\n');
-fprintf('  Kv = lim s*K*G = %.2f\n', dcgain(s*K0*G0));
-fprintf('  램프 오차 = 1/Kv = %.4f  (요구 0.01 이하)\n\n', 1/dcgain(s*K0*G0));
+Kv = dcgain(s*K0*G0)        % 속도오차상수 (5주차)
+ramp_error = 1/Kv           % 램프 오차. 요구는 0.01 이하
 %% 2. Lead 보상기 — 위상을 끌어올린다
 % $$D(s) = K\,\frac{Ts + 1}{\alpha T s + 1}, \qquad 0 < \alpha < 1$$
 %
@@ -233,15 +236,14 @@ fprintf('  램프 오차 = 1/Kv = %.4f  (요구 0.01 이하)\n\n', 1/dcgain(s*K0
 %
 % 설계에서 **$\omega_m$ 을 어디에 둘 것인가**가 5단계의 핵심입니다.
 % 새 교차주파수가 될 자리에 봉우리 꼭대기를 갖다 놓는 것입니다.
-fprintf('=== Lead 가 올릴 수 있는 위상 ===\n');
-fprintf('     phi[도]    alpha     고주파 이득 배율 (1 나누기 alpha)\n');
-fprintf('   ---------  --------  ----------------------------------\n');
-for ph = [20 30 45 60 70]
-    al = (1 - sind(ph))/(1 + sind(ph));
-    fprintf('   %9.0f  %8.4f  %34.1f\n', ph, al, 1/al);
-end
-fprintf('   --> 60 도를 넘기려면 고주파 이득을 14 배 이상 키워야 합니다.\n');
-fprintf('       실용적으로 **한 단은 60 도까지**입니다. 더 필요하면 두 단으로 나눕니다.\n\n');
+phi   = [20 30 45 60 70]';                     % 올리고 싶은 위상 [도]
+alpha = (1 - sind(phi))./(1 + sind(phi));      % 유도한 공식
+gain_hf = 1./alpha;                            % 고주파 이득이 몇 배가 되는가
+
+table(phi, alpha, gain_hf)
+%%
+% $60$ 도를 넘기려면 고주파 이득을 **14 배 이상** 키워야 합니다.
+% 실용적으로 **한 단은 $60$ 도까지**이고, 더 필요하면 두 단으로 나눕니다.
 %% 2-1-1. 그 두 공식은 어디서 나왔는가
 % 앞 절의 두 공식을 그냥 받아 적으면 시험에서 하나만 틀려도 손을 못 씁니다.
 % **세 줄이면 유도됩니다.** 한 번만 따라가 보십시오.
@@ -281,16 +283,18 @@ fprintf('       실용적으로 **한 단은 60 도까지**입니다. 더 필요
 %   = \frac{\sqrt{1 + 1/\alpha}}{\sqrt{1 + \alpha}} = \frac{1}{\sqrt{\alpha}}$$
 %
 % 이 세 줄이 Lead 설계의 전부입니다. 아래에서 수치로 확인합니다.
-al_chk = 0.138;   T_chk = 0.1;
-wm_chk = 1/(T_chk*sqrt(al_chk));
-D_chk  = (T_chk*s + 1)/(al_chk*T_chk*s + 1);
-[mg_chk, ph_chk] = bode(D_chk, wm_chk);
-fprintf('=== 유도한 세 공식 확인 (alpha = %.3f, T = %.3f) ===\n', al_chk, T_chk);
-fprintf('  wm  : 공식 %.4f  vs  실제 봉우리 %.4f rad/s\n', wm_chk, wm_chk);
-fprintf('  최대 위상 : 공식 %.2f 도  vs  bode %.2f 도\n', ...
-        asind((1-al_chk)/(1+al_chk)), squeeze(ph_chk));
-fprintf('  그 자리 크기 : 공식 %.4f 배  vs  bode %.4f 배\n\n', ...
-        1/sqrt(al_chk), squeeze(mg_chk));
+alpha = 0.138;   T = 0.1;
+
+wm = 1/(T*sqrt(alpha))            % 위상이 가장 높아지는 주파수 [rad/s]
+%%
+D_chk = (T*s + 1)/(alpha*T*s + 1);
+[mag_wm, phase_wm] = bode(D_chk, wm);
+
+phase_formula = asind((1-alpha)/(1+alpha))    % 유도한 최대 위상 [도]
+phase_bode    = squeeze(phase_wm)             % bode 가 준 값
+%%
+mag_formula = 1/sqrt(alpha)       % 그 자리에서의 크기 [배]
+mag_bode    = squeeze(mag_wm)
 %% 2-2. Lead 설계 — 3단계부터 5단계까지
 % 1단계와 2단계는 앞의 1절과 1-1절에서 이미 했습니다.
 % 여기서는 나머지를 앞 절의 두 공식으로 채웁니다.
@@ -306,15 +310,13 @@ fprintf('  그 자리 크기 : 공식 %.4f 배  vs  bode %.4f 배\n\n', ...
 % **5단계에서 왜 그 크기를 찾는가** — 보상 후 그 주파수가 새 교차주파수
 % ($0$ dB) 가 되기를 원합니다. Lead 가 거기서 $-10\log_{10}\alpha$ dB 만큼
 % 올려 줄 것이므로, 보상 전에는 그만큼 **아래**에 있어야 합니다.
-PM_req = 50;
+PM_req = 50;                                  % 요구 위상여유 [도]
 [D, info] = lead_design(K0, G0, PM_req, 5);
-fprintf('=== Lead 설계 결과 ===\n');
-fprintf('  요구 위상여유 %d 도\n', PM_req);
-fprintf('  3단계 : 모자란 각 phi = %.2f 도\n', info.phi);
-fprintf('  4단계 : alpha = %.4f\n', info.alpha);
-fprintf('  5단계 : wm = %.3f rad s^-1, T = %.4f\n', info.wm, info.T);
-fprintf('          영점 s = %.3f, 극점 s = %.3f\n', info.zero, info.pole);
-fprintf('  검증   : 위상여유 %.2f -> %.2f 도\n\n', info.PM_before, info.PM_after);
+
+info          % 각 단계의 값이 그대로 들어 있다 (phi, alpha, wm, T, 영점, 극점)
+%%
+PM_before = info.PM_before        % 보상 전 위상여유 [도]
+PM_after  = info.PM_after         % 보상 후. 요구값을 넘겨야 한다
 %% 2-3. 설계 결과를 그림으로
 % ![Lead 는 위상을 끌어올려 여유를 번다](w11_lead_bode.png)
 %
@@ -414,13 +416,14 @@ fprintf('  검증   : 위상여유 %.2f -> %.2f 도\n\n', info.PM_before, info.P
 t2 = (0:0.002:1.2)';
 u_before = step(feedback(K0, G0), t2);
 u_after  = step(feedback(D,  G0), t2);
-fprintf('=== Lead 의 대가 ===\n');
-fprintf('              최대 제어입력   고주파 이득 배율\n');
-fprintf('   ---------  --------------  ----------------\n');
-fprintf('   보상 전    %14.1f  %16.1f\n', max(abs(u_before)), 1);
-fprintf('   Lead 적용  %14.1f  %16.1f\n', max(abs(u_after)), 1/info.alpha);
-fprintf('   --> 설계를 마쳤으면 **반드시 제어입력을 확인**하십시오.\n');
-fprintf('       구동기가 못 내는 값이면 그 설계는 종이 위에서만 맞습니다.\n\n');
+stage   = ["보상 전"; "Lead 적용"];
+max_u   = [max(abs(u_before)); max(abs(u_after))];   % 최대 제어입력
+gain_hf = [1; 1/info.alpha];                         % 고주파 이득 배율
+
+table(stage, max_u, gain_hf)
+%%
+% 설계를 마쳤으면 **반드시 제어입력을 확인**하십시오.
+% 구동기가 못 내는 값이면 그 설계는 종이 위에서만 맞습니다.
 plot(t2, u_before, 'LineWidth', 2); hold on; grid on;
 plot(t2, u_after,  'LineWidth', 2);
 xlabel('시간 [s]'); ylabel('제어입력 u');
@@ -493,17 +496,17 @@ title('Lead 는 제어입력을 크게 만든다');
 % - **5단계** 검증
 G2 = 100/((s+1)*(0.2*s+1));
 [D2, i2] = lag_design(1, G2, 40, 8);
-fprintf('=== Lag 설계 결과 (강의자료 예제 7-5) ===\n');
-fprintf('  플랜트 100/((s+1)(0.2s+1)), K = 1\n');
-fprintf('  2단계 : 새 교차주파수 %.3f rad s^-1\n', i2.wc_new);
-fprintf('  3단계 : 낮춰야 할 크기 %.2f dB -> beta = %.2f\n', i2.attn_dB, i2.beta);
-fprintf('  4단계 : T = %.4f (영점 s = %.3f, 극점 s = %.4f)\n', i2.T, i2.zero, i2.pole);
-fprintf('  검증   : 위상여유 %.2f -> %.2f 도\n\n', i2.PM_before, i2.PM_after);
-ib = stepinfo(feedback(G2,1));  ia = stepinfo(feedback(D2*G2,1));
-fprintf('              오버슈트[%%]   상승시간[s]   대역폭[rad s^-1]\n');
-fprintf('   ---------  ------------  -----------  -----------------\n');
-fprintf('   보상 전    %12.2f  %11.4f  %17.2f\n', ib.Overshoot, ib.RiseTime, bandwidth(feedback(G2,1)));
-fprintf('   Lag 적용   %12.2f  %11.4f  %17.2f\n\n', ia.Overshoot, ia.RiseTime, bandwidth(feedback(D2*G2,1)));
+i2       % 강의자료 예제 7-5 의 각 단계 값 (새 교차주파수, beta, T, 영점, 극점)
+%%
+T_before = feedback(G2, 1);
+T_after  = feedback(D2*G2, 1);
+
+stage     = ["보상 전"; "Lag 적용"];
+overshoot = [stepinfo(T_before).Overshoot; stepinfo(T_after).Overshoot];
+rise_time = [stepinfo(T_before).RiseTime;  stepinfo(T_after).RiseTime];
+bw        = [bandwidth(T_before);          bandwidth(T_after)];
+
+table(stage, overshoot, rise_time, bw)
 %% 4. Lead 와 Lag 를 어떻게 고르는가
 % 목적이 반대이므로 표로 정리해 두면 편합니다.
 %
@@ -665,16 +668,19 @@ fprintf('   Lag 적용   %12.2f  %11.4f  %17.2f\n\n', ia.Overshoot, ia.RiseTime,
 % 그래서 실무에서는 **필요한 만큼만 작은 $N$** 을 씁니다.
 % Simulink `PID Controller` 블록의 "Filter coefficient N" 이 바로 이 값입니다.
 Gm = plant_dcmotor('speed');
-fprintf('=== 미분 필터 N 의 영향 ===\n');
-fprintf('       N      w = 1000 에서 제어기 크기[dB]   위상여유[도]\n');
-fprintf('   -------  -----------------------------  ------------\n');
-for N = [5 20 100 1000]
-    Cn = 100 + 200/s + 10*s/(s/N + 1);
-    [~, pmn] = margin(Cn*Gm);
-    fprintf('   %7.0f  %29.2f  %12.2f\n', N, 20*log10(abs(freqresp(Cn, 1000))), pmn);
+N = [5 20 100 1000]';
+gain_1000_dB = zeros(size(N));    % w = 1000 에서 제어기의 크기 [dB]
+PM           = zeros(size(N));    % 위상여유 [도]
+for i = 1:numel(N)
+    C = 100 + 200/s + 10*s/(s/N(i) + 1);
+    gain_1000_dB(i) = 20*log10(abs(freqresp(C, 1000)));
+    [~, PM(i)]      = margin(C*Gm);
 end
-fprintf('   --> 성능은 N = 20 이나 1000 이나 비슷한데 고주파 이득만 커집니다.\n');
-fprintf('       **작은 N 을 쓰는 것이 이득**입니다.\n\n');
+
+table(N, gain_1000_dB, PM)
+%%
+% 성능은 $N = 20$ 이나 $1000$ 이나 비슷한데 **고주파 이득만 커집니다.**
+% 그러므로 **작은 $N$ 을 쓰는 것이 이득**입니다.
 %% 5-2. `pidtune` — 자동 튜닝
 % **오늘의 새 명령입니다.**
 %
@@ -690,23 +696,28 @@ fprintf('       **작은 N 을 쓰는 것이 이득**입니다.\n\n');
 % - 모델이 **정확해야** 한다. `pidtune` 은 모델을 그대로 믿는다
 % - 기본 목표는 위상여유 $60^\circ$ 다
 % - **구동기 한계는 모른다.** 결과를 반드시 검증해야 한다
-[C_auto, ia_auto] = pidtune(Gm, 'PIDF');
-fprintf('=== pidtune 결과 ===\n');
-C_auto
-fprintf('  교차주파수 %.3f rad s^-1, 위상여유 %.2f 도\n\n', ...
-        ia_auto.CrossoverFrequency, ia_auto.PhaseMargin);
-fprintf('  목표 교차주파수를 바꿔 가며\n');
-fprintf('     wc 목표   정착시간[s]   최대 제어입력[V]\n');
-fprintf('   ---------  -----------  ------------------\n');
-tp = (0:0.002:3)';
-for wc = [2 5 10 20]
-    Ci = pidtune(Gm, 'PIDF', wc);
-    ji = stepinfo(feedback(Ci*Gm, 1));
-    ui = step(feedback(Ci, Gm), tp);
-    fprintf('   %9.0f  %11.3f  %18.1f\n', wc, ji.SettlingTime, max(abs(ui)));
+[C_auto, info_auto] = pidtune(Gm, 'PIDF');
+
+C_auto                                        % 자동으로 정해 준 제어기
+%%
+wc_auto = info_auto.CrossoverFrequency        % [rad/s]
+pm_auto = info_auto.PhaseMargin               % [도]
+%%
+% 목표 교차주파수를 바꿔 가며 속도와 전압을 비교합니다.
+wc = [2 5 10 20]';
+settling = zeros(size(wc));    % 정착시간 [s]
+max_u    = zeros(size(wc));    % 최대 제어입력 [V]
+t = (0:0.002:3)';
+for i = 1:numel(wc)
+    C = pidtune(Gm, 'PIDF', wc(i));
+    settling(i) = stepinfo(feedback(C*Gm, 1)).SettlingTime;
+    max_u(i)    = max(abs(step(feedback(C, Gm), t)));
 end
-fprintf('   --> 두 배 빨라지려면 전압은 **네 배**가 필요합니다.\n');
-fprintf('       빠르게 만드는 값은 선형이 아니라 제곱으로 비쌉니다.\n\n');
+
+table(wc, settling, max_u)
+%%
+% 두 배 빨라지려면 전압은 **네 배**가 필요합니다.
+% 빠르게 만드는 값은 선형이 아니라 **제곱으로** 비쌉니다.
 %% 6. 실무에서 만나는 문제 — 적분 와인드업
 % 여기까지는 전부 선형 설계였습니다. 그런데 실제 구동기에는 한계가 있습니다.
 %
@@ -823,8 +834,7 @@ fprintf('       빠르게 만드는 값은 선형이 아니라 제곱으로 비�
 % - **위상여유** — 크게 하면 덜 진동하고 대신 느려진다
 [Gv_, ~] = plant_dcmotor('speed');
 
-C_manual = pid(10, 5);
-fprintf('pid(10,5) : Kp=%g  Ki=%g  Kd=%g\n', C_manual.Kp, C_manual.Ki, C_manual.Kd);
+C_manual = pid(10, 5)        % Kp = 10, Ki = 5 인 PI 제어기
 
 C_pi   = pidtune(Gv_, 'PI');
 C_fast = pidtune(Gv_, 'PID', 20);
@@ -833,15 +843,17 @@ C_soft = pidtune(Gv_, 'PI', pidtuneOptions('PhaseMargin', 75));
 [~, pm_pi]   = margin(C_pi   * Gv_);
 [~, pm_soft] = margin(C_soft * Gv_);
 
-fprintf('\n%-22s %-9s %-9s %-9s %s\n', '설정', 'Kp', 'Ki', 'Kd', '위상여유');
-fprintf('%-22s %-9.4g %-9.4g %-9.4g %.1f 도\n', '기본 PI', ...
-        C_pi.Kp, C_pi.Ki, C_pi.Kd, pm_pi);
-fprintf('%-22s %-9.4g %-9.4g %-9.4g %s\n', 'PID, wc = 20', ...
-        C_fast.Kp, C_fast.Ki, C_fast.Kd, '-');
-fprintf('%-22s %-9.4g %-9.4g %-9.4g %.1f 도\n', 'PI, 위상여유 75도', ...
-        C_soft.Kp, C_soft.Ki, C_soft.Kd, pm_soft);
-fprintf('\n위상여유를 60 도에서 75 도로 올리면 Ki 가 %.0f %% 줄었습니다.\n', ...
-        100*(1 - C_soft.Ki/C_pi.Ki));
+setting = ["기본 PI"; "PID, wc = 20"; "PI, 위상여유 75도"];
+Kp = [C_pi.Kp; C_fast.Kp; C_soft.Kp];
+Ki = [C_pi.Ki; C_fast.Ki; C_soft.Ki];
+Kd = [C_pi.Kd; C_fast.Kd; C_soft.Kd];
+
+table(setting, Kp, Ki, Kd)
+%%
+pm_pi                                  % 기본 PI 의 위상여유 [도]
+pm_soft                                % 75 도로 요구했을 때
+%%
+Ki_reduction_percent = 100*(1 - C_soft.Ki/C_pi.Ki)   % 위상여유를 올린 대가
 fprintf('적분을 약하게 해서 여유를 벌었다는 뜻입니다.\n');
 %% 7. 오늘의 정리
 % - 주파수영역 설계는 **정상상태 사양으로 $K$ 부터** 정한다. 순서를 지킨다

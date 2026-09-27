@@ -183,20 +183,19 @@ s = tf('s');
 %
 % $$L(s) = \frac{K}{s\,(s+1)^2}$$
 G = 1/(s*(s+1)^2);
-fprintf('=== K 를 키우면 ===\n');
-fprintf('     K     폐루프 극점 실수부 최댓값    상태\n');
-fprintf('   ------  ------------------------  --------\n');
-for K = [0.5 1 2 3]
-    mx = max(real(pole(feedback(K*G,1))));
-    if mx < -1e-6,          st = '안정';
-    elseif abs(mx) < 1e-6,  st = '경계';
-    else,                   st = '불안정';
-    end
-    fprintf('   %6.1f  %24.4f  %8s\n', K, mx, st);
+K = [0.5 1 2 3]';
+
+max_real = zeros(size(K));            % 폐루프 극점 실수부의 최댓값
+for i = 1:numel(K)
+    max_real(i) = max(real(pole(feedback(K(i)*G, 1))));
 end
-fprintf('\n');
-fprintf('  이 시스템은 K = 2 가 안정 한계입니다.\n');
-fprintf('  5주차에서 Routh 표로 구했던 임계이득과 같은 값입니다.\n\n');
+stable = max_real < 0;                % 전부 좌반면이면 안정
+
+table(K, max_real, stable)
+%%
+% 실수부 최댓값이 $0$ 을 넘는 순간 불안정해집니다.
+% 이 시스템은 $K = 2$ 가 안정 한계이고, **5주차에서 라우스 표로 구했던
+% 임계이득과 같은 값**입니다.
 %% 2. 나이퀴스트 선도
 % 보드 선도는 크기와 위상을 **따로** 그렸습니다.
 % 나이퀴스트 선도는 둘을 **한 평면에** 그립니다.
@@ -239,12 +238,11 @@ G_ex = 1/(s*(s+1)^2);
 w_ex = logspace(-1, 1, 2000);
 [re_ex, im_ex] = nyquist(0.5*G_ex, w_ex);
 re_ex = squeeze(re_ex);  im_ex = squeeze(im_ex);
-dist  = min(hypot(re_ex + 1, im_ex));
-fprintf('=== nyquist 로 값 받기 ===\n');
-fprintf('  K = 0.5 일 때 궤적과 -1 점의 최단 거리 : %.3f\n', dist);
-fprintf('  (이 거리가 작을수록 불안정에 가깝습니다.\n');
-fprintf('   5절에서 배울 감도 최대값과 %.3f = 1/%.2f 로 이어집니다)\n\n', ...
-        dist, 1/dist);
+distance = min(hypot(re_ex + 1, im_ex))   % 궤적과 -1 점의 최단 거리
+%%
+% 이 거리가 **작을수록 불안정에 가깝습니다.**
+% 5절에서 배울 감도 최대값은 이 거리의 역수입니다.
+peak_sensitivity = 1/distance
 %%
 % ![K = 2 에서 궤적이 -1 점을 정확히 지난다](w10_nyquist_K.png)
 %
@@ -340,17 +338,20 @@ fprintf('   5절에서 배울 감도 최대값과 %.3f = 1/%.2f 로 이어집니
 % 시스템**이 실제로 있기 때문입니다. 거꾸로 선 진자가 그 예이고,
 % 그런 시스템은 오히려 **이득을 충분히 키워야** 안정해집니다.
 Gu = 1/((s-1)*(s+3));
-fprintf('=== 개루프가 불안정한 경우 : G = 1/((s-1)(s+3)) ===\n');
-fprintf('  개루프 극점 %s -> 우반면 극점 P = 1\n', mat2str(round(pole(Gu).',3)));
-fprintf('     K     폐루프 우반면 극점 Z    상태\n');
-fprintf('   ------  ---------------------  --------\n');
-for K = [1 3 5 10]
-    Z = sum(real(pole(feedback(K*Gu,1))) > 1e-9);
-    if Z == 0, st = '안정'; else, st = '불안정'; end
-    fprintf('   %6.1f  %21d  %8s\n', K, Z, st);
+
+pole(Gu)'                    % 개루프 극점. +1 이 있으므로 우반면 극점 P = 1
+%%
+K = [1 3 5 10]';
+Z = zeros(size(K));          % 폐루프 우반면 극점 개수
+for i = 1:numel(K)
+    Z(i) = sum(real(pole(feedback(K(i)*Gu, 1))) > 0);
 end
-fprintf('\n');
-fprintf('  이득을 키워야 안정해집니다. 상식이 항상 맞지는 않습니다.\n\n');
+stable = Z == 0;
+
+table(K, Z, stable)
+%%
+% **이득을 키워야 안정해집니다.** "이득을 키우면 불안정해진다" 는 상식이
+% 항상 맞지는 않습니다.
 %% 2-1-1. $N$ 을 실제로 세어 본다
 % 위 표는 `pole(feedback(...))` 로 **답을 미리 본 것**입니다.
 % 이제 그림만 보고 $N$ 을 세어 같은 답이 나오는지 확인합니다.
@@ -401,19 +402,21 @@ fprintf('  이득을 키워야 안정해집니다. 상식이 항상 맞지는 �
 % 아래 코드가 곡선의 왼쪽 끝만 보고 판정합니다.
 % 이 예제는 곡선이 음의 실축에서 출발해 한 바퀴 도는 단순한 모양이라
 % **$-K/3$ 이 $-1$ 보다 왼쪽인가**만 보면 됩니다.
-fprintf('=== 그림만 보고 판정하기 ===\n');
-fprintf('  %-6s %-12s %-6s %-6s %-6s %s\n', 'K', 'L(0)=-K/3', 'N', 'P', 'Z', '판정');
-for K = [1 2.9 3.1 10]
-    L0 = -K/3;
-    if L0 < -1, N = -1; else, N = 0; end
-    Z = N + 1;
-    if Z == 0, st = '안정'; else, st = '불안정'; end
-    Zreal = sum(real(pole(feedback(K*Gu,1))) > 1e-9);
-    fprintf('  %-6.1f %-12.3f %-6d %-6d %-6d %s   (실제 Z = %d)\n', ...
-            K, L0, N, 1, Z, st, Zreal);
+K  = [1 2.9 3.1 10]';
+L0 = -K/3;                        % w = 0 에서 궤적이 있는 자리
+N  = -1*(L0 < -1);                % -1 점을 감싸는 횟수 (감싸면 -1)
+P  = ones(size(K));               % 개루프 우반면 극점 수
+Z  = N + P;                       % 나이퀴스트 판정식
+
+Z_real = zeros(size(K));          % 실제로 세어 본 값
+for i = 1:numel(K)
+    Z_real(i) = sum(real(pole(feedback(K(i)*Gu, 1))) > 0);
 end
-fprintf('  --> 그림으로 센 Z 와 실제 Z 가 모두 같습니다.\n');
-fprintf('      경계는 -K/3 = -1, 즉 K = 3 입니다.\n\n');
+
+table(K, L0, N, P, Z, Z_real)
+%%
+% 그림으로 센 $Z$ 와 실제 $Z$ 가 모두 같습니다.
+% 경계는 $-K/3 = -1$, 즉 $K = 3$ 입니다.
 %% 3. 이득여유와 위상여유
 % "$-1$ 점에서 얼마나 떨어져 있는가" 를 두 방향으로 나눠 잰 것입니다.
 %
@@ -430,21 +433,23 @@ fprintf('      경계는 -K/3 = -1, 즉 K = 3 입니다.\n\n');
 % - 그 주파수에서 **아래 위상 그림**을 본다 $\rightarrow$ 위상여유
 %
 % 즉 **한 그림에서 찾고 다른 그림에서 읽습니다.**
-fprintf('=== margin 이 주는 값 ===\n');
-fprintf('     K      GM[배]   GM[dB]    PM[도]     wcg      wcp\n');
-fprintf('   ------  -------  -------  --------  -------  -------\n');
-ws = warning('off','Control:analysis:MarginUnstable');
-for K = [0.2 0.5 1 2 3]
-    [gm, pm, wcg, wcp] = margin(K*G);
-    fprintf('   %6.1f  %7.3f  %7.2f  %8.2f  %7.3f  %7.3f\n', ...
-            K, gm, 20*log10(gm), pm, wcg, wcp);
+K = [0.2 0.5 1 2 3]';
+GM = zeros(size(K));  PM = GM;  wcg = GM;  wcp = GM;
+
+ws = warning('off', 'Control:analysis:MarginUnstable');
+for i = 1:numel(K)
+    [GM(i), PM(i), wcg(i), wcp(i)] = margin(K(i)*G);
 end
 warning(ws);
-fprintf('\n');
-fprintf('  읽는 법\n');
-fprintf('    K 를 키우면 크기 곡선이 통째로 위로 올라갑니다.\n');
-fprintf('    그래서 이득여유가 정확히 K 에 반비례합니다.\n');
-fprintf('    K = 2 에서 GM = 1 배 (0 dB), PM = 0 도. 안정 한계입니다.\n\n');
+GM_dB = 20*log10(GM);
+
+table(K, GM, GM_dB, PM, wcg, wcp)
+%%
+% 읽는 법
+%
+% - $K$ 를 키우면 크기 곡선이 통째로 위로 올라갑니다
+% - 그래서 **이득여유가 정확히 $K$ 에 반비례**합니다
+% - $K = 2$ 에서 $GM = 1$ 배 ($0$ dB), $PM = 0$ 도. **안정 한계**입니다
 %% 3-1. `margin` — 오늘의 새 명령
 % 명령 정리
 %
@@ -460,12 +465,12 @@ fprintf('    K = 2 에서 GM = 1 배 (0 dB), PM = 0 도. 안정 한계입니다.
 % - 출력을 안 받고 `margin(L)` 만 부르면 그림을 그린다
 %
 % 예제
-L1 = 0.5*G;
+L1 = 0.5*G;                      % L = 0.5/(s(s+1)^2)
 [gm, pm, wcg, wcp] = margin(L1);
-fprintf('=== margin 예제 ===\n');
-fprintf('  L = 0.5/(s(s+1)^2)\n');
-fprintf('  GM = %.3f 배 = %.2f dB   (wcg = %.3f rad s^-1)\n', gm, 20*log10(gm), wcg);
-fprintf('  PM = %.2f 도             (wcp = %.3f rad s^-1)\n\n', pm, wcp);
+
+gm_dB = 20*log10(gm)             % 이득여유 [dB]
+pm                               % 위상여유 [도]
+%%
 margin(L1); grid on;
 %% 4. 여유가 얼마면 충분한가
 % 실무 기준은 이렇습니다.
@@ -525,17 +530,17 @@ margin(L1); grid on;
 % 계산식으로 확인하면 $\tau_{max} = 44.1^\circ \times (\pi/180) / 0.424 = 1.81$ s 입니다.
 % **그림의 노란 곡선이 정확히 그 값에서 안정 한계가 되었습니다.**
 % 위상여유가 추상적으로 느껴질 때 이 변환을 쓰십시오.
-fprintf('=== 위상여유를 시간지연으로 ===\n');
-fprintf('     K      PM[도]     wcp      견디는 지연[s]\n');
-fprintf('   ------  --------  -------  ----------------\n');
-for K = [0.2 0.5 1.0]
-    [~, pm_, ~, wcp_] = margin(K*G);
-    fprintf('   %6.1f  %8.2f  %7.3f  %16.3f\n', K, pm_, wcp_, deg2rad(pm_)/wcp_);
+K = [0.2 0.5 1.0]';
+PM = zeros(size(K));  wcp = PM;
+for i = 1:numel(K)
+    [~, PM(i), ~, wcp(i)] = margin(K(i)*G);
 end
-fprintf('\n');
-fprintf('  읽는 법\n');
-fprintf('    이득을 키우면 견딜 수 있는 지연이 급격히 줄어듭니다.\n');
-fprintf('    빠른 제어기일수록 지연에 약합니다. 공짜가 없습니다.\n\n');
+delay_max = deg2rad(PM)./wcp;      % 견딜 수 있는 시간지연 [s]
+
+table(K, PM, wcp, delay_max)
+%%
+% 이득을 키우면 **견딜 수 있는 지연이 급격히 줄어듭니다.**
+% 빠른 제어기일수록 지연에 약합니다. 공짜가 없습니다.
 %% 5. 시간영역 사양과의 번역
 % 4주차에서 배운 시간영역 사양과 오늘의 주파수영역 사양은
 % **같은 것을 다르게 말하는 것**입니다. 서로 번역할 수 있습니다.
@@ -574,20 +579,20 @@ fprintf('    빠른 제어기일수록 지연에 약합니다. 공짜가 없습�
 % **외울 것은 $\zeta \approx PM/100$ 한 줄입니다.**
 % PM $30^\circ$ 면 $\zeta \approx 0.3$ (오버슈트 $37\%$),
 % PM $60^\circ$ 면 $\zeta \approx 0.6$ (오버슈트 $9\%$) 로 어림합니다.
-fprintf('=== 위상여유로 오버슈트 짐작하기 ===\n');
-fprintf('     K      PM[도]   zeta 추정   공식 OS[%%]   실제 OS[%%]\n');
-fprintf('   ------  --------  ---------  -----------  -----------\n');
-for K = [0.2 0.4 0.6 0.8 1.0]
-    [~, pm_] = margin(K*G);
-    z  = pm_/100;
-    oe = 100*exp(-z*pi/sqrt(1-z^2));
-    ii = stepinfo(feedback(K*G,1));
-    fprintf('   %6.1f  %8.2f  %9.4f  %11.2f  %11.2f\n', K, pm_, z, oe, ii.Overshoot);
+K = [0.2 0.4 0.6 0.8 1.0]';
+PM = zeros(size(K));  OS_real = PM;
+for i = 1:numel(K)
+    [~, PM(i)] = margin(K(i)*G);
+    OS_real(i) = stepinfo(feedback(K(i)*G, 1)).Overshoot;
 end
-fprintf('\n');
-fprintf('  정확히 맞지는 않습니다. 3차 시스템이라 2차 공식이 어긋납니다.\n');
-fprintf('  그래도 **설계 초기에 짐작하기에는 충분합니다.**\n');
-fprintf('  설계를 마치면 반드시 stepinfo 로 검증해야 합니다.\n\n');
+zeta_est   = PM/100;                                        % 어림 규칙
+OS_formula = 100*exp(-zeta_est*pi./sqrt(1-zeta_est.^2));    % 4주차 공식
+
+table(K, PM, zeta_est, OS_formula, OS_real)
+%%
+% 정확히 맞지는 않습니다. 3차 시스템이라 2차 공식이 어긋납니다.
+% 그래도 **설계 초기에 짐작하기에는 충분합니다.**
+% 설계를 마치면 반드시 `stepinfo` 로 검증해야 합니다.
 %% 5-1. 대역폭 — 빠르기의 주파수영역 표현
 % 대역폭이란 폐루프 크기가 $-3$ dB 로 떨어지는 주파수입니다.
 % "이 주파수까지는 지령을 따라간다" 는 뜻이므로 곧 **빠르기**입니다.
@@ -618,15 +623,16 @@ fprintf('  설계를 마치면 반드시 stepinfo 로 검증해야 합니다.\n\
 % 왼쪽만 보면 "대역폭을 넓히면 좋다" 로 읽힙니다.
 % **오른쪽을 함께 보십시오.** 대역폭을 넓히려고 이득을 키우면
 % 위상여유가 깎여 오버슈트가 커집니다. 여기서도 공짜가 없습니다.
-fprintf('=== 대역폭과 시간응답 ===\n');
-fprintf('     K     대역폭[rad s^-1]   상승시간[s]   1.8 나누기 BW\n');
-fprintf('   ------  -----------------  -----------  ---------------\n');
-for K = [0.2 0.5 1.0 1.4]
-    T = feedback(K*G, 1);
-    ii = stepinfo(T);  b = bandwidth(T);
-    fprintf('   %6.1f  %17.3f  %11.2f  %15.2f\n', K, b, ii.RiseTime, 1.8/b);
+K = [0.2 0.5 1.0 1.4]';
+bw = zeros(size(K));  rise_time = bw;
+for i = 1:numel(K)
+    T = feedback(K(i)*G, 1);
+    bw(i)        = bandwidth(T);
+    rise_time(i) = stepinfo(T).RiseTime;
 end
-fprintf('\n');
+rule_of_thumb = 1.8./bw;        % 어림 규칙 : 상승시간 = 1.8 / 대역폭
+
+table(K, bw, rise_time, rule_of_thumb)
 %% 5-2. 근본적인 맞바꿈 — 감도함수
 % 두 전달함수를 함께 봅니다. 그런데 그 전에 **잡음이 어디로 들어오는지**를
 % 그림에서 확인해야 합니다. 외란과 들어오는 자리가 다릅니다.
@@ -840,16 +846,18 @@ title('S 와 T 는 동시에 작아질 수 없다');
 s = tf('s');
 Lm = 1/(s*(s+1)^2);
 
-[Gm_, Pm_, Wcg_, Wcp_] = margin(Lm);
-fprintf('이득여유 : %.3f 배 = %.2f dB   (w = %.3f rad/s)\n', Gm_, mag2db(Gm_), Wcg_);
-fprintf('위상여유 : %.2f 도             (w = %.3f rad/s)\n', Pm_, Wcp_);
+[gm, pm, wcg, wcp] = margin(Lm);
 
+gm_dB = mag2db(gm)              % 이득여유 [dB]
+pm                              % 위상여유 [도]
+%%
 am = allmargin(Lm);
-fprintf('\n지연여유 : %.4f 초\n', am.DelayMargin);
-fprintf('  -> 루프에 %.0f ms 이상 지연이 생기면 불안정해집니다.\n', am.DelayMargin*1000);
-fprintf('폐루프 안정 여부 : %d (1 이면 안정)\n', am.Stable);
-fprintf('\n확인 : 위상여유 %.2f 도를 교차주파수 %.3f rad/s 로 나누면\n', Pm_, Wcp_);
-fprintf('       %.4f 초로 지연여유와 같습니다.\n', deg2rad(Pm_)/Wcp_);
+
+delay_margin = am.DelayMargin   % 견딜 수 있는 지연 [s]
+is_stable    = am.Stable        % 1 이면 폐루프가 안정
+%%
+% 지연여유는 **위상여유를 교차주파수로 나눈 것**과 같습니다.
+delay_check = deg2rad(pm)/wcp
 %% 7. 오늘의 정리
 % - 불안정의 조건은 $L(j\omega) = -1$. **여유란 그 점에서 얼마나 떨어졌는가**다
 % - 나이퀴스트 선도는 크기와 위상을 한 평면에 그린 것이다
