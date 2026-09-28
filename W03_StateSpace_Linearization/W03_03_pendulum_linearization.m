@@ -131,6 +131,14 @@ ev = eig(p.A); fprintf('%+.3f%+.3fj  ', [real(ev).'; imag(ev).']); fprintf('\n')
 fprintf('  실수부가 0 입니다. 감쇠가 없어서 영원히 흔들린다는 뜻입니다.\n');
 fprintf('  (2주차에서 본 "극점이 허수축 위" 상황과 같습니다)\n\n');
 
+s = tf('s');
+G_s = p.C*inv(s*eye(2) - p.A)*p.B
+pole(G_s)
+
+[num, den] = ss2tf(p.A, p.B, p.C, p.D)
+G_s_2 = tf(num, den)
+pole(G_s_2)
+
 %% 5. 작은 각도로 흔들어 보기 : 잘 맞는다
 %
 %  이제 진짜 비선형 진자와 선형 근사 모델을 나란히 돌려 봅시다.
