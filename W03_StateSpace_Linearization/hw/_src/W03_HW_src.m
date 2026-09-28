@@ -83,6 +83,7 @@ end
 %% 2-1. 먼저 sin 과 직선을 겹쳐 그려 보기
 % 코드는 다 되어 있습니다. 실행만 하면 됩니다.
 
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 th = linspace(-pi/2, pi/2, 400);
 plot(rad2deg(th), sin(th), 'LineWidth', 2); hold on;
 plot(rad2deg(th), th, 'LineWidth', 2);
@@ -119,6 +120,7 @@ end
 %
 % `TODO` 두 줄을 채우십시오. 힌트는 바로 위 부호입니다.
 
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 g_ = 9.81;  l_ = 0.3;
 
 G_down = NaN;    % TODO : 1/(s^2 + g_/l_) 로 만드십시오  (매달린 진자)

@@ -60,6 +60,7 @@ end
 %% 1-1. 그림으로 보기
 % 코드는 다 되어 있습니다.
 
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 t1 = (0:0.02:12)';
 tiledlayout(1,2,'TileSpacing','compact');
 
@@ -144,6 +145,7 @@ end
 % 만든 시스템이 정말 사양을 만족하는지 `stepinfo` 로 확인합니다.
 % 코드는 다 되어 있습니다.
 
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 if exist('G2', 'var') && isa(G2, 'tf')
     i2 = stepinfo(G2);
     fprintf('\n=== 검증 ===\n');

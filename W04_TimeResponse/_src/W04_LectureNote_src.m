@@ -126,6 +126,7 @@ s = tf('s');
 %% 0-0-1. 가장 작은 예부터
 % 이해를 돕기 위해 제일 쉬운 것부터 봅니다.
 % 극점 두 개가 어디 있느냐에 따라 응답이 이렇게 달라집니다.
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 figure;
 tiledlayout(1,2,'TileSpacing','compact');
 cases = { '천천히, 안 튄다', 0.9, 1
@@ -258,6 +259,7 @@ legend('Location','southeast');
 %
 % 왼쪽과 오른쪽을 함께 읽으십시오. **극점이 왼쪽에 있을수록 빠르다** 가
 % 오늘 계속 나올 문장이고, 여기가 그 첫 등장입니다.
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 t = 0:0.01:12;
 for tau = [0.5 1 2]
     plot(t, step(1/(tau*s+1), t), 'LineWidth', 2); hold on
@@ -376,6 +378,7 @@ legend('\tau = 0.5','\tau = 1','\tau = 2','목표값','63.2 %','Location','south
 % $t=\tau$ 에서 목표값 $1$ 에 닿습니다. 아래 그림의 점선이 그것입니다.
 %
 % 손으로 푼 해가 맞는지, MATLAB 의 `step` 과 겹쳐 봅니다.
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 tau = 1;
 t   = 0:0.01:6;
 
@@ -638,6 +641,7 @@ phase                                    % -84.3 도
 % - `tau` 를 $5$ 로 키우면 잡음은 더 깎이지만 **신호 자체도 작아지고 늦어집니다**
 %
 % 강의 중에는 아래 코드로 바로 돌려 봅니다.
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 model = 'W04_LowPass';
 if ~bdIsLoaded(model), load_system(model); end     % setup_path 가 경로를 잡아 둔다
 tau = 1;  w_lo = 0.2;  w_hi = 10;  a_lo = 1;  a_hi = 0.5;  t_end = 60;
@@ -870,6 +874,7 @@ theta_from_zeta = acosd(zeta)                    % 3단계의 공식
 % | $\times$ 가 실축과 이루는 각 | $\zeta$ 가 작을수록 크다 | **각도 $=\arccos\zeta$.** 5절에서 이 각이 부채꼴이 된다 |
 %
 % 왼쪽 곡선 하나와 오른쪽 $\times$ 하나가 **짝**입니다. 색으로 짝을 찾아 보십시오.
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 wn = 2;  zl = [0.1 0.3 0.5 0.707 1.0 1.5];  t2 = 0:0.01:15;
 tiledlayout(1,2,'TileSpacing','compact')
 nexttile
@@ -1087,6 +1092,7 @@ end
 table(zeta, OS_formula, OS_measured, Tp_formula, Tp_measured)
 %%
 % 봉투와 응답을 함께 그려 본다
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 z = 0.3; w = 2;
 Gx = w^2/(s^2 + 2*z*w*s + w^2);
 tx = (0:0.01:10)';
@@ -1364,6 +1370,7 @@ ts_check = info_t.SettlingTime           % 실제 정착시간. 2 s 이하여야
 % - 오버슈트 $10\%$ — $\zeta \ge 0.591$ — 각도 $\le 53.8^\circ$
 % - 오버슈트 $20\%$ — $\zeta \ge 0.456$ — 각도 $\le 62.9^\circ$
 % - 오버슈트 $40\%$ — $\zeta \ge 0.280$ — 각도 $\le 73.7^\circ$
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 r = linspace(0,6,100);
 for os = [5 10 20 40]
     zmin = spec2pole(os, 1);  th = acos(zmin);
@@ -1424,6 +1431,7 @@ legend('5 % 한계','10 % 한계','20 % 한계','40 % 한계','Location','southw
 % - $\omega_n$ 을 원으로 그리므로 수직선 조건과는 조금 다르지만,
 %   원이 수직선보다 보수적이라 실용상 문제가 없다
 % - 6주차부터 계속 쓴다
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 P_OS = 10; ts = 2;
 [zeta_min, wn_min, s_t] = spec2pole(P_OS, ts);
 th = acos(zeta_min);
@@ -1505,6 +1513,7 @@ table(p_cand, note, OS, ts_c, verdict)
 % 여기서 배울 실무 규칙 — **가장 오른쪽 극점(원점에 가장 가까운 것)이
 % 응답을 지배합니다.** 이것을 **지배극점**이라 부르고, 6주차 근궤적 설계에서
 % 계속 씁니다.
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 Gt = wn_min^2/(s^2+2*zeta_min*wn_min*s+wn_min^2);
 t4 = 0:0.01:8;
 plot(t4, step(Gt, t4), 'LineWidth', 2.5); hold on

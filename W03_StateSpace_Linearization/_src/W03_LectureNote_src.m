@@ -95,6 +95,7 @@ s = tf('s');
 %
 % $$G_1(s) = \frac{1}{s+1}, \qquad G_2(s) = \frac{2}{s+2}
 %   \qquad \Rightarrow \qquad G_1 G_2 = \frac{2}{(s+1)(s+2)}$$
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 dg_new(10, 2.6, '직렬 : 이어 붙이면 곱한다');
 b1 = dg_block(3.5, 1.3, 1.8, 1.0, 'G_1(s)', [0.88 0.93 1.00]);
 b2 = dg_block(6.5, 1.3, 1.8, 1.0, 'G_2(s)', [0.93 0.93 0.93]);
@@ -191,6 +192,7 @@ pole(G1*G2)'                 % 두 시스템의 극점이 그대로 모인다
 % 센서 값이 목표와 같아지면 거기서 멈춥니다. 실제 출력은 어긋난 채로요.
 %
 % 아래에서 센서 이득이 3배인 경우를 확인해 봅니다.
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 G = 1/(s+1) * 20/(s+2);
 H = 3/(0.2*s+1);
 t = 0:0.01:10;
@@ -424,6 +426,7 @@ D_hand = 0
 sys_hand  = ss(A_hand, B_hand, C_hand, D_hand);
 G_from_ss = tf(sys_hand)
 %%
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 max(abs(sort(pole(G_from_ss)) - sort(pole(G_msd))))   % 2주차 결과와의 극점 차이
 t_cmp = (0:0.02:30)';
 plot(t_cmp, step(G_from_ss, t_cmp), 'LineWidth', 2.5); hold on;
@@ -470,6 +473,7 @@ title('두 응답이 완전히 겹친다 — 같은 시스템이다');
 %
 % 아래 그림에서 위치가 최대일 때 속도가 $0$ 이고, 위치가 $0$ 을 지날 때 속도가
 % 최대인 것을 확인하십시오. 그네를 떠올리면 자연스러운 결과입니다.
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 sys_all = ss(p.A, p.B, eye(2), [0;0]);
 t2 = 0:0.01:40;
 y_all = initial(sys_all, [0.5;0], t2);
@@ -532,6 +536,7 @@ xlabel('시간 [s]'); ylabel('속도 [m/s]')
 % 선형화가 정확히 이겁니다. 곡선 전체를 직선으로 바꾸는 게 아니라
 % **관심 있는 한 점 근처만** 직선으로 바꿉니다.
 % 그 점을 **동작점** 또는 **평형점**이라고 부릅니다.
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 x = -2:0.01:2;
 plot(x, sin(x), 'LineWidth',3); hold on
 plot(x, x, '--', 'LineWidth',2)
@@ -851,6 +856,7 @@ table(deg, sin_theta, theta, err_pct)
 % 때문입니다.
 %
 % 먼저 $5^\circ$ 에서 놓아 봅니다. 두 선이 겹쳐서 하나로 보입니다.
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 [sysLin, pp] = plant_pendulum(0);
 t3 = linspace(0,10,1000)';
 [tn, xn] = ode45(@(t,x) pp.f(x,0), [0 10], [deg2rad(5); 0]);
@@ -870,6 +876,7 @@ legend('비선형 (진짜)','선형 근사','Location','northeast')
 % - 크게 벌어진 지점에서는 중력이 되돌리는 힘이 생각만큼 크지 않기 때문
 %   ($\sin 60^\circ = 0.87$ 로, $60^\circ = 1.05\,\mathrm{rad}$ 보다 한참 작다)
 % - 선형 모델은 이걸 모르고 각도와 상관없이 항상 같은 주기라고 본다
+close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 [tn2, xn2] = ode45(@(t,x) pp.f(x,0), [0 10], [deg2rad(60); 0]);
 plot(tn2, rad2deg(xn2(:,1)), 'LineWidth',3); hold on
 plot(t3, rad2deg(initial(sysLin,[deg2rad(60);0],t3)), '--', 'LineWidth',2)
