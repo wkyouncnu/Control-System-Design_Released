@@ -1,4 +1,4 @@
-%% W06_03_run_simulink.m
+ %% W06_03_run_simulink.m
 %  6주차 실습 (3) : 근궤적으로 고른 이득을 Simulink 로 검증하기
 %
 %  이번 실습의 핵심 메시지
