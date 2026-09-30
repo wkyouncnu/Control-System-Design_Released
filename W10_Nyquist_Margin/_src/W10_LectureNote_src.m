@@ -4,7 +4,19 @@
 %
 % **참고자료 — 먼저 볼 것**
 %
-% 아래 다섯 과목은 **이 강의의 담당교수가 직접 한 강의**입니다.
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
 % 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
 % 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
 %
@@ -16,13 +28,16 @@
 % | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
 % | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
 %
-% **MATLAB 이나 Simulink 가 아직 익숙하지 않다면** 실습에 들어가기 전에 아래를 먼저 하십시오.
-% 무료이고 각각 몇 시간이면 끝납니다.
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
 %
-% | 도구 | 학습 자료 |
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
 % |---|---|
 % | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
 % | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
+%
 %
 % 지난 주에는 주파수응답이 **어떻게 생겼는지**를 봤습니다.
 % 오늘은 그 그림으로 **안정한지 아닌지, 그리고 얼마나 여유가 있는지**를 판단합니다.
@@ -184,13 +199,11 @@ s = tf('s');
 % $$L(s) = \frac{K}{s\,(s+1)^2}$$
 G = 1/(s*(s+1)^2);
 K = [0.5 1 2 3]';
-
 max_real = zeros(size(K));            % 폐루프 극점 실수부의 최댓값
 for i = 1:numel(K)
     max_real(i) = max(real(pole(feedback(K(i)*G, 1))));
 end
 stable = max_real < 0;                % 전부 좌반면이면 안정
-
 table(K, max_real, stable)
 %%
 % 실수부 최댓값이 $0$ 을 넘는 순간 불안정해집니다.
@@ -338,7 +351,6 @@ peak_sensitivity = 1/distance
 % 시스템**이 실제로 있기 때문입니다. 거꾸로 선 진자가 그 예이고,
 % 그런 시스템은 오히려 **이득을 충분히 키워야** 안정해집니다.
 Gu = 1/((s-1)*(s+3));
-
 pole(Gu)'                    % 개루프 극점. +1 이 있으므로 우반면 극점 P = 1
 %%
 K = [1 3 5 10]';
@@ -347,7 +359,6 @@ for i = 1:numel(K)
     Z(i) = sum(real(pole(feedback(K(i)*Gu, 1))) > 0);
 end
 stable = Z == 0;
-
 table(K, Z, stable)
 %%
 % **이득을 키워야 안정해집니다.** "이득을 키우면 불안정해진다" 는 상식이
@@ -407,12 +418,10 @@ L0 = -K/3;                        % w = 0 에서 궤적이 있는 자리
 N  = -1*(L0 < -1);                % -1 점을 감싸는 횟수 (감싸면 -1)
 P  = ones(size(K));               % 개루프 우반면 극점 수
 Z  = N + P;                       % 나이퀴스트 판정식
-
 Z_real = zeros(size(K));          % 실제로 세어 본 값
 for i = 1:numel(K)
     Z_real(i) = sum(real(pole(feedback(K(i)*Gu, 1))) > 0);
 end
-
 table(K, L0, N, P, Z, Z_real)
 %%
 % 그림으로 센 $Z$ 와 실제 $Z$ 가 모두 같습니다.
@@ -435,14 +444,12 @@ table(K, L0, N, P, Z, Z_real)
 % 즉 **한 그림에서 찾고 다른 그림에서 읽습니다.**
 K = [0.2 0.5 1 2 3]';
 GM = zeros(size(K));  PM = GM;  wcg = GM;  wcp = GM;
-
 ws = warning('off', 'Control:analysis:MarginUnstable');
 for i = 1:numel(K)
     [GM(i), PM(i), wcg(i), wcp(i)] = margin(K(i)*G);
 end
 warning(ws);
 GM_dB = 20*log10(GM);
-
 table(K, GM, GM_dB, PM, wcg, wcp)
 %%
 % 읽는 법
@@ -467,7 +474,6 @@ table(K, GM, GM_dB, PM, wcg, wcp)
 % 예제
 L1 = 0.5*G;                      % L = 0.5/(s(s+1)^2)
 [gm, pm, wcg, wcp] = margin(L1);
-
 gm_dB = 20*log10(gm)             % 이득여유 [dB]
 pm                               % 위상여유 [도]
 %%
@@ -536,7 +542,6 @@ for i = 1:numel(K)
     [~, PM(i), ~, wcp(i)] = margin(K(i)*G);
 end
 delay_max = deg2rad(PM)./wcp;      % 견딜 수 있는 시간지연 [s]
-
 table(K, PM, wcp, delay_max)
 %%
 % 이득을 키우면 **견딜 수 있는 지연이 급격히 줄어듭니다.**
@@ -587,7 +592,6 @@ for i = 1:numel(K)
 end
 zeta_est   = PM/100;                                        % 어림 규칙
 OS_formula = 100*exp(-zeta_est*pi./sqrt(1-zeta_est.^2));    % 4주차 공식
-
 table(K, PM, zeta_est, OS_formula, OS_real)
 %%
 % 정확히 맞지는 않습니다. 3차 시스템이라 2차 공식이 어긋납니다.
@@ -631,7 +635,6 @@ for i = 1:numel(K)
     rise_time(i) = stepinfo(T).RiseTime;
 end
 rule_of_thumb = 1.8./bw;        % 어림 규칙 : 상승시간 = 1.8 / 대역폭
-
 table(K, bw, rise_time, rule_of_thumb)
 %% 5-2. 근본적인 맞바꿈 — 감도함수
 % 두 전달함수를 함께 봅니다. 그런데 그 전에 **잡음이 어디로 들어오는지**를
@@ -845,14 +848,11 @@ title('S 와 T 는 동시에 작아질 수 없다');
 % 통신 지연이나 센서 처리 시간이 있는 시스템에서 바로 쓸 수 있는 숫자입니다.
 s = tf('s');
 Lm = 1/(s*(s+1)^2);
-
 [gm, pm, wcg, wcp] = margin(Lm);
-
 gm_dB = mag2db(gm)              % 이득여유 [dB]
 pm                              % 위상여유 [도]
 %%
 am = allmargin(Lm);
-
 delay_margin = am.DelayMargin   % 견딜 수 있는 지연 [s]
 is_stable    = am.Stable        % 1 이면 폐루프가 안정
 %%

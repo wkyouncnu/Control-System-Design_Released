@@ -4,7 +4,19 @@
 %
 % **참고자료 — 먼저 볼 것**
 %
-% 아래 다섯 과목은 **이 강의의 담당교수가 직접 한 강의**입니다.
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
 % 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
 % 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
 %
@@ -16,13 +28,16 @@
 % | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
 % | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
 %
-% **MATLAB 이나 Simulink 가 아직 익숙하지 않다면** 실습에 들어가기 전에 아래를 먼저 하십시오.
-% 무료이고 각각 몇 시간이면 끝납니다.
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
 %
-% | 도구 | 학습 자료 |
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
 % |---|---|
 % | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
 % | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
+%
 %
 % 1주차에서 $G(s) = \frac{1}{ms^2+bs+k}$ 를 하늘에서 떨어진 것처럼 유도 없이 받아 썼습니다.
 % 이번 주에는 이 물건이 **어디서 오는지**, 그리고 이것만 보고 무엇을 알 수 있는지를 다룹니다.
@@ -69,7 +84,6 @@ s = tf('s');
 %
 % 이 강의노트의 그림은 대부분 `make_figures.m` 이 미리 만들어 문서에 박아 둔 것입니다.
 % 그림을 고치고 싶으면 그 파일의 해당 함수를 고친 뒤 `make_figures()` 를 다시 돌립니다.
-
 %% 0. 오늘 한 장 요약
 % 오늘 하는 일은 이 화살표를 따라가는 것입니다.
 %
@@ -115,7 +129,6 @@ s = tf('s');
 % 이 전달함수의 극점은 $s = -1$ 하나뿐입니다.
 % 극점이 하나면 응답도 아주 단순합니다. 단조롭게 올라가 멈춥니다.
 G_tiny = 1/(s+1);
-
 pole(G_tiny)         % 극점 하나
 dcgain(G_tiny)       % DC 이득. 천천히 넣으면 그대로 나온다
 t0 = (0:0.02:6)';
@@ -411,7 +424,6 @@ dcgain(G)       % DC 이득 = 1/k
 G_way1 = tf(1, [m b k]);              % 계수를 그대로 적는 방법
 G_way2 = 1/(m*s^2 + b*s + k);         % s 연산자로 쓰는 방법
 G_way3 = zpk([], roots([m b k]).', 1/m);   % 극점과 영점으로 쓰는 방법
-
 pole(G_way1)'
 pole(G_way2)'
 pole(G_way3)'
@@ -433,7 +445,6 @@ zpk(G_way1)          % zpk 로 보면 극점과 영점이 바로 보인다
 numel(zero(G))            % MSD 의 영점 개수. 분자가 상수라 0 개
 %%
 G_withzero = (s + 2)*G;
-
 zero(G_withzero)'         % 분자에 (s+2) 를 곱하면 영점이 하나 생긴다
 %% 5-1-1. 극점을 손으로 구해 보기 — 근의 공식이면 끝
 % 분모를 $0$ 으로 놓은 것이 특성방정식입니다.
@@ -455,14 +466,12 @@ zero(G_withzero)'         % 분자에 (s+2) 를 곱하면 영점이 하나 생�
 % $m = 1$, $k = 1$ 이면 경계는 $b = 2$ 입니다. 숫자로 확인해 봅니다.
 b_list = [0.2 1.0 2.0 3.0]';          % 감쇠를 바꿔 본다 (m = k = 1)
 discriminant = b_list.^2 - 4;         % 판별식 b^2 - 4mk
-
 pole1 = zeros(size(b_list));  pole2 = pole1;
 for i = 1:numel(b_list)
     r = roots([1 b_list(i) 1]);
     pole1(i) = r(1);
     pole2(i) = r(2);
 end
-
 table(b_list, discriminant, pole1, pole2)
 %%
 % 판별식이 음수이면 부족감쇠(복소수 극점), $0$ 이면 임계감쇠,
@@ -524,7 +533,6 @@ table(b_list, discriminant, pole1, pole2)
 % $$L\,\frac{d^2 q}{dt^2} + R\,\frac{dq}{dt} + \frac{1}{C}\,q = V(t)$$
 L_ = 1;   R_ = 0.4;   Cc_ = 1;        % 인덕턴스, 저항, 커패시턴스
 G_rlc = tf(1, [L_ R_ 1/Cc_]);
-
 pole(G_rlc)'          % 복소수. 즉 진동한다
 t_rlc = (0:0.02:25)';
 plot(t_rlc, step(G_rlc, t_rlc), 'LineWidth', 2); hold on;
@@ -1075,7 +1083,6 @@ B_hand = [0; 1/m];
 C_hand = [1 0];
 D_hand = 0;
 sys_ss = ss(A_hand, B_hand, C_hand, D_hand);
-
 A_hand
 B_hand
 C_hand
@@ -1183,30 +1190,25 @@ legend('상태공간이 주는 답','전달함수가 주는 답 (항상 0)','Loc
 % 두 번째 칸의 `'v'` 는 "벡터로 달라" 는 뜻입니다.
 % 빼면 셀 배열로 나와 다루기 번거롭습니다.
 s = tf('s');
-
 % (1) 같은 시스템을 세 방식으로 만들고 대조한다
 Ga = tf(4, [1 0.8 4]);
 Gb = zpk([], roots([1 0.8 4]).', 4);
 Gc = 4/(s^2 + 0.8*s + 4);
-
 norm(Ga - Gc, inf)           % tf 대 s 연산자
 norm(tf(Gb) - Gc, inf)       % tf 대 zpk
 %%
 % (2) 값을 꺼내는 세 가지 명령
 [zz, pp_, kk] = zpkdata(Gc, 'v');
-
 zz'                          % 영점 (없으면 빈 것)
 pp_'                         % 극점
 kk                           % 이득
 %%
 [nn, dd] = tfdata(Gc, 'v');
-
 nn                           % 분자 계수
 dd                           % 분모 계수
 %%
 % (3) 극영점 상쇄가 있으면 minreal 이 정리해 준다
 Gcancel = (s+2)/((s+1)*(s+2));
-
 pole(Gcancel)'                       % 상쇄 전
 pole(minreal(Gcancel, 1e-6))'        % minreal 뒤
 %%
@@ -1214,13 +1216,11 @@ pole(minreal(Gcancel, 1e-6))'        % minreal 뒤
 tt = (0:0.001:15)';
 ys = step(Gc, tt);
 yi = impulse(Gc, tt);
-
 max(abs(yi(2:end) - diff(ys)/0.001))   % 두 방법의 차이 (수치미분 오차)
 %%
 % (5) 전달함수로는 못 하고 상태공간으로만 되는 일
 Gss = ss([0 1; -4 -0.8], [0; 4], [1 0], 0);   % 물리 상태 : 위치와 속도
 y_ini = initial(Gss, [0.5; 0], tt);
-
 y_ini(1)                     % 시작. 초기 위치 0.5 에서 놓았다
 y_ini(end)                   % 끝. 0 으로 돌아온다
 %% 14. 오늘의 정리

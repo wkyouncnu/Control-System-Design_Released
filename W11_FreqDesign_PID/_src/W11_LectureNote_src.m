@@ -4,7 +4,19 @@
 %
 % **참고자료 — 먼저 볼 것**
 %
-% 아래 다섯 과목은 **이 강의의 담당교수가 직접 한 강의**입니다.
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
 % 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
 % 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
 %
@@ -16,13 +28,16 @@
 % | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
 % | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
 %
-% **MATLAB 이나 Simulink 가 아직 익숙하지 않다면** 실습에 들어가기 전에 아래를 먼저 하십시오.
-% 무료이고 각각 몇 시간이면 끝납니다.
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
 %
-% | 도구 | 학습 자료 |
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
 % |---|---|
 % | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
 % | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
+%
 %
 % 9주차에 **보는 법**을, 10주차에 **판단하는 법**을 배웠습니다.
 % 오늘은 **만드는 법**입니다.
@@ -121,12 +136,10 @@ s = tf('s');
 G0 = 1/(s*(s+1));
 K0 = 100;
 [~, pm00, ~, wcp00] = margin(K0*G0);
-
 pm00                    % 위상여유 [도] — 거의 없다
 wcp00                   % 교차주파수 [rad/s]
 %%
 ii00 = stepinfo(feedback(K0*G0, 1));
-
 overshoot = ii00.Overshoot        % [%]
 settling  = ii00.SettlingTime     % [s]
 %%
@@ -239,7 +252,6 @@ ramp_error = 1/Kv           % 램프 오차. 요구는 0.01 이하
 phi   = [20 30 45 60 70]';                     % 올리고 싶은 위상 [도]
 alpha = (1 - sind(phi))./(1 + sind(phi));      % 유도한 공식
 gain_hf = 1./alpha;                            % 고주파 이득이 몇 배가 되는가
-
 table(phi, alpha, gain_hf)
 %%
 % $60$ 도를 넘기려면 고주파 이득을 **14 배 이상** 키워야 합니다.
@@ -284,12 +296,10 @@ table(phi, alpha, gain_hf)
 %
 % 이 세 줄이 Lead 설계의 전부입니다. 아래에서 수치로 확인합니다.
 alpha = 0.138;   T = 0.1;
-
 wm = 1/(T*sqrt(alpha))            % 위상이 가장 높아지는 주파수 [rad/s]
 %%
 D_chk = (T*s + 1)/(alpha*T*s + 1);
 [mag_wm, phase_wm] = bode(D_chk, wm);
-
 phase_formula = asind((1-alpha)/(1+alpha))    % 유도한 최대 위상 [도]
 phase_bode    = squeeze(phase_wm)             % bode 가 준 값
 %%
@@ -312,7 +322,6 @@ mag_bode    = squeeze(mag_wm)
 % 올려 줄 것이므로, 보상 전에는 그만큼 **아래**에 있어야 합니다.
 PM_req = 50;                                  % 요구 위상여유 [도]
 [D, info] = lead_design(K0, G0, PM_req, 5);
-
 info          % 각 단계의 값이 그대로 들어 있다 (phi, alpha, wm, T, 영점, 극점)
 %%
 PM_before = info.PM_before        % 보상 전 위상여유 [도]
@@ -419,7 +428,6 @@ u_after  = step(feedback(D,  G0), t2);
 stage   = ["보상 전"; "Lead 적용"];
 max_u   = [max(abs(u_before)); max(abs(u_after))];   % 최대 제어입력
 gain_hf = [1; 1/info.alpha];                         % 고주파 이득 배율
-
 table(stage, max_u, gain_hf)
 %%
 % 설계를 마쳤으면 **반드시 제어입력을 확인**하십시오.
@@ -500,12 +508,10 @@ i2       % 강의자료 예제 7-5 의 각 단계 값 (새 교차주파수, beta
 %%
 T_before = feedback(G2, 1);
 T_after  = feedback(D2*G2, 1);
-
 stage     = ["보상 전"; "Lag 적용"];
 overshoot = [stepinfo(T_before).Overshoot; stepinfo(T_after).Overshoot];
 rise_time = [stepinfo(T_before).RiseTime;  stepinfo(T_after).RiseTime];
 bw        = [bandwidth(T_before);          bandwidth(T_after)];
-
 table(stage, overshoot, rise_time, bw)
 %% 4. Lead 와 Lag 를 어떻게 고르는가
 % 목적이 반대이므로 표로 정리해 두면 편합니다.
@@ -676,7 +682,6 @@ for i = 1:numel(N)
     gain_1000_dB(i) = 20*log10(abs(freqresp(C, 1000)));
     [~, PM(i)]      = margin(C*Gm);
 end
-
 table(N, gain_1000_dB, PM)
 %%
 % 성능은 $N = 20$ 이나 $1000$ 이나 비슷한데 **고주파 이득만 커집니다.**
@@ -697,7 +702,6 @@ table(N, gain_1000_dB, PM)
 % - 기본 목표는 위상여유 $60^\circ$ 다
 % - **구동기 한계는 모른다.** 결과를 반드시 검증해야 한다
 [C_auto, info_auto] = pidtune(Gm, 'PIDF');
-
 C_auto                                        % 자동으로 정해 준 제어기
 %%
 wc_auto = info_auto.CrossoverFrequency        % [rad/s]
@@ -713,7 +717,6 @@ for i = 1:numel(wc)
     settling(i) = stepinfo(feedback(C*Gm, 1)).SettlingTime;
     max_u(i)    = max(abs(step(feedback(C, Gm), t)));
 end
-
 table(wc, settling, max_u)
 %%
 % 두 배 빨라지려면 전압은 **네 배**가 필요합니다.
@@ -833,21 +836,16 @@ table(wc, settling, max_u)
 % - **교차주파수 $\omega_c$** — 크게 하면 빨라지고 제어입력이 커진다
 % - **위상여유** — 크게 하면 덜 진동하고 대신 느려진다
 [Gv_, ~] = plant_dcmotor('speed');
-
 C_manual = pid(10, 5)        % Kp = 10, Ki = 5 인 PI 제어기
-
 C_pi   = pidtune(Gv_, 'PI');
 C_fast = pidtune(Gv_, 'PID', 20);
 C_soft = pidtune(Gv_, 'PI', pidtuneOptions('PhaseMargin', 75));
-
 [~, pm_pi]   = margin(C_pi   * Gv_);
 [~, pm_soft] = margin(C_soft * Gv_);
-
 setting = ["기본 PI"; "PID, wc = 20"; "PI, 위상여유 75도"];
 Kp = [C_pi.Kp; C_fast.Kp; C_soft.Kp];
 Ki = [C_pi.Ki; C_fast.Ki; C_soft.Ki];
 Kd = [C_pi.Kd; C_fast.Kd; C_soft.Kd];
-
 table(setting, Kp, Ki, Kd)
 %%
 pm_pi                                  % 기본 PI 의 위상여유 [도]

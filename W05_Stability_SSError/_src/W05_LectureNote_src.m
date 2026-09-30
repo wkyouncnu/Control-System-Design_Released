@@ -4,7 +4,19 @@
 %
 % **참고자료 — 먼저 볼 것**
 %
-% 아래 다섯 과목은 **이 강의의 담당교수가 직접 한 강의**입니다.
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
 % 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
 % 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
 %
@@ -16,13 +28,16 @@
 % | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
 % | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
 %
-% **MATLAB 이나 Simulink 가 아직 익숙하지 않다면** 실습에 들어가기 전에 아래를 먼저 하십시오.
-% 무료이고 각각 몇 시간이면 끝납니다.
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
 %
-% | 도구 | 학습 자료 |
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
 % |---|---|
 % | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
 % | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
+%
 %
 % 1주차에서 두 가지를 미뤄 뒀습니다. 오늘 둘 다 해결합니다.
 %
@@ -110,14 +125,11 @@ s = tf('s');
 % 이득을 키워 가며 두 가지만 봅니다.
 % **정상상태 오차**와 **극점의 위치**입니다.
 G0 = 1/(s*(s+1)*(s+3));
-
 K_list = [1 5 10 12 14]';
 max_Re = zeros(5,1);   OS = max_Re;   verdict = strings(5,1);
-
 for i = 1:5
     T = feedback(K_list(i)*G0, 1);
     max_Re(i) = max(real(pole(T)));          % 가장 오른쪽 극점의 실수부
-
     if max_Re(i) < 0
         verdict(i) = "안정";
         OS(i)      = stepinfo(T).Overshoot;
@@ -126,7 +138,6 @@ for i = 1:5
         OS(i)      = NaN;                    % 발산하므로 오버슈트가 없다
     end
 end
-
 table(K_list, max_Re, OS, verdict)
 %%
 t0 = (0:0.05:30)';
@@ -309,7 +320,6 @@ xlim([-15 5]); ylim([-8 8])
 %
 % 우리 시스템에 적용하면
 a3 = denP(1);   a2 = denP(2);   a1 = denP(3);   b0 = numP(end);
-
 [a3 a2 a1 b0]                % 특성방정식 a3*s^3 + a2*s^2 + a1*s + b0*K = 0 의 계수
 %%
 K_limit = (a2*a1)/(a3*b0)    % a2*a1 > a3*b0*K 에서 나온 상한
@@ -375,11 +385,9 @@ K_routh = (a2*a1)/(a3*b0)             % 부호가 바뀌는 자리 = 임계이�
 % 즉 $0 < K < 2$ 입니다. `roots` 로 확인해 보면 정확히 맞습니다.
 K4     = [1.9 2.0 2.1]';
 max_Re = zeros(3,1);
-
 for i = 1:3
     max_Re(i) = max(real(roots([1 2 3 4 K4(i)])));
 end
-
 table(K4, max_Re)            % K = 2 에서 실수부가 0 을 지난다
 %% 2-3-3. 같은 임계이득을 세 가지 방법으로
 % 임계이득을 구하는 방법이 이 과목에 셋 있습니다.
@@ -407,17 +415,14 @@ K_jw = a2*w_c^2/b0
 % 방법 3 : K 를 촘촘히 키우며 근을 본다
 Ksweep = linspace(100, 140, 40001);
 max_Re = zeros(size(Ksweep));
-
 for i = 1:numel(Ksweep)
     max_Re(i) = max(real(roots(denP + [0 0 0 Ksweep(i)*b0])));
 end
-
 K_sweep = Ksweep(find(max_Re > 0, 1))     % 처음으로 우반면에 들어간 K
 %%
 % 세 방법을 나란히
 method = ["라우스 표"; "s = jw 대입"; "roots 훑기"];
 K_crit = [K_routh; K_jw; K_sweep];
-
 table(method, K_crit)
 %%
 roots(denP + [0 0 0 K_routh*b0])'     % 그 K 의 극점. 실수부 0 인 한 쌍이 있다
@@ -539,19 +544,16 @@ roots(denP + [0 0 0 K_routh*b0])'     % 그 K 의 극점. 실수부 0 인 한 �
 %
 % 먼저 **안정한 경우**입니다. 정리로 구한 값과 실제 응답의 끝값을 비교합니다.
 T_ok = feedback(50*Gs, 1);
-
 e_theorem = 1 - dcgain(T_ok)        % 최종값 정리로 구한 정상상태 오차
 %%
 t = 0:0.01:3;
 y = step(T_ok, t);
-
 e_measured = 1 - y(end)             % 실제 응답의 끝값으로 구한 오차
 %%
 % 두 값이 같습니다. 이번에는 **정착하지 않는 경우**를 봅니다.
 % 극점이 $\pm 2j$ 인 시스템은 진동을 멈추지 않습니다.
 G_osc = tf(1, [1 0 4]);
 t = 0:0.01:20;
-
 plot(t, step(G_osc, t), 'LineWidth', 2); grid on
 xlabel('시간 [s]'); ylabel('출력')
 title('끝값이 없다 : 이런 응답에는 최종값 정리를 쓸 수 없다')
@@ -716,7 +718,6 @@ title('끝값이 없다 : 이런 응답에는 최종값 정리를 쓸 수 없다
 % **계단 입력** — 타입 0 인 속도 모델로 확인합니다.
 L_step = 50*Gs;
 Kp     = dcgain(L_step);
-
 e_formula = 1/(1 + Kp)                          % 유도한 공식
 e_measured = 1 - dcgain(feedback(L_step, 1))    % 실제 폐루프의 정상상태 오차
 %%
@@ -725,7 +726,6 @@ L_ramp = 50*Gp;
 Kv     = dcgain(s*L_ramp);
 t      = (0:0.01:60)';
 y      = lsim(feedback(L_ramp, 1), t, t);       % 입력이 t 인 램프
-
 e_formula = 1/Kv                                % 유도한 공식
 e_measured = t(end) - y(end)                    % 끝에서 지령과 출력의 차이
 %
@@ -765,12 +765,10 @@ K = 50;
 L0 = K*Gs;                   % 타입 0 : 속도 모델
 L1 = K*Gp;                   % 타입 1 : 위치 모델 (원점 극점 하나)
 L2 = K*Gp/s;                 % 타입 2 : 적분기를 하나 더 붙인 것
-
 type = ["타입 0"; "타입 1"; "타입 2"];
 Kp = [dcgain(L0);     dcgain(L1);     dcgain(L2)];
 Kv = [dcgain(s*L0);   dcgain(s*L1);   dcgain(s*L2)];
 Ka = [dcgain(s^2*L0); dcgain(s^2*L1); dcgain(s^2*L2)];
-
 table(type, Kp, Kv, Ka)
 %% 6. 타입과 입력의 대응 — 규칙 하나
 % 표를 외울 필요는 없습니다. 규칙 하나면 됩니다.
@@ -974,14 +972,11 @@ sgtitle('타입이 높을수록, 입력 차수가 낮을수록 잘 따라간다'
 % 이 차이 하나가 되먹임을 쓰는 이유 전부입니다.
 K2 = 30;
 Kr = 1/dcgain(feedback(K2*Gs, 1));       % 모델이 맞다고 믿고 구한 보정 상수
-
 y_Kr  = dcgain(Kr*feedback(K2*Gs*1.3, 1));   % 실제 플랜트가 30 % 크다면
 y_int = dcgain(feedback(K2*Gp*1.3, 1));      % 적분기가 있는 경우
-
 way    = ["Kr 보정"; "적분기"];
 y_ss   = [y_Kr; y_int];
 err_ss = 1 - y_ss;                            % 목표는 1
-
 table(way, y_ss, err_ss)
 %% 10. Simulink 로 확인하기
 % 모델 `W05_SteadyStateError.slx` 는 DC 모터 속도제어에 **PI 제어기**를 붙인 것입니다.
@@ -1042,20 +1037,17 @@ table(way, y_ss, err_ss)
 s = tf('s');
 [Gm_, ~] = plant_dcmotor('position');
 L = 100 * Gm_;
-
 nType = sum(abs(pole(L)) < 1e-9)          % 시스템 타입 = 원점 극점의 개수
 %%
 input_type = ["계단"; "램프"; "포물선"];
 constant   = [dcgain(L); dcgain(s*L); dcgain(s^2*L)];
 ess        = [1/(1 + dcgain(L)); 1/dcgain(s*L); 1/dcgain(s^2*L)];
-
 table(input_type, constant, ess)
 %%
 % 이론값이 실제로 맞는지 램프 응답으로 확인합니다.
 T  = feedback(L, 1);
 tr = (0:0.005:60)';
 yr = lsim(T, tr, tr);
-
 err_20s = tr(4001) - yr(4001)             % t = 20 s 에서의 오차
 err_60s = tr(end)  - yr(end)              % t = 60 s 에서의 오차
 ess_theory = 1/dcgain(s*L)                % 이론값. 충분히 기다려야 닿는다

@@ -4,7 +4,19 @@
 %
 % **참고자료 — 먼저 볼 것**
 %
-% 아래 다섯 과목은 **이 강의의 담당교수가 직접 한 강의**입니다.
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
 % 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
 % 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
 %
@@ -16,13 +28,16 @@
 % | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
 % | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
 %
-% **MATLAB 이나 Simulink 가 아직 익숙하지 않다면** 실습에 들어가기 전에 아래를 먼저 하십시오.
-% 무료이고 각각 몇 시간이면 끝납니다.
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
 %
-% | 도구 | 학습 자료 |
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
 % |---|---|
 % | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
 % | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
+%
 %
 % 지난 주까지는 **시간**으로 봤습니다. 계단을 넣고 얼마나 빨리, 얼마나 흔들리며
 % 따라오는지를 봤습니다.
@@ -156,7 +171,6 @@ title('0.707 배로 줄고 45도 늦는다');
 % 주파수가 두 배면 같은 각도라도 지연은 절반입니다.
 w = [0.5 1 2 10]';          % 주파수 [rad/s]
 delay = (pi/4)./w;          % 45 도가 뜻하는 시간 지연 [s]
-
 table(w, delay)
 %% 1. 왜 사인인가
 % 계단이나 임펄스가 아니라 왜 하필 사인인가.
@@ -268,7 +282,6 @@ w_bode   = wg(pick);
 mag_bode = mg(pick);
 dB_bode  = 20*log10(mag_bode);
 ph_bode  = pg(pick);
-
 table(w_bode, mag_bode, dB_bode, ph_bode)
 bode(G1); grid on;
 title('bode 로 그린 주파수응답');
@@ -289,7 +302,6 @@ title('bode 로 그린 주파수응답');
 % 주파수도 마찬가지라서 로그축을 씁니다.
 ratio = [0.01 0.1 0.5 1/sqrt(2) 1 2 10 100]';   % 배율
 dB    = 20*log10(ratio);                        % 데시벨
-
 table(ratio, dB)
 %% 4-1. 기울기의 단위 — dB per decade
 % 데케이드(decade)는 **주파수가 10 배가 되는 구간**입니다.
@@ -329,7 +341,6 @@ table(ratio, dB)
 %
 % 정리해 보면
 Gx = 50/((s+10)*(s+2));
-
 dc_gain = dcgain(Gx)          % 저주파 크기 (w -> 0). 50/(10*2) = 2.5 와 같아야 한다
 dc_dB   = 20*log10(dc_gain)   % 데시벨로는 약 8 dB
 %% 5-2. 조각을 더하면 전체가 된다
@@ -386,7 +397,6 @@ w_check  = [0.1 1 2 10 100]';
 asymptote = interp1(log(w), a_sum,  log(w_check));   % 점근선 [dB]
 actual    = interp1(log(w), m_real, log(w_check));   % 실제 곡선 [dB]
 gap       = actual - asymptote;                      % 차이 [dB]
-
 table(w_check, asymptote, actual, gap)
 %% 5-3. 위상도 점근선으로 그린다
 % 앞 절에서는 **크기**만 점근선으로 그렸습니다.
@@ -442,15 +452,12 @@ table(w_check, asymptote, actual, gap)
 % 아래 표에서 어긋남을 숫자로 확인하십시오.
 L5  = 10/(s*(s+1)*(0.1*s+1));
 w   = [0.1 0.316 1 3.162 10 31.6 100]';
-
 ph_pole1 = -45*min(max(log10(w/0.1), 0), 2);   % 극점 s+1    (꺾임 1)
 ph_pole2 = -45*min(max(log10(w/1  ), 0), 2);   % 극점 0.1s+1 (꺾임 10)
 ph_asym  = -90 + ph_pole1 + ph_pole2;          % -90 은 적분기 몫
-
 [~, ph] = bode(L5, w);
 ph_real = squeeze(ph);
 gap     = ph_real - ph_asym;
-
 table(w, ph_asym, ph_real, gap)
 %% 5-4. 점근선만으로 교차주파수와 위상여유를 읽는다
 % **이 절이 손작도를 배우는 이유입니다.**
@@ -505,7 +512,6 @@ table(w, ph_asym, ph_real, gap)
 w_hand  = 10^0.5;
 ph_hand = -90 - 45*log10(w_hand/0.1) - 45*log10(w_hand/1);
 [~, pm_margin, ~, wc_margin] = margin(L5);
-
 wc_hand = w_hand              % 손으로 읽은 교차주파수 [rad/s]
 wc_margin                     % margin 이 구한 값
 %%
@@ -567,15 +573,12 @@ pm_margin                     % margin 이 구한 값
 % $\zeta \ge 0.707$ 이면 봉우리가 아예 없습니다.
 % 이 값이 실무에서 자주 쓰이는 이유입니다.
 zeta = [0.1 0.2 0.3 0.5 0.707 1.0]';
-
 Mr_dB = 20*log10(1./(2*zeta.*sqrt(1-zeta.^2)));   % 봉우리 높이 [dB]
 Mr_dB(zeta >= 1/sqrt(2)) = NaN;                   % 0.707 이상이면 봉우리가 없다
-
 OS = zeros(size(zeta));                           % 오버슈트 [%]
 for i = 1:numel(zeta)
     OS(i) = stepinfo(1/(s^2 + 2*zeta(i)*s + 1)).Overshoot;
 end
-
 table(zeta, Mr_dB, OS)
 %% 7. 필터 — 주파수로 신호를 골라내기
 % 지금까지는 시스템을 "제어 대상" 으로만 봤습니다.
@@ -701,11 +704,9 @@ table(zeta, Mr_dB, OS)
 % $$\tau = \frac{-\Delta t}{\ln a}$$
 dt  = 0.001;                  % 샘플 주기 [s]
 a   = [0.90 0.95 0.99 0.999]';
-
 tau = -dt./log(a);            % 연속 시정수 [s]
 w0  = 1./tau;                 % 차단주파수 [rad/s]
 f0  = w0/(2*pi);              % 차단주파수 [Hz]
-
 table(a, tau, w0, f0)
 %%
 % 읽는 법
@@ -794,7 +795,6 @@ table(a, tau, w0, f0)
 tau = [0.1 0.2 0.5 1.0]';
 w0  = 1./tau;                 % 차단주파수 [rad/s]
 ts_approx = 4*tau;            % 4주차의 어림 정착시간 [s]
-
 ts_real = zeros(size(tau));   % 실제 정착시간
 bw      = zeros(size(tau));   % 실제 대역폭
 for i = 1:numel(tau)
@@ -802,7 +802,6 @@ for i = 1:numel(tau)
     ts_real(i) = stepinfo(G).SettlingTime;
     bw(i)      = bandwidth(G);
 end
-
 table(tau, w0, ts_approx, ts_real, bw)
 %%
 % $4\tau$ 어림과 실제 정착시간이 잘 맞고, 대역폭도 $1/\tau$ 와 거의 같습니다.
@@ -854,7 +853,6 @@ t     = (0:0.001:4)';
 clean = sin(2*pi*0.5*t);                                    % 참값 (0.5 Hz)
 rng(11);
 noisy = clean + 0.35*sin(2*pi*20*t) + 0.12*randn(size(t));  % 잡음이 섞인 신호
-
 fc = [0.3 0.6 1 2 4 8 16 40]';        % 필터의 차단주파수 [Hz]
 rms_error = zeros(size(fc));          % 참값과의 오차
 delay_deg = zeros(size(fc));          % 0.5 Hz 에서의 위상 지연
@@ -864,7 +862,6 @@ for i = 1:numel(fc)
     rms_error(i) = sqrt(mean((y - clean).^2));
     delay_deg(i) = -rad2deg(angle(freqresp(G, 2*pi*0.5)));
 end
-
 table(fc, rms_error, delay_deg)
 %%
 % 오차가 가장 작은 줄이 **가장 좋은 차단주파수**입니다.
@@ -1007,7 +1004,6 @@ Gd = plant_dcmotor('speed');
 plant   = ["질량-스프링-댐퍼"; "DC 모터 (속도)"];
 bw_rad  = [bandwidth(Gm); bandwidth(Gd)];     % 대역폭 [rad/s]
 bw_Hz   = bw_rad/(2*pi);                      % 대역폭 [Hz]
-
 table(plant, bw_rad, bw_Hz)
 %%
 % 읽는 법
@@ -1054,7 +1050,6 @@ bw_calc = [bandwidth(tf(1,[1 1]))
            bandwidth(tf(1,[1 2 1]))
            bandwidth(tf(5,[1 2 5]))];
 bw_slide = [0.9976; 9.9763; 0.6423; 2.9700];   % 강의자료 11~12 쪽의 값
-
 table(system_name, bw_calc, bw_slide)
 %%
 % 두 열이 소수점 넷째 자리까지 같습니다. 이 실습이 강의자료와 같은 것을
@@ -1065,7 +1060,6 @@ table(system_name, bw_calc, bw_slide)
 % - 1차는 차단 뒤 $-20$ dB/dec, 2차는 $-40$ dB/dec 로 더 가파르게 떨어집니다
 % - 즉 **차수가 높을수록 잘 막습니다.** 대신 위상이 더 많이 깎입니다
 % - 막는 능력과 위상 지연은 언제나 함께 갑니다. 공짜가 없습니다
-
 %% 8. Simulink 로 직접 재 보기
 % 오늘의 마지막은 **실험**입니다.
 % 전달함수를 모른다고 치고, 사인을 넣어 보드 선도를 만들어 봅니다.
@@ -1143,13 +1137,11 @@ table(system_name, bw_calc, bw_slide)
 s = tf('s');
 Gb = 4/(s^2 + 0.8*s + 4);
 wq = [0.5 1 2 5];
-
 [mg, ph] = bode(Gb, wq);
 w      = wq(:);
 mag    = squeeze(mg);        % 배수
 mag_dB = mag2db(mag);        % 데시벨
 phase  = squeeze(ph);        % 도
-
 table(w, mag, mag_dB, phase)
 %%
 % 같은 값을 복소수로 직접 얻을 수도 있습니다.

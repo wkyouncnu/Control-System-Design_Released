@@ -4,7 +4,19 @@
 %
 % **참고자료 — 먼저 볼 것**
 %
-% 아래 다섯 과목은 **이 강의의 담당교수가 직접 한 강의**입니다.
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
 % 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
 % 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
 %
@@ -16,13 +28,16 @@
 % | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
 % | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
 %
-% **MATLAB 이나 Simulink 가 아직 익숙하지 않다면** 실습에 들어가기 전에 아래를 먼저 하십시오.
-% 무료이고 각각 몇 시간이면 끝납니다.
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
 %
-% | 도구 | 학습 자료 |
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
 % |---|---|
 % | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
 % | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
+%
 %
 % 6주차에서 벽에 부딪혔습니다.
 %
@@ -398,7 +413,6 @@ title('예제 C : 오차가 0.05 에 닿기 전에 발산');
 G_pd = 1/((s+1)*(s+2));
 z_pd = 3;
 K_pd = 38;
-
 pole(feedback(K_pd*G_pd, 1))'              % 플랜트만 그렸을 때 (틀린 궤적)
 %%
 pole(feedback(K_pd*(s+z_pd)*G_pd, 1))'     % (s+z)G 를 그렸을 때 (맞는 궤적)
@@ -471,15 +485,12 @@ POS_d = 16;  ts_d = 1;
 sig_d = zeta_d*wn_d;
 wd_d  = wn_d*sqrt(1 - zeta_d^2);
 sd    = -sig_d + 1i*wd_d;
-
 Gd0   = 1/(s*(s+4));
 angG  = rad2deg(angle(evalfr(Gd0, sd)));
 phi   = mod(-180 - angG, 360);
 z_pd  = sig_d + wd_d/tand(phi);
-
 Cpd   = s + z_pd;
 K_pd  = 1/abs(evalfr(Cpd*Gd0, sd));
-
 sd                 % 1단계 : 사양이 요구하는 목표 극점
 angle_sum = sum(rad2deg(angle(sd - pole(Gd0).')))   % 2단계 : 극점 각의 합 [도]
 phi                % 3단계 : 보태야 할 각 [도]
@@ -489,14 +500,11 @@ K_pd                      % 5단계 : 크기 조건이 준 이득
 %%
 Kp = K_pd*z_pd     % C(s) = K(s + z) 를 풀면 이것이 비례 이득
 Kd = K_pd          % 그리고 이것이 미분 이득
-
 T_pd = feedback(K_pd*Cpd*Gd0, 1);
-
 pole(T_pd)'             % 폐루프 극점
 [sd conj(sd)]           % 목표 극점. 위와 같아야 한다
 %%
 info_pd = stepinfo(T_pd);
-
 info_pd.Overshoot       % 실측 오버슈트 [%]. 사양은 POS_d
 info_pd.SettlingTime    % 실측 정착시간 [s]. 사양은 ts_d
 %% 2-0-1. 왜 오버슈트가 사양보다 크게 나오는가
@@ -522,7 +530,6 @@ info_pd.SettlingTime    % 실측 정착시간 [s]. 사양은 ts_d
 OS_target = [16 12 9]';      % 목표를 조금씩 보수적으로 잡아 본다
 zero_pos = zeros(size(OS_target));   K_sel = zero_pos;
 OS_real  = zero_pos;                 ts_real = zero_pos;
-
 for i = 1:numel(OS_target)
     [zt, wt] = spec2pole(OS_target(i), ts_d);
     sdt = -zt*wt + 1i*wt*sqrt(1-zt^2);                  % 목표 극점
@@ -531,11 +538,9 @@ for i = 1:numel(OS_target)
     Ct  = s + zt2;
     Kt  = 1/abs(evalfr(Ct*Gd0, sdt));                   % 크기 조건
     it  = stepinfo(feedback(Kt*Ct*Gd0, 1));
-
     zero_pos(i) = -zt2;   K_sel(i) = Kt;
     OS_real(i)  = it.Overshoot;   ts_real(i) = it.SettlingTime;
 end
-
 table(OS_target, zero_pos, K_sel, OS_real, ts_real)
 %%
 % 목표를 $12\%$ 로 낮춰 잡으면 실측이 사양 $16\%$ 안에 들어옵니다.
@@ -597,17 +602,14 @@ table(OS_target, zero_pos, K_sel, OS_real, ts_real)
 GD = 1/((s+1)*(s+4));
 zero_pos = [1 3 6]';                  % 영점을 세 자리에 놓아 본다
 K_sel = zeros(size(zero_pos));  OS = K_sel;  ess = K_sel;  umax = K_sel;
-
 for i = 1:numel(zero_pos)
     Ti  = rl_scan(s + zero_pos(i), GD, linspace(0.2, 40, 300), true);
     ok  = Ti.stable & Ti.OS <= 10 & Ti.ts <= 2.5 & Ti.umax <= 10;
     sub = Ti(ok,:);
     [~, j] = min(sub.ess);            % 사양을 만족하는 것 중 오차가 가장 작은 것
-
     K_sel(i) = sub.K(j);   OS(i) = sub.OS(j);
     ess(i)   = sub.ess(j); umax(i) = sub.umax(j);
 end
-
 table(zero_pos, K_sel, OS, ess, umax)
 %% 2-2. 영점을 플랜트 극점 위에 놓으면 — 해도 되는 것과 절대 안 되는 것
 % 영점을 플랜트 극점과 **같은 자리**에 놓으면 그 극점이 약분되어 사라집니다.
@@ -907,15 +909,12 @@ Kq0 = 2;   zq0 = 5;                % C(s) = 2(s + 5)
 Gq1 = 1/(s*(s+2));                 % 상대차수 2
 Gq2 = 1/(s*(s+2)*(s+5));           % 상대차수 3
 t = linspace(0, 5, 5001)';
-
 u1 = ctrl_input(Kq0*(s+zq0), Gq1, t);
 u2 = ctrl_input(Kq0*(s+zq0), Gq2, t);
-
 plant        = ["1/(s(s+2))"; "1/(s(s+2)(s+5))"];
 relative_deg = [2; 3];
 u_measured   = [u1(1); u2(1)];                       % 실측 u(0+)
 u_formula    = [Kq0*(zq0-Kq0); Kq0*zq0];             % 유도한 공식
-
 table(plant, relative_deg, u_measured, u_formula)
 %%
 % 아래 예제의 플랜트는 상대차수 3 이므로 $Kz$ 쪽을 씁니다.
@@ -962,7 +961,6 @@ K_max = max(Tq.K(okq))     % 그 위쪽. 구간이 매우 좁다
 % $\zeta = \cos\theta$ 이므로 **감쇠비가 커집니다.** 슬라이드의 문장이 이것입니다.
 G_ex = 1/((s+1)*(s+2));
 D_pd = (s+3)/3;                    % Kp = 1, Kd = 1/3 인 PD
-
 figure
 rlocus(G_ex, D_pd*G_ex)       % 두 궤적을 한 번에 그린다 (hold on 을 쓰면 오류가 난다)
 axis([-8 1 -7 7]); grid on
@@ -973,14 +971,12 @@ title('영점 하나가 궤적을 통째로 바꾼다 (파랑 : P, 주황 : PD)'
 % 강의자료와 같은 $K = 3, 8, 38$ 로 P 와 PD 를 나란히 비교합니다.
 K = [3 8 38]';
 OS_P = zeros(size(K));  ts_P = OS_P;  OS_PD = OS_P;  ts_PD = OS_P;
-
 for i = 1:numel(K)
     T_P  = feedback(K(i)*G_ex, 1);
     T_PD = feedback(K(i)*D_pd*G_ex, 1);
     OS_P(i)  = stepinfo(T_P).Overshoot;    ts_P(i)  = stepinfo(T_P).SettlingTime;
     OS_PD(i) = stepinfo(T_PD).Overshoot;   ts_PD(i) = stepinfo(T_PD).SettlingTime;
 end
-
 table(K, OS_P, OS_PD, ts_P, ts_PD)
 %%
 % 읽는 법
@@ -1003,7 +999,6 @@ table(K, OS_P, OS_PD, ts_P, ts_PD)
 % 두 방법이 같은 시스템인지 확인합니다.
 L_way1 = tf([1 3], 3*[1 3 2]);     % 방법 1
 L_way2 = D_pd*G_ex;                % 방법 2
-
 zero(L_way1)'
 zero(L_way2)'
 %%
@@ -1130,7 +1125,6 @@ pole(L_way2)'
 % 앱 화면을 믿고 끝내지 마십시오. 숫자로 남겨야 제출물이 됩니다.
 C_app = 25*(s + 1);                  % 앱에서 내보낸 제어기라고 하자
 G_app = 1/(s*(s+2)*(s+5));
-
 T_app = minreal(feedback(C_app*G_app, 1))
 %%
 stepinfo(T_app).Overshoot
@@ -1173,27 +1167,21 @@ stepinfo(T_app).SettlingTime
 %
 % 먼저 앞의 두 사양을 $\zeta$, $\omega_n$ 으로 바꿉니다.
 G44 = 1/(s*(s+2)*(s+5));
-
 [zeta_min, wn_min] = spec2pole(1, 5.2)
 %%
 % 이제 $K$ 를 훑으며 네 가지를 모두 확인합니다.
 % **제어입력까지 확인하는 것이 이 절의 핵심입니다.**
 t44 = (0:0.005:40)';
-
 K_list = (4.0:0.2:6.0)';
 OS = zeros(size(K_list));   ts = OS;   umax = OS;
-
 for i = 1:numel(K_list)
     T = feedback(K_list(i)*G44, 1);
     y = step(T, t44);
-
     OS(i)   = stepinfo(T).Overshoot;
     ts(i)   = stepinfo(T).SettlingTime;
     umax(i) = max(abs(K_list(i)*(1 - y)));      % u = K(r - y), r = 1
 end
-
 pass = (OS < 1) & (ts < 5.2) & (umax <= 5);
-
 table(K_list, OS, ts, umax, pass)
 %%
 % 표를 읽으면 답이 바로 보입니다.
@@ -1215,7 +1203,6 @@ table(K_list, OS, ts, umax, pass)
 % 제어입력까지 더해지면 **그 구간의 어느 끝을 고를지**까지 정해집니다.
 K_star = 4.80;
 T_star = feedback(K_star*G44, 1);
-
 pole(T_star)'
 %%
 stepinfo(T_star).Overshoot
@@ -1242,21 +1229,16 @@ max(abs(K_star*(1 - step(T_star, t44))))     % 제어입력 최댓값
 % 이제 $z$ 후보마다 조건을 만족하는 $K$ 구간을 찾고, 그중 $\max|u|$ 가 최소인 것을 고릅니다.
 G45 = 1/(s*(s+2));
 t45 = (0:0.005:10)';
-
 z_list = [1 3 4 6]';
 K_best = zeros(4,1);   OS = K_best;   ts = K_best;   umax = K_best;
-
 for i = 1:4
     z = z_list(i);
     best = inf;                                % 아직 후보가 없다는 뜻
-
     for K = 0.1:0.1:20
         T = feedback(K*(s+z)*G45, 1);
         if stepinfo(T).Overshoot > 5 || stepinfo(T).SettlingTime > 2, continue; end
-
         e = 1 - step(T, t45);
         u = K*(gradient(e, t45) + z*e);        % gradient 는 수치 미분
-
         if max(abs(u)) <= 3 && max(abs(u)) < best
             best = max(abs(u));
             K_best(i) = K;   umax(i) = best;
@@ -1264,7 +1246,6 @@ for i = 1:4
         end
     end
 end
-
 table(z_list, K_best, OS, ts, umax)
 %%
 % $z = 1$ 과 $z = 6$ 은 **통과하는 $K$ 가 아예 없습니다** (표에 $0$ 으로 남습니다).
@@ -1504,7 +1485,6 @@ table(z_list, K_best, OS, ts, umax)
 % 여기서는 DC 모터 위치제어에 $K = 20$ 인 비례제어를 출발점으로 씁니다.
 G_lag = plant_dcmotor('position');
 K_lag = 20;
-
 T_P = feedback(K_lag*G_lag, 1);
 p_P  = pole(T_P);
 [~, i] = max(real(p_P));
@@ -1541,12 +1521,10 @@ dphi_approx = -(z_lag - p_lag)*wd/abs(sd)^2*180/pi
 % 그런데 과도응답은 전혀 다릅니다.
 z_try = [1 0.5 0.2 0.1]';
 dphi = zeros(4,1);   Re_c = dphi;   OS = dphi;   ts = dphi;   ess = dphi;
-
 for i = 1:4
     z = z_try(i);
     C = (s + z)/(s + z/m);
     T = feedback(K_lag*C*G_lag, 1);
-
     dphi(i) = (angle(sd + z) - angle(sd + z/m))*180/pi;
     q = pole(T);
     q = q(abs(imag(q)) > 0.1);            % 복소 지배극점만 골라낸다
@@ -1555,7 +1533,6 @@ for i = 1:4
     ts(i)   = stepinfo(T).SettlingTime;
     ess(i)  = 1/dcgain(s*K_lag*C*G_lag);
 end
-
 table(z_try, dphi, Re_c, OS, ts, ess)
 %%
 % 표 읽는 법 — 비례제어만 쓸 때의 지배극점 실수부는 $-0.775$ 였습니다.
@@ -1588,7 +1565,6 @@ zero(feedback(K_lag*C_lag*G_lag, 1))'
 % 그리고 $z$ 를 더 작게 잡으면 그 극점이 원점에 더 가까워져
 % **꼬리가 더 길어집니다.** $z=0.1$ 의 정착시간이 더 길었던 이유입니다.
 t = 0:0.02:25;
-
 figure                                    % 앞 절 차트 위에 그리지 않도록
 plot(t, step(T_P, t), 'k--', 'LineWidth', 2); hold on; grid on
 plot(t, step(feedback(K_lag*(s+1)/(s+0.1)*G_lag, 1), t), 'LineWidth', 2)
@@ -1753,14 +1729,12 @@ controller = string(ctrls(:,1));
 overshoot  = zeros(size(controller));
 settling   = overshoot;
 error_ss   = overshoot;
-
 for i = 1:numel(controller)
     Tc = feedback(ctrls{i,2}*Gc, 1);
     overshoot(i) = stepinfo(Tc).Overshoot;
     settling(i)  = stepinfo(Tc).SettlingTime;
     error_ss(i)  = 1 - dcgain(Tc);
 end
-
 table(controller, overshoot, settling, error_ss)
 %% 9. Simulink 로 확인 — 잡음이 들어오면
 % 모델 `W07_PD_Noise.slx` 는 PD 와 Lead 를 나란히 놓고 **똑같은 측정 잡음**을

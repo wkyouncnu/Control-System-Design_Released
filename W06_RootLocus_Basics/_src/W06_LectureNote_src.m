@@ -4,7 +4,19 @@
 %
 % **참고자료 — 먼저 볼 것**
 %
-% 아래 다섯 과목은 **이 강의의 담당교수가 직접 한 강의**입니다.
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
 % 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
 % 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
 %
@@ -16,13 +28,16 @@
 % | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
 % | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
 %
-% **MATLAB 이나 Simulink 가 아직 익숙하지 않다면** 실습에 들어가기 전에 아래를 먼저 하십시오.
-% 무료이고 각각 몇 시간이면 끝납니다.
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
 %
-% | 도구 | 학습 자료 |
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
 % |---|---|
 % | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
 % | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
+%
 %
 % 오늘 두 주 동안 준비한 것이 하나로 합쳐집니다.
 %
@@ -151,7 +166,6 @@ for i = 1:numel(K)
     pole1(i) = r(1);
     pole2(i) = r(2);
 end
-
 table(K, pole1, pole2)
 %%
 % $K$ 가 커지면 두 극점이 만나 복소수가 되지만, **실수부는 $-2$ 로 고정**입니다.
@@ -216,7 +230,6 @@ table(K, pole1, pole2)
 % 확인해 봅니다. 두 방법이 같은 답을 주어야 합니다.
 G1 = 1/((s+1)*(s+3));
 K  = 5;
-
 pole(feedback(K*G1, 1))'     % feedback 으로 만든 폐루프 극점
 roots([1 4 3+K])'            % 특성방정식 1 + KL = 0 의 근
 %% 1-2. 어떤 점이 궤적 위에 있는지 확인하는 법 — 각도 조건
@@ -275,7 +288,6 @@ roots([1 4 3+K])'            % 특성방정식 1 + KL = 0 의 근
 % 각도 조건이 통과한 점에서 크기 조건으로 구한 $K=5$ 가 정말 맞는지
 % 폐루프 극점으로 확인합니다.
 s_test = -2 + 2i;                              % 궤적 위에 있는지 볼 시험점
-
 angle_from_pole1 = rad2deg(angle(s_test + 1))  % 극점 -1 에서 온 각 [도]
 angle_from_pole2 = rad2deg(angle(s_test + 3))  % 극점 -3 에서 온 각 [도]
 angle_sum = angle_from_pole1 + angle_from_pole2   % 180 도이면 궤적 위
@@ -345,7 +357,6 @@ title('DC 모터 위치제어의 근궤적')
 % 수업 중에는 직접 클릭해 보고 아래 숫자와 맞는지 대조하십시오.
 L_tip = 1/((s+1)*(s+2));
 K_tip = 8;
-
 p_tip = pole(feedback(K_tip*L_tip, 1));
 p_tip = p_tip(imag(p_tip) > 0)          % 위쪽 극점 하나
 %%
@@ -437,13 +448,11 @@ stepinfo(feedback(K_tip*L_tip, 1)).Overshoot            % 실측과 대조
 % 아래 코드는 이 세기를 그대로 옮긴 것입니다.
 pz   = [-1 -3 -5 -2]';                  % 극점 셋 + 영점 하나
 test = [-6; -4; -2.5; -1.5; -0.5];      % 구간마다 시험점 하나
-
 count_right = zeros(size(test));        % 시험점 오른쪽에 있는 극·영의 개수
 for i = 1:numel(test)
     count_right(i) = sum(pz > test(i));
 end
 on_locus = mod(count_right, 2) == 1;    % 홀수이면 궤적 위
-
 table(test, count_right, on_locus)
 %% 3-2. 가지는 왜 $n$ 개이고, 왜 실축에 대칭인가
 % 앞 절에서 궤적의 출발점과 도착점을 정했습니다.
@@ -511,7 +520,6 @@ table(test, count_right, on_locus)
 %
 % 숫자로 확인합니다. $K$ 를 세 가지로 바꾸어 폐루프 극점을 직접 구해 봅니다.
 L_br = 1/(s*(s+1)*(s+3));      % 극점 3 개, 영점 0 개
-
 pole(feedback(0.1*L_br, 1))'   % K = 0.1
 pole(feedback(1*L_br,   1))'   % K = 1
 pole(feedback(10*L_br,  1))'   % K = 10
@@ -602,7 +610,6 @@ pole(feedback(10*L_br,  1))'   % K = 10
 La = 1/(s*(s+1)*(s+3));
 p  = pole(La);
 z  = zero(La);
-
 n_minus_m = numel(p) - numel(z)                       % 무한대로 가는 가지 수
 %%
 sigma = (sum(p) - sum(z))/n_minus_m                   % 점근선 중심 (규칙 6)
@@ -692,7 +699,6 @@ for i = 1:4
     first_angle(i) = 180/n_minus_m(i);
 end
 can_go_unstable = n_minus_m >= 3;    % 각이 90 도보다 작으면 오른쪽으로 휜다
-
 table(n_minus_m, first_angle, can_go_unstable)
 %% 4-2. 이탈점 — 궤적은 어디서 실축을 떠나는가
 % 0-1절의 그림에서 두 극점이 $-2$ 에서 만나 위아래로 갈라졌습니다.
@@ -746,7 +752,6 @@ table(n_minus_m, first_angle, can_go_unstable)
 sigma = linspace(-2.999, -1.001, 4001);
 K_sigma = -(sigma+1).*(sigma+3);        % 실축 위의 각 점을 지나는 데 필요한 K
 [K_max, i_max] = max(K_sigma);          % 봉우리가 이탈점
-
 breakaway = sigma(i_max)                % 손계산은 -2
 K_at_breakaway = K_max                  % 손계산은 1
 %%
@@ -788,11 +793,9 @@ zeta = -real(r(1))/abs(r(1))            % 감쇠비 1 = 임계감쇠
 % 숫자로 확인합니다. 극점이 셋인 $L(s) = 1/((s+1)(s+3)(s+10))$ 으로
 % (궤적이 전체적으로는 수직이 아닌 경우를 골랐습니다.)
 L_b = 1/((s+1)*(s+3)*(s+10));
-
 sigma = linspace(-2.999, -1.001, 200001);
 K_sigma = -(sigma+1).*(sigma+3).*(sigma+10);
 [K_b, i_b] = max(K_sigma);
-
 sigma_b = sigma(i_b)
 K_b
 %%
@@ -806,16 +809,13 @@ Kpp = -(6*sigma_b + 28)                    % 손으로 두 번 미분한 것
 % 이탈점 바로 위에서 이득을 조금씩 키우며 **떠나는 각**을 재 봅니다.
 dK = [0.01 0.1 0.5]';
 ang = zeros(3,1);   dist = ang;
-
 for i = 1:3
     r = pole(feedback((K_b + dK(i))*L_b, 1));
     r = r(imag(r) > 1e-9);                 % 위쪽 복소근 하나
     ang(i)  = angle(r - sigma_b)*180/pi;   % 이탈점에서 본 방향
     dist(i) = abs(r - sigma_b);
 end
-
 dist_pred = sqrt(2*dK/abs(Kpp));           % 유도한 식
-
 table(dK, ang, dist, dist_pred)
 %%
 % $\Delta K$ 가 작아질수록 각이 $90^\circ$ 에 붙습니다 ($89.14 \rightarrow 89.88$).
@@ -879,7 +879,6 @@ w_hand = sqrt(3);            % 손으로 푼 교차 주파수 [rad/s]
 K_hand = 4*w_hand^2          % 손으로 푼 임계 이득
 %%
 L3 = 1/(s*(s+1)*(s+3));
-
 pole(feedback(K_hand*L3, 1))'   % 임계 이득에서. 실수부가 0 이면 허수축 위다
 %%
 pole(feedback(11.5*L3, 1))'     % 조금 작으면 안정 (실수부가 음수)
@@ -933,14 +932,12 @@ pole(feedback(12.5*L3, 1))'     % 조금 크면 불안정 (실수부가 양수)
 % 움직였는지 재면 됩니다.
 p1     = -1 + 2i;              % 출발각을 구할 복소극점
 others = [0, -1-2i];           % 나머지 극점 두 개 (영점은 없다)
-
 theta_hand = 180 - sum(rad2deg(angle(p1 - others)))   % 손계산 : 180 에서 극점 각을 뺀다
 %%
 % 이제 이득을 아주 조금만 주어 극점이 **실제로 어느 쪽으로 움직였는지** 잽니다.
 L_dep = 1/(s*(s^2 + 2*s + 5));
 p_new = pole(feedback(0.0001*L_dep, 1));      % K = 0.0001 인 폐루프 극점
 p_new = p_new(abs(p_new - p1) < 0.5);         % p1 근처로 움직인 것 하나
-
 theta_measured = rad2deg(angle(p_new - p1))   % 실제로 움직인 방향
 %%
 % 두 각이 같습니다. 각도 조건만으로 **그림을 그리기 전에** 방향을 알 수 있습니다.
@@ -967,7 +964,6 @@ theta_measured = rad2deg(angle(p_new - p1))   % 실제로 움직인 방향
 Lchk = 1/(s*(s+1)*(s+3));
 pz   = [pole(Lchk).' zero(Lchk).'];
 nmk  = numel(pole(Lchk)) - numel(zero(Lchk));
-
 % 1단계 — 극점과 영점
 pole(Lchk)'
 zero(Lchk)'
@@ -983,7 +979,6 @@ for i = 1:numel(sigma)
     K_sigma(i) = -1/real(evalfr(Lchk, sigma(i)));
 end
 [K_break, i_break] = max(K_sigma);
-
 breakaway = sigma(i_break)
 K_break
 %%
@@ -1154,7 +1149,6 @@ title('근궤적 위에 사양 영역을 겹친 모습')
 %
 % **1단계 — 사양을 $\zeta$, $\omega_n$ 으로 바꾼다** (4주차 공식)
 G7 = 1/((s+1)*(s+3));
-
 POS_spec = 10;   ts_spec = 2;
 [zeta_min, wn_min] = spec2pole(POS_spec, ts_spec)
 %%
@@ -1175,7 +1169,6 @@ title('사양 영역과 궤적이 만나는 곳')
 %%
 % **4단계 — 검증.** 공식은 2차 근사이므로 여기서 끝내면 안 됩니다.
 T7 = feedback(K7*G7, 1);
-
 OS_real = stepinfo(T7).Overshoot         % 요구 10 % 이하
 ts_real = stepinfo(T7).SettlingTime      % 요구 2 s 이하
 %%
@@ -1195,10 +1188,8 @@ ts_real = stepinfo(T7).SettlingTime      % 요구 2 s 이하
 %
 % $$t_s \approx \frac{4}{\zeta\omega_n}, \qquad T_p = \frac{\pi}{\omega_d}$$
 p_dom = p7(imag(p7) > 0);                % 위쪽 지배극점
-
 sigma = -real(p_dom);
 wd    =  imag(p_dom);
-
 wn_calc   = sqrt(sigma^2 + wd^2)
 zeta_calc = sigma/wn_calc
 %%
@@ -1388,7 +1379,6 @@ Tp_measured = stepinfo(T7).PeakTime      % 실측
 % 3-0-2절의 각 $\theta$ 가 커지고, $\zeta = \cos\theta$ 가 작아지기 때문입니다.
 G_ex = 1/((s+1)*(s+2));
 K = [3 8 38]';
-
 OS = zeros(size(K));  ts = OS;  ess = OS;  zeta_cl = OS;
 for i = 1:numel(K)
     T = feedback(K(i)*G_ex, 1);
@@ -1398,7 +1388,6 @@ for i = 1:numel(K)
     p = pole(T);
     zeta_cl(i) = -real(p(1))/abs(p(1));      % 폐루프 극점의 감쇠비
 end
-
 table(K, zeta_cl, OS, ts, ess)
 %%
 % 표가 슬라이드의 세 문장을 그대로 보여 줍니다.
@@ -1428,7 +1417,6 @@ title('이득을 키우면 오차는 줄고 진동은 심해진다')
 K = 10;
 T_hand = tf(K, [1 3 2+K]);          % 방법 1 : 손으로 계산한 폐루프
 T_fb   = feedback(K*G_ex, 1);       % 방법 2 : feedback
-
 pole(T_hand)'
 pole(T_fb)'
 %% 10-2. CTMS 예제 — 사양을 영역으로 바꾸고 이득을 고른다
@@ -1455,7 +1443,6 @@ pole(T_fb)'
 %
 % **2단계 — 궤적과 사양 영역을 겹쳐 그린다**
 H_ctms = (s + 7)/(s*(s + 5)*(s + 15)*(s + 20));
-
 figure
 rlocus(H_ctms)
 sgrid(0.7, 1.8)             % 사양 영역을 겹쳐 그린다
@@ -1472,14 +1459,12 @@ title('궤적이 사양 영역을 지나는가')
 % 이 과목에서는 이득을 훑어 표로 고릅니다 (7주차의 `rl_scan` 과 같은 생각).
 K_try = [200 300 350 400]';
 OS = zeros(size(K_try));   tr = OS;   ts = OS;
-
 for i = 1:numel(K_try)
     T = feedback(K_try(i)*H_ctms, 1);
     OS(i) = stepinfo(T).Overshoot;
     tr(i) = stepinfo(T).RiseTime;
     ts(i) = stepinfo(T).SettlingTime;
 end
-
 table(K_try, OS, tr, ts)
 %%
 % $K = 350$ 이면 오버슈트가 거의 $0$ 이고 상승시간이 $0.99$ s 로
@@ -1490,7 +1475,6 @@ table(K_try, OS, tr, ts)
 % 이 시스템은 극점이 넷이라 **2차 근사가 정확하지 않습니다.**
 % 그래서 사양 영역만 보고 끝내면 안 되고, 응답을 직접 그려 확인해야 합니다.
 T_ctms = feedback(350*H_ctms, 1);
-
 pole(T_ctms)'          % 지배극점 두 개가 사양 영역 안에 있는지 본다
 %%
 figure
@@ -1548,7 +1532,6 @@ p_star = -1.5 + 1i*sqrt(10 - 1.5^2);      % K = 8 일 때의 극점
 dp_dK  = -1/(2*p_star + 3)                % 미분으로 구한 민감도
 %%
 dp_pred = 0.8*dp_dK                       % K 를 8 -> 8.8 로 (dK = +0.8)
-
 p_new = pole(feedback(8.8*G_ex, 1));      % 실제로 다시 풀어 본 것
 dp_true = p_new(1) - p_star
 %%
@@ -1561,7 +1544,6 @@ dp_true = p_new(1) - p_star
 % 10-1절 표의 "실수부가 셋 다 $-1.5$" 가 바로 이 이야기입니다.
 K_rob = [7.2 8 8.8]';
 OS = zeros(3,1);   ts = OS;   Re = OS;
-
 for i = 1:3
     T = feedback(K_rob(i)*G_ex, 1);
     OS(i) = stepinfo(T).Overshoot;
@@ -1569,7 +1551,6 @@ for i = 1:3
     p = pole(T);
     Re(i) = real(p(1));
 end
-
 table(K_rob, Re, OS, ts)
 %% 10-3-2. 임계 이득에 가까울수록 같은 10 % 가 위험해진다
 % 4-3절의 $L(s) = 1/(s(s+1)(s+3))$ 는 임계 이득이 $K_{cr} = 12$ 였습니다.
@@ -1577,12 +1558,10 @@ table(K_rob, Re, OS, ts)
 Kbit  = linspace(3.6, 4.4, 40);           % K* = 4 의 +-10 %
 Kbit2 = linspace(9.0, 11.0, 40);          % K* = 10 의 +-10 %
 Kall  = linspace(0.01, 14, 400);          % 전체 궤적
-
 P  = zeros(3, 400);   Q1 = zeros(3, 40);   Q2 = zeros(3, 40);
 for i = 1:400, P(:,i)  = pole(feedback(Kall(i)*L3,  1)); end
 for i = 1:40,  Q1(:,i) = pole(feedback(Kbit(i)*L3,  1)); end
 for i = 1:40,  Q2(:,i) = pole(feedback(Kbit2(i)*L3, 1)); end
-
 figure                                    % rlocus 차트 위에 그리면 오류가 난다
 plot(real(P)',  imag(P)',  'b.', 'MarkerSize', 4); hold on; grid on
 plot(real(Q1)', imag(Q1)', 'r.', 'MarkerSize', 14)
@@ -1595,7 +1574,6 @@ title('파란 점 : 전체 궤적    빨간 점 : K = 3.6 \sim 4.4    자홍 점
 % (이 이름은 10주차에서 제대로 배웁니다).
 K_two = [3.6 4 4.4 9 10 11]';
 Re = zeros(6,1);   ts = Re;   OS = Re;   GM = 12./K_two;
-
 for i = 1:6
     T = feedback(K_two(i)*L3, 1);
     p = pole(T);
@@ -1604,7 +1582,6 @@ for i = 1:6
     ts(i) = stepinfo(T).SettlingTime;
     OS(i) = stepinfo(T).Overshoot;
 end
-
 table(K_two, GM, Re, ts, OS)
 %%
 % 표 읽는 법

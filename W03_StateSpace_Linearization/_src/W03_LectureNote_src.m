@@ -4,7 +4,19 @@
 %
 % **참고자료 — 먼저 볼 것**
 %
-% 아래 다섯 과목은 **이 강의의 담당교수가 직접 한 강의**입니다.
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
 % 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
 % 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
 %
@@ -16,13 +28,16 @@
 % | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
 % | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
 %
-% **MATLAB 이나 Simulink 가 아직 익숙하지 않다면** 실습에 들어가기 전에 아래를 먼저 하십시오.
-% 무료이고 각각 몇 시간이면 끝납니다.
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
 %
-% | 도구 | 학습 자료 |
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
 % |---|---|
 % | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
 % | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
+%
 %
 % 오늘은 세 가지를 합니다. 앞의 둘은 도구이고 **마지막 하나가 진짜 중요합니다.**
 %
@@ -105,7 +120,6 @@ dg_arrow(b2.R, [9.2 1.3], 'y');
 %%
 G1 = 1/(s+1);
 G2 = 2/(s+2);
-
 minreal(G1*G2)               % 직렬로 이으면 곱이 된다
 %%
 pole(G1*G2)'                 % 두 시스템의 극점이 그대로 모인다
@@ -604,10 +618,8 @@ legend('sin(x)  진짜 곡선','x  직선 근사','Location','southeast')
 % 외울 숫자는 하나입니다 — **$14^\circ$**. 이 안쪽이면 마음 놓고 선형 모델을 씁니다.
 deg   = [1 5 10 20 30 45 60 90]';
 theta = deg2rad(deg);
-
 sin_theta = sin(theta);
 err_pct   = abs(theta - sin_theta)./sin_theta*100;
-
 table(deg, sin_theta, theta, err_pct)
 %% 9-1. 선형화의 근거 — 테일러 급수
 % 앞 절까지는 "$\sin\theta$ 를 $\theta$ 로 바꾼다" 를 **그림으로만** 정당화했습니다.
@@ -951,7 +963,6 @@ legend('비선형 (진짜)','선형 근사','Location','northeast')
 % 벗어나서도 계속 계산한 결과**입니다. 이것이 14절에서 말할 "반드시 비선형
 % 모델로 되돌아가 검증하라" 의 이유입니다.
 [~, pUp] = plant_pendulum(pi);
-
 eig(pp.A)'                   % 매달린 자세. 실수부가 음수 또는 0
 %%
 eig(pUp.A)'                  % 거꾸로 자세. 양수가 하나 있다 -> 불안정

@@ -4,7 +4,19 @@
 %
 % **참고자료 — 먼저 볼 것**
 %
-% 아래 다섯 과목은 **이 강의의 담당교수가 직접 한 강의**입니다.
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
 % 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
 % 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
 %
@@ -16,13 +28,16 @@
 % | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
 % | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
 %
-% **MATLAB 이나 Simulink 가 아직 익숙하지 않다면** 실습에 들어가기 전에 아래를 먼저 하십시오.
-% 무료이고 각각 몇 시간이면 끝납니다.
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
 %
-% | 도구 | 학습 자료 |
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
 % |---|---|
 % | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
 % | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
+%
 %
 % 지금까지 "빠르다", "진동한다" 를 **감으로** 말해 왔습니다.
 % 이번 주에는 이것을 **숫자로** 적는 법을 배웁니다.
@@ -381,10 +396,8 @@ legend('\tau = 0.5','\tau = 1','\tau = 2','목표값','63.2 %','Location','south
 close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 tau = 1;
 t   = 0:0.01:6;
-
 y_hand = 1 - exp(-t/tau);            % 손으로 푼 해
 y_step = step(1/(tau*s+1), t);       % MATLAB 이 구한 해
-
 plot(t, y_hand, 'LineWidth', 4); hold on; grid on
 plot(t, y_step, 'r--', 'LineWidth', 2)
 plot(t, t/tau, 'm:', 'LineWidth', 2)       % 초기 기울기 1/tau 의 접선
@@ -516,7 +529,6 @@ legend('손으로 푼 해', 'step', '접선 t/\tau', 'Location', 'southeast')
 % 공식과 실제를 숫자로 맞춰 봅니다.
 tau = 1;
 G_lpf = 1/(tau*s + 1);
-
 w = 0.2;
 gain_low = 1/sqrt(1 + (w*tau)^2)        % 저주파에서의 크기비
 %%
@@ -645,10 +657,8 @@ close all   % 절 단위로 실행할 때 앞 절 그림과 겹치지 않도록
 model = 'W04_LowPass';
 if ~bdIsLoaded(model), load_system(model); end     % setup_path 가 경로를 잡아 둔다
 tau = 1;  w_lo = 0.2;  w_hi = 10;  a_lo = 1;  a_hi = 0.5;  t_end = 60;
-
 out = sim(model, 'StopTime', '60');
 uy  = out.uy_sim;
-
 plot(uy.Time, uy.Data(:,1), 'Color', [0.6 0.6 0.6]); hold on; grid on
 plot(uy.Time, uy.Data(:,2), 'LineWidth', 2.2)
 xlim([20 40]); xlabel('시간 [s]'); ylabel('신호')
@@ -908,14 +918,12 @@ xlabel('Real'); ylabel('Imag'); title('그때의 극점 위치')
 % - 주파수응답에서 **공진 피크가 사라지는 경계**이기도 하다 (10주차에서 다시 만남)
 zeta = zl';
 OS = zeros(numel(zl),1);   tr = OS;   ts = OS;
-
 for i = 1:numel(zl)
     info = stepinfo(wn^2/(s^2 + 2*zeta(i)*wn*s + wn^2));
     OS(i) = info.Overshoot;
     tr(i) = info.RiseTime;
     ts(i) = info.SettlingTime;
 end
-
 table(zeta, OS, tr, ts)
 %% 4. 오늘의 핵심 — 사양과 극점을 잇는 두 공식
 % 이 두 공식이 4주차의 전부이고, 6주차 설계의 출발점입니다.
@@ -1078,17 +1086,14 @@ table(zeta, OS, tr, ts)
 % 숫자로 확인해 봅니다.
 zeta = [0.2 0.4 0.6 0.8]';
 w = 2;
-
 OS_formula = 100*exp(-zeta*pi./sqrt(1 - zeta.^2));   % 유도한 공식
 Tp_formula = pi./(w*sqrt(1 - zeta.^2));
-
 OS_measured = zeros(4,1);   Tp_measured = OS_measured;
 for i = 1:4
     info = stepinfo(w^2/(s^2 + 2*zeta(i)*w*s + w^2));
     OS_measured(i) = info.Overshoot;
     Tp_measured(i) = info.PeakTime;
 end
-
 table(zeta, OS_formula, OS_measured, Tp_formula, Tp_measured)
 %%
 % 봉투와 응답을 함께 그려 본다
@@ -1167,12 +1172,10 @@ title('진동은 지수 봉투 안에서 잦아든다');
 % 원래 사양으로 돌아오는지 봅니다. 마지막 열은 실제로 시스템을 만들어 잰 값입니다.
 OS = 10;                                 % 사양 : 오버슈트 10 % 이하
 LN = log(OS/100);
-
 zeta = -LN/sqrt(pi^2 + LN^2)             % 유도한 역공식으로 구한 감쇠비
 %%
 % 이 $\zeta$ 로 2차 시스템을 만들어 실제 오버슈트를 재 봅니다.
 G_check = 4/(s^2 + 2*zeta*2*s + 4);      % wn = 2
-
 stepinfo(G_check).Overshoot              % 사양 10 % 가 그대로 나와야 한다
 %% 4-2. 공식 둘 — 정착시간은 실수부만으로 정해진다
 % $$t_s \approx \frac{4}{\zeta\omega_n}$$
@@ -1289,13 +1292,11 @@ stepinfo(G_check).Overshoot              % 사양 10 % 가 그대로 나와야 �
 %
 % 숫자로 확인합니다.
 zeta = 0.5;   wn = 2;
-
 ts_derived = (log(1/0.02) + 0.5*log(1/(1-zeta^2)))/(zeta*wn)   % 유도한 식
 ts_formula = 4/(zeta*wn)                                        % 외우는 공식
 %%
 % 두 값이 거의 같습니다. 이제 실제 응답에서 재 봅니다.
 G_ts = wn^2/(s^2 + 2*zeta*wn*s + wn^2);
-
 stepinfo(G_ts).SettlingTime      % 실측. 공식보다 짧게 나온다
 %% 4-3. 두 공식을 함수로
 % 이 과목에서는 `spec2pole` 함수로 만들어 두었습니다.
@@ -1306,13 +1307,11 @@ stepinfo(G_ts).SettlingTime      % 실측. 공식보다 짧게 나온다
 %
 % 아래에서 요구를 넣고 확인해 봅니다.
 P_OS = 10;   ts = 2;                     % 요구 : 오버슈트 10 % 이하, 정착 2 s 이하
-
 [zeta_min, wn_min, s_target] = spec2pole(P_OS, ts)
 %%
 theta = rad2deg(acos(zeta_min))          % 목표 극점이 실축과 이루는 각 [도]
 %%
 info_t = stepinfo(wn_min^2/(s^2 + 2*zeta_min*wn_min*s + wn_min^2));
-
 OS_check = info_t.Overshoot              % 실제 오버슈트. 10 % 이하여야 한다
 ts_check = info_t.SettlingTime           % 실제 정착시간. 2 s 이하여야 한다
 %% 5. 사양을 $s$ 평면의 영역으로 그리기
@@ -1454,23 +1453,18 @@ legend('만족 영역','오버슈트 경계','정착시간 경계','목표 극�
 % 안이면 합격, 밖이면 불합격이 나와야 합니다.
 p_cand = [-2.0+2.7j; -3.0+2.0j; -1.0+2.0j; -2.0+5.0j];
 note   = ["영역 안 (경계)"; "영역 안 (여유)"; "영역 밖 (느림)"; "영역 밖 (진동)"];
-
 OS = zeros(4,1);   ts_c = OS;   verdict = strings(4,1);
-
 for i = 1:4
     p  = p_cand(i);
     Gc = abs(p)^2/(s^2 - 2*real(p)*s + abs(p)^2);   % 그 극점을 갖는 2차 시스템
-
     OS(i)   = stepinfo(Gc).Overshoot;
     ts_c(i) = stepinfo(Gc).SettlingTime;
-
     if OS(i) <= P_OS + 0.5 && ts_c(i) <= ts + 0.05
         verdict(i) = "합격";
     else
         verdict(i) = "불합격";
     end
 end
-
 table(p_cand, note, OS, ts_c, verdict)
 %% 6. 공식의 한계 — 극점이 셋 이상이면
 % 두 공식은 **극점 두 개, 영점 없음**이라는 가정에서 나왔습니다.
@@ -1651,23 +1645,18 @@ legend('2차 (기준)','먼 극점 s = -10','가까운 극점 s = -1','Location'
 % 아래에서 두 방법을 MATLAB 으로 실제로 계산해 계수를 대조합니다.
 zeta = [0 0.3 0.707 1]';
 w = 2;
-
 std_s1 = zeros(4,1);   std_s0 = std_s1;      % 표준형 분모의 s 항과 상수항
 blk_s1 = std_s1;       blk_s0 = std_s1;      % 루프를 하나씩 닫아 얻은 분모
-
 for i = 1:4
     z = zeta(i);
     G_std = w^2/(s^2 + 2*z*w*s + w^2);              % 3절의 표준형
     G_in  = 1/(s + 2*z*w);                          % 안쪽 속도 루프를 닫은 것
     G_blk = minreal(feedback(w^2*G_in*(1/s), 1));   % 바깥 위치 루프까지 닫은 것
-
     d1 = G_std.Denominator{1}/G_std.Denominator{1}(1);
     d2 = G_blk.Denominator{1}/G_blk.Denominator{1}(1);
-
     std_s1(i) = d1(2);   std_s0(i) = d1(3);
     blk_s1(i) = d2(2);   blk_s0(i) = d2(3);
 end
-
 table(zeta, std_s1, std_s0, blk_s1, blk_s0)
 %%
 % 계수가 같습니다. **그림과 표준형은 같은 시스템입니다.**
@@ -1719,17 +1708,14 @@ s = tf('s');
 Gz = 4/(s^2 + 0.8*s + 4);
 tt = (0:0.001:20)';
 yy = step(Gz, tt);
-
 iSys  = stepinfo(Gz);
 iData = stepinfo(yy, tt);
 i010  = stepinfo(Gz, 'RiseTimeLimits', [0 1]);
 i05   = stepinfo(Gz, 'SettlingTimeThreshold', 0.05);
-
 how = ["시스템에서"; "데이터에서"; "상승시간 0~100 %"; "정착시간 5 % 기준"];
 tr  = [iSys.RiseTime;     iData.RiseTime;     i010.RiseTime;     i05.RiseTime];
 ts  = [iSys.SettlingTime; iData.SettlingTime; i010.SettlingTime; i05.SettlingTime];
 OS  = [iSys.Overshoot;    iData.Overshoot;    i010.Overshoot;    i05.Overshoot];
-
 table(how, tr, ts, OS)
 %%
 iSys.SettlingTime / i05.SettlingTime     % 기준만 바꿔도 정착시간이 몇 배 차이 나나

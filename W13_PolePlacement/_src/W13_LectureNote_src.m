@@ -4,7 +4,19 @@
 %
 % **참고자료 — 먼저 볼 것**
 %
-% 아래 다섯 과목은 **이 강의의 담당교수가 직접 한 강의**입니다.
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
 % 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
 % 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
 %
@@ -16,13 +28,16 @@
 % | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
 % | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
 %
-% **MATLAB 이나 Simulink 가 아직 익숙하지 않다면** 실습에 들어가기 전에 아래를 먼저 하십시오.
-% 무료이고 각각 몇 시간이면 끝납니다.
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
 %
-% | 도구 | 학습 자료 |
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
 % |---|---|
 % | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
 % | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
+%
 %
 %
 % 6~7주차에서 우리는 **정해진 길** 위에서만 극점을 움직일 수 있었습니다.
@@ -165,7 +180,6 @@ title('되먹임 이득 하나로 고유값의 부호를 뒤집는다');
 sys = ss(p.A, p.B, p.C, p.D);
 p_des = [-8 -10 -12];
 K = place(p.A, p.B, p_des);
-
 eig(p.A)'                    % 개루프 고유값
 %%
 poly(p_des)                  % 원하는 특성다항식의 계수
@@ -230,7 +244,6 @@ sort(eig(p.A - p.B*K))'      % 검증 : 원한 -8, -10, -12 가 나와야 한다
 % 그러면 ④ 를 풀 수 없습니다. 그것이 **가제어가 아닌 경우**입니다.
 % 12주차의 판정이 여기서 쓰입니다.
 A2 = [0 1; -2 -3];   B2 = [0; 1];
-
 K2_hand  = [18 6]                        % 손으로 푼 것
 K2_place = place(A2, B2, [-4 -5])        % place 가 준 것
 %%
@@ -259,7 +272,6 @@ sort(eig(A2 - B2*K2_hand))'              % 고유값이 -5, -4 로 옮겨졌다
 %  [주의] 이 절만 Symbolic Math Toolbox 가 필요합니다.
 %         없는 PC 에서도 강의노트가 끝까지 돌도록 확인하고 건너뜁니다.
 hasSym = license('test','Symbolic_Toolbox') && ~isempty(which('syms'));
-
 if hasSym
     syms k1 k2 k3 sv real
     Ksym = [k1 k2 k3];
@@ -271,7 +283,6 @@ else
     K_hand3 = K;             % 툴박스가 없으면 계수 대조만 한다
     disp('Symbolic Math Toolbox 가 없어 기호 계산은 건너뜁니다.')
 end
-
 K_hand3                      % 계수비교로 푼 것
 K                            % place 가 준 것
 %%
@@ -649,7 +660,6 @@ dcgain(ss(p.A - p.B*K, p.B*Kr, p.C, p.D))   % 보정 후 직류이득. 1 이어�
 [~, pB] = plant_dcmotor('position');
 Ap = pB.A;  Bp = pB.B;
 p_want = [-8 -10 -12];
-
 K_place = place(Ap, Bp, p_want)
 K_acker = acker(Ap, Bp, p_want)
 %%

@@ -4,7 +4,19 @@
 %
 % **참고자료 — 먼저 볼 것**
 %
-% 아래 다섯 과목은 **이 강의의 담당교수가 직접 한 강의**입니다.
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
 % 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
 % 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
 %
@@ -16,13 +28,16 @@
 % | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
 % | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
 %
-% **MATLAB 이나 Simulink 가 아직 익숙하지 않다면** 실습에 들어가기 전에 아래를 먼저 하십시오.
-% 무료이고 각각 몇 시간이면 끝납니다.
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
 %
-% | 도구 | 학습 자료 |
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
 % |---|---|
 % | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
 % | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
+%
 %
 %
 % 지금까지 열한 주 동안 **전달함수**로 일했습니다.
@@ -139,7 +154,6 @@ title('상태 하나짜리 : 부호가 운명을 정한다');
 %
 % 학생들이 가장 많이 틀리는 지점입니다. 반드시 `m` 을 붙이십시오.
 A0 = [0 1; -2 -3];
-
 exp(A0)         % 원소마다 지수를 취한 것. 이것은 틀린 계산이다
 expm(A0)        % 행렬 지수. 이것이 맞는 계산이다
 %% 2-1. 상태천이행렬의 성질 세 가지
@@ -331,7 +345,6 @@ max_difference = max(abs(E_expm(:) - E_ser(:)))
 % - 13주차에서 `poly([-8 -10 -12])` 처럼 **원하는 극점으로 특성다항식을 만들 때**
 %   다시 씁니다
 A_ex = [0 1; -2 -3];
-
 eig(A_ex)'                                  % 고유값
 poly(A_ex)                                  % 특성다항식 s^2 + 3s + 2 의 계수
 roots(poly(A_ex))'                          % 그 다항식의 근
@@ -342,7 +355,6 @@ pole(tf(ss(A_ex, [0;1], [1 0], 0)))'        % 전달함수의 극점
 poly([-8 -10 -12])        % (s+8)(s+10)(s+12) 의 계수
 %%
 [V0, D0] = eig(A0);
-
 diag(D0)'                 % 고유값
 V0                        % 고유벡터 (열마다 하나)
 %%
@@ -584,7 +596,6 @@ eig(sys2.A)'              % 똑같다
 %
 % 예제 — 대각행렬이라 두 상태가 서로 무관한 시스템에서
 Ac = [-1 0; 0 -2];
-
 rank(ctrb(Ac, [1;1]))     % 두 상태 모두 입력이 닿는다 -> 2, 가제어
 rank(ctrb(Ac, [1;0]))     % 둘째 상태에 입력이 안 닿는다 -> 1, 가제어가 아니다
 %% 8. 가제어가 아니면 실제로 무슨 일이 생기는가
@@ -624,7 +635,6 @@ rank(ctrb(Ac, [1;0]))     % 둘째 상태에 입력이 안 닿는다 -> 1, 가�
 %
 % 토크 하나로 각도와 각속도를 **둘 다** 원하는 대로 만들 수 있는가?
 [sysUp, pUp] = plant_pendulum(pi);    % 거꾸로 선 진자
-
 pUp.A
 pUp.B
 %%
@@ -783,13 +793,11 @@ rank(obsv(pUp.A, eye(2)))     % 둘 다 잰다
 % MATLAB 의 `minreal` 이 하는 일이 바로 그 사라진 부분을 떼어내는 것입니다.
 % 떼어낸 만큼이 **가제어도 가관측도 아닌 부분**입니다.
 sys_full = ss([-1 0; 0 -2], [1;1], [1 0], 0);
-
 eig(sys_full.A)'             % 상태가 둘이므로 고유값도 둘
 %%
 pole(tf(sys_full))'          % 전달함수의 극점은 하나뿐이다
 %%
 sys_min = minreal(sys_full);
-
 size(sys_full.A, 1)          % 원래 상태 개수
 size(sys_min.A,  1)          % minreal 이 남긴 상태 개수. 하나가 숨어 있었다
 %% 13. 오늘 판정한 것이 다음 두 주의 입장권이다
@@ -868,16 +876,13 @@ size(sys_min.A,  1)          % minreal 이 남긴 상태 개수. 하나가 숨�
 % 우리가 필요한 것은 언제나 `expm` 입니다.
 [~, pA] = plant_dcmotor('position');
 Am = pA.A;  Bm = pA.B;  Cm = pA.C;
-
 [Vm, Dm] = eig(Am);
-
 diag(Dm)'                    % 고유값
 %%
 % expm 이 정말 고유분해와 같은지 확인
 tq = 0.1;
 E_direct = expm(Am*tq);
 E_eigen  = real(Vm * diag(exp(diag(Dm)*tq)) / Vm);
-
 max(abs(E_direct(:) - E_eigen(:)))     % 0 이면 같다
 %%
 % 특성다항식으로 돌아가도 같은 고유값이 나온다

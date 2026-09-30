@@ -4,7 +4,19 @@
 %
 % **참고자료 — 먼저 볼 것**
 %
-% 아래 다섯 과목은 **이 강의의 담당교수가 직접 한 강의**입니다.
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
 % 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
 % 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
 %
@@ -16,13 +28,16 @@
 % | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
 % | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
 %
-% **MATLAB 이나 Simulink 가 아직 익숙하지 않다면** 실습에 들어가기 전에 아래를 먼저 하십시오.
-% 무료이고 각각 몇 시간이면 끝납니다.
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
 %
-% | 도구 | 학습 자료 |
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
 % |---|---|
 % | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
 % | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
+%
 %
 %
 % 13주차 내내 $u = -Kx$ 를 썼습니다. 그러려면 **상태를 전부 알아야** 합니다.
@@ -222,7 +237,6 @@ s = tf('s');
 A = p.A; B = p.B; C = p.C; D = p.D;
 p_obs = [-30 -34 -38];
 L = place(A', C', p_obs)';
-
 C                            % 각도만 잰다
 %%
 rank(obsv(A,C))              % 상태 개수와 같으면 가관측
@@ -605,11 +619,9 @@ sort(eig(A - L*C))'          % 원한 -38, -34, -30 이 나와야 한다
 [~, pC] = plant_dcmotor('position');
 Ao = pC.A;  Co = pC.C;
 p_obs = [-30 -34 -38];
-
 Ad = Ao.';  Bd = Co.';
 Kd = place(Ad, Bd, p_obs);
 Lo = Kd.';
-
 size(Ad)                     % 1) 전치한 A
 size(Bd)                     %    전치한 C. 열벡터가 되었다
 %%
@@ -623,7 +635,6 @@ sort(eig(Ao - Lo*Co))'       % 실제로 간 자리
 %%
 % 한 줄로 쓴 것과 같은지 확인
 L_one = place(Ao.', Co.', p_obs).';
-
 max(abs(Lo - L_one))         % 0 이면 같다
 %% 13. 오늘의 정리
 % - 관측기는 **같은 모델을 컴퓨터에서 함께 돌리고, 출력 차이를 보고 고치는 것**

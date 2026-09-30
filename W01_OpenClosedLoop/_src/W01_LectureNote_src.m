@@ -4,7 +4,19 @@
 %
 % **참고자료 — 먼저 볼 것**
 %
-% 아래 다섯 과목은 **이 강의의 담당교수가 직접 한 강의**입니다.
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
 % 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
 % 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
 %
@@ -16,13 +28,16 @@
 % | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
 % | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
 %
-% **MATLAB 이나 Simulink 가 아직 익숙하지 않다면** 실습에 들어가기 전에 아래를 먼저 하십시오.
-% 무료이고 각각 몇 시간이면 끝납니다.
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
 %
-% | 도구 | 학습 자료 |
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
 % |---|---|
 % | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
 % | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
+%
 %
 %
 % 오늘 답할 질문은 하나입니다 — **피드백은 무엇을 해 주는가?**
@@ -57,7 +72,6 @@
 % - 보일러를 새로 바꿨다 → **모델이 바뀜**
 %
 % 오늘 배울 내용은 이 이야기가 전부이고, 나머지는 숫자로 확인하는 과정입니다.
-
 %% 0-1. 이미 해 본 적이 있습니다 — 운전
 % 샤워기보다 더 익숙한 예가 있습니다. **운전**입니다.
 % 강의자료 2장 4쪽에 나오는 그림을 블록으로 옮기면 이렇게 됩니다.
@@ -104,7 +118,6 @@
 % - **핸들을 너무 급하게 꺾으면?** $\rightarrow$ 이득이 너무 큼. 4절에서 다룬다
 %
 % 오늘 나오는 모든 그래프는 이 네 질문 중 하나에 대한 답입니다.
-
 if isempty(which('plant_msd'))   % 경로가 아직 등록 안 되었으면 알아서 잡는다
     p_ = pwd;
     if ~isempty(mfilename('fullpath')), p_ = fileparts(mfilename('fullpath')); end
@@ -329,7 +342,6 @@ title('step 으로 구한 계단응답')
 % - `y = step(5*G, t)`
 y1 = 5 * step(G_ex, t);
 y2 = step(5*G_ex, t);
-
 max(abs(y1 - y2))            % 두 방법의 차이. 0 이면 같다
 %% 1-5. `dcgain` — 천천히 넣으면 몇 배로 나오나
 % - **하는 일** — 전달함수에 $s=0$ 을 대입한다. 그게 전부다
@@ -351,7 +363,6 @@ max(abs(y1 - y2))            % 두 방법의 차이. 0 이면 같다
 % - 정상상태 오차 계산
 % - 목표가 $1$ 인데 $G(0)=0.8$ 이면 $20\%$ 모자란다는 뜻
 y_long = step(G_ex, 0:0.01:200);
-
 dcgain(G_ex)                 % s = 0 을 대입한 값
 y(end)                       % t = 20 s. 아직 진동이 남아 조금 어긋난다
 y_long(end)                  % t = 200 s. 충분히 기다리니 딱 맞는다
@@ -447,7 +458,6 @@ y_long(end)                  % t = 200 s. 충분히 기다리니 딱 맞는다
 %   극점이 쓸데없이 늘어난다. 아래에서 확인
 T_cmd  = feedback(G_ex, 1);
 T_hand = G_ex / (1 + G_ex);
-
 pole(T_cmd)'                 % feedback 명령
 %%
 pole(T_hand)'                % 손으로 나눈 것. 약분이 안 되어 극점이 늘어났다
@@ -521,7 +531,6 @@ info = stepinfo(feedback(5*G_ex, 1))
 OS = info.Overshoot;
 tr = info.RiseTime;
 ts = info.SettlingTime;
-
 table(OS, tr, ts)
 %% 1-8. `lsim` — 아무 입력이나 넣어 보기
 % - `step` 은 계단입력만 넣는다
@@ -578,11 +587,9 @@ legend('입력 u (t=10 에 켜짐)', '출력 y', 'Location','southeast')
 % 아래 코드를 실행하면 위 표의 값이 실제로 나옵니다.
 s = tf('s');
 Gd = 4/(s^2 + 0.8*s + 4);                 % zeta = 0.2, wn = 2
-
 % (1) 만드는 방법 세 가지가 같은 것을 주는지 확인
 Ga = tf(4, [1 0.8 4]);
 Gb = zpk([], roots([1 0.8 4]).', 4);
-
 norm(Ga - Gd, inf)           % tf 와 s 연산자의 차이
 norm(tf(Gb) - Gd, inf)       % tf 와 zpk 의 차이
 %%
@@ -590,7 +597,6 @@ norm(tf(Gb) - Gd, inf)       % tf 와 zpk 의 차이
 damp(Gd)
 %%
 [wn_v, z_v] = damp(Gd);
-
 wn_v(1)
 z_v(1)
 %%
@@ -601,7 +607,6 @@ ts_5 = stepinfo(Gd, 'SettlingTimeThreshold', 0.05).SettlingTime         % 5 % �
 % (4) 되먹임 부호를 틀리면 어떻게 되는가
 %     이득이 2 배인 플랜트로 보면 차이가 뚜렷합니다.
 G2 = 2*Gd;
-
 pole(feedback(G2, 1))'       % 음되먹임 (기본)
 %%
 pole(feedback(G2, 1, +1))'   % 양되먹임. 실수부가 양수인 극점이 있다 -> 발산
@@ -843,16 +848,13 @@ legend('개루프 출력', '목표값 r', 'Location','southeast'); ylim([0 2])
 % 6주차부터는 그 숫자를 보고 $K$ 를 고릅니다.
 K_list = [1 3 9]';
 y_ss   = zeros(3,1);   y_theory = y_ss;   err_pct = y_ss;
-
 for i = 1:3
     T = feedback(K_list(i)*G, 1);
     plot(t, step(r*T, t), 'LineWidth', 2); hold on
-
     y_ss(i)     = dcgain(r*T);
     y_theory(i) = K_list(i)/(1 + K_list(i));
     err_pct(i)  = 100*(1 - y_theory(i));
 end
-
 yline(r, 'k--', 'LineWidth', 1.5); grid on
 xlabel('시간 [s]'); ylabel('변위 x [m]')
 title('비례제어: K 를 키우면 오차는 줄지만 진동이 심해진다')
@@ -1256,16 +1258,13 @@ G_pert = tf(G_design.num{1}*(1+dG_rel), G_design.den{1});
 T_now  = dcgain(feedback(K*G_design, 1));
 T_new  = dcgain(feedback(K*G_pert,   1));
 S_num  = ((T_new - T_now)/T_now) / dG_rel;
-
 Kff_s  = 1/dcgain(G_design);
 To_now = dcgain(Kff_s*G_design);
 To_new = dcgain(Kff_s*G_pert);
 So_num = ((To_new - To_now)/To_now) / dG_rel;
-
 loop    = ["폐루프"; "개루프"];
 S_numeric = [S_num; So_num];                          % 수치로 재 본 것
 S_theory  = [1/(1+K*dcgain(G_design)); 1];            % 유도한 식
-
 table(loop, S_numeric, S_theory)
 %
 % 앞으로의 연결
@@ -1276,7 +1275,6 @@ table(loop, S_numeric, S_theory)
 L0 = K*dcgain(G_design)      % 루프이득 K*G(0)
 S0 = 1/(1 + L0)              % 감도
 reduction = 1 + L0           % 외란도 모델 오차도 이만큼 줄어든다
-
 %% 8-C. 두 장면을 나란히 놓고 보기
 % 말로만 하면 잘 안 믿깁니다. 두 장면을 한 장에 놓고 보겠습니다.
 %
@@ -1325,7 +1323,6 @@ reduction = 1 + L0           % 외란도 모델 오차도 이만큼 줄어든다
 %
 % 오른쪽 두 칸이 오늘의 핵심입니다. **두 그래프의 모양이 같습니다.**
 % 원인이 외란이든 모델 오차든, $K$ 를 키우면 같은 비율로 줄어듭니다.
-
 %% 8-D. 감도를 이득별로 — 얼마나 줄어드는가
 % 앞의 8-A · 8-B 에서 두 문제 모두 $S = \frac{1}{1+KG}$ 가 나오는 것을 보았습니다.
 % 이제 그 값이 이득에 따라 어떻게 변하는지 봅니다.
@@ -1361,12 +1358,10 @@ reduction = 1 + L0           % 외란도 모델 오차도 이만큼 줄어든다
 %
 % 오른쪽 그림은 이 값을 주파수별로 그린 것입니다. 지금은 "저주파에서 작다" 정도만
 % 보면 됩니다. **10주차에서 이 그림이 다시 나옵니다.**
-
 K_list = [1 5 20 50 100]';
 L_loop = K_list*dcgain(G_design);      % 루프이득 K*G(0)
 S      = 1./(1 + L_loop);              % 감도
 reduction = 1 + L_loop;                % 오차가 줄어드는 배수
-
 table(K_list, L_loop, S, reduction)
 %% 8-E. 그러면 $K$ 를 무한히 키우면 되는가
 % 좋은 질문이고, 답은 **안 된다**입니다.
