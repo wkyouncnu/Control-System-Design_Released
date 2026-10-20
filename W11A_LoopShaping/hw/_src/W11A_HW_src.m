@@ -185,7 +185,7 @@ end
 if all(pm_v == 0)
     fprintf('  제어기 Ck 를 아직 안 만들었습니다.\n');
 else
-    table(corner, K./corner, pm_v, wc_v, wb_v, Sd_v, os_v, ...
+    table(corner, K*corner, pm_v, wc_v, wb_v, Sd_v, os_v, ...
         'VariableNames', {'꺾이는자리', 'Ki', 'PM_deg', 'wc', 'wb', ...
                           '외란_1Hz_dB', 'OS_퍼센트'})
 end
@@ -229,7 +229,6 @@ pass = (Sd_s <= -30) & (pm_s >= 60) & (wc_s <= 72);
 fprintf('\n=== 합격 구간 ===\n');
 if any(pass)
     fprintf('  1/Ti = %.1f 부터 %.1f 까지\n', min(av(pass)), max(av(pass)));
-    mid = round(mean([min(av(pass)) max(av(pass)))]/0.5)*0.5;
 end
 
 i1 = find(Sd_s <= -30, 1);
@@ -265,12 +264,15 @@ table(corner_pick, 20*log10(gm_f), pm_f, wc_f, bandwidth(T_fin), ...
       'VariableNames', {'고른_꺾이는자리', 'GM_dB', 'PM_deg', 'wc', 'wb', ...
                         '외란_1Hz_dB', 'OS_퍼센트'})
 
+% 비교 기준은 1번의 설계, 즉 꺾이는 자리가 2 인 것입니다 (2-1절 참고)
+L_base = minreal(P*K*(s + 2)/s);
+
 figure;
 tiledlayout(1, 2, 'TileSpacing', 'compact');
 
 nexttile; hold on; grid on;
 t = linspace(0, 0.2, 800)';
-plot(t, step(L/(1+L), t), '--', 'LineWidth', 2, 'DisplayName', '1번 설계');
+plot(t, step(L_base/(1+L_base), t), '--', 'LineWidth', 2, 'DisplayName', '1번 설계');
 plot(t, step(T_fin, t), 'LineWidth', 2.2, 'DisplayName', '2번 설계');
 yline(1, 'k:');
 xlabel('시간 [s]'); ylabel('속도');
@@ -278,7 +280,7 @@ legend('Location', 'southeast'); title('계단응답 — 오버슈트가 생겼�
 
 nexttile; hold on; grid on;
 wv = logspace(-1, 4, 500);
-semilogx(wv, 20*log10(abs(squeeze(freqresp(1/(1+L), wv)))), '--', ...
+semilogx(wv, 20*log10(abs(squeeze(freqresp(1/(1+L_base), wv)))), '--', ...
     'LineWidth', 2, 'DisplayName', '1번 설계');
 semilogx(wv, 20*log10(abs(squeeze(freqresp(S_fin, wv)))), ...
     'LineWidth', 2.2, 'DisplayName', '2번 설계');

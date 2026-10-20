@@ -1,6 +1,42 @@
 %% 11A주차 — 루프 성형 : 루프이득의 모양을 내가 정한다
 % **제어시스템설계** · 충남대학교 자율운항시스템공학과
 %
+%
+% **참고자료 — 먼저 볼 것**
+%
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
+% 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
+% 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
+%
+% | # | 과목 | 수준 | 언어 | 영상 | 강의자료·코드 |
+% |---|---|---|---|---|---|
+% | 1 | **제어공학** — 기초. 전달함수, 피드백, 안정도, 근궤적, PID | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvJMpF9HZS-Mp8tDv9dTdglk) | [드라이브](https://drive.google.com/drive/folders/1TNIPDNtS_Iy8li-olka5WJslSXDYf0aT) |
+% | 2 | **제어시스템설계** — 해석이 아니라 설계. 사양, 루프 성형, 이산 구현 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvIGroZ5rgn7x08F7C79d9WZ) | [드라이브](https://drive.google.com/drive/folders/11m5Xxl_PHJvxgHghLSP-jhCpmRpbvoXh) |
+% | 3 | **제어공학특론** — 좌표계, 6자유도 운동방정식, 회전행렬과 오일러각, 선형화 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvJmvF2ljx4KM5dj1P5jEcw0) | [드라이브](https://drive.google.com/drive/folders/1GUxbbONl916lNd0ggnFnXrNwNkd13-2-) |
+% | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
+% | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
+%
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
+%
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
+% |---|---|
+% | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
+% | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
 % 9주차에서 보드 선도를 그렸고, 10주차에서 나이퀴스트로 안정성을 판정하고
 % 이득여유와 위상여유를 읽었습니다. 그런데 거기까지는 전부 **읽기**였습니다.
 % 남의 시스템을 보고 "이건 위상여유가 30도네" 하고 판정만 한 것입니다.
