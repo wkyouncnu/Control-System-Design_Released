@@ -6,6 +6,8 @@
 %
 %      (가) 수송지연 e^(-s*Td)  — 앱과 margin 은 유리함수만 다룹니다.
 %           진짜 지연을 넣어 볼 수 있는 곳은 Simulink 뿐입니다.
+%           지연은 **구동기 앞**(전방경로)에 둡니다. 강의노트 8-5 절과 같은
+%           자리이고, 그래야 y_sim 이 곧 실제 출력이 됩니다.
 %      (나) 제어입력 u 의 한계 — 앱의 기본 화면에는 u 가 아예 없습니다.
 %
 %    강의노트 8절에서 설계한 제어기를 그대로 넣습니다.
@@ -38,8 +40,8 @@ if isfile(fpath),    delete(fpath);          end
 new_system(name);
 open_system(name);
 
-X_SRC=40; X_FLT=150; X_ERR=340; X_C=400; X_SAT=600; X_PL=700; X_OUT=900;
-X_MUX=1010; X_SCP=1080; X_DLY=600;
+X_SRC=40; X_FLT=150; X_ERR=340; X_C=400; X_SAT=600; X_DLY=700; X_PL=830;
+X_OUT=1030; X_MUX=1140; X_SCP=1210;
 Y_MAIN=150; Y_R=60; Y_FB=300; Y_U=440;
 
 gp = @(x,y) [x, y-16, x+70, y+16];
@@ -69,13 +71,15 @@ add_block('simulink/Discontinuities/Saturation', [name '/구동기 한계'], ...
     'Position', gp(X_SAT, Y_MAIN), ...
     'UpperLimit','u_sat', 'LowerLimit','-u_sat');
 
+%% 블록 — 수송지연 (계산한 전압이 모터에 실제로 걸리기까지 걸리는 시간)
+%  루프 안 어디에 두어도 여유(PM·GM)는 같습니다. 전방경로에 두면
+%  y_sim 이 곧 실제 출력이 되어 강의노트 8-5 절의 G_real 과 똑같아집니다.
+add_block('simulink/Continuous/Transport Delay', [name '/수송지연'], ...
+    'Position', gp(X_DLY, Y_MAIN), 'DelayTime','Td', 'InitialOutput','0', ...
+    'BufferSize','16384');
+
 add_block('simulink/Continuous/Transfer Fcn', [name '/플랜트 G'], ...
     'Position', tp(X_PL, Y_MAIN), 'Numerator','numG', 'Denominator','denG');
-
-%% 블록 — 되먹임 선의 수송지연 (센서가 값을 주기까지 걸리는 시간)
-add_block('simulink/Continuous/Transport Delay', [name '/수송지연'], ...
-    'Position', gp(X_DLY, Y_FB), 'DelayTime','Td', 'InitialOutput','0', ...
-    'BufferSize','16384');
 
 %% 블록 — 기록과 그래프
 add_block('simulink/Sinks/To Workspace', [name '/r_sim'], ...
@@ -103,11 +107,11 @@ L('지령 r/1',            '지령 완만화 필터/1');
 L('지령 완만화 필터/1',   '오차 계산/1');
 L('오차 계산/1',          '설계한 제어기 C/1');
 L('설계한 제어기 C/1',    '구동기 한계/1');
-L('구동기 한계/1',        '플랜트 G/1');
+L('구동기 한계/1',        '수송지연/1');
+L('수송지연/1',           '플랜트 G/1');
 
-% 되먹임 : 출력이 센서를 지나 Td 만큼 늦게 돌아온다
-L('플랜트 G/1',           '수송지연/1');
-L('수송지연/1',           '오차 계산/2');
+% 되먹임 : 출력이 그대로 돌아온다 (단위 피드백)
+L('플랜트 G/1',           '오차 계산/2');
 
 L('플랜트 G/1',           'y_sim/1');
 L('플랜트 G/1',           'Mux/1');
@@ -123,8 +127,8 @@ set_param(get_param([name '/지령 완만화 필터'],'PortHandles').Outport(1),
 set_param(get_param([name '/오차 계산'],'PortHandles').Outport(1),        'Name','e');
 set_param(get_param([name '/설계한 제어기 C'],'PortHandles').Outport(1),  'Name','u_raw');
 set_param(get_param([name '/구동기 한계'],'PortHandles').Outport(1),      'Name','u');
+set_param(get_param([name '/수송지연'],'PortHandles').Outport(1),         'Name','u_late');
 set_param(get_param([name '/플랜트 G'],'PortHandles').Outport(1),         'Name','y');
-set_param(get_param([name '/수송지연'],'PortHandles').Outport(1),         'Name','ym');
 
 %% Scope 설정
 %  [주의] ScopeConfiguration 의 Name 은 창 제목이 아니라 **블록 이름**입니다.
@@ -146,11 +150,11 @@ a1.position = [X_SRC, Y_R-90];
 a1.FontSize = 12;
 
 a2 = Simulink.Annotation([name '/a2']);
-a2.Text = ['수송지연은 되먹임 선에 있습니다. 센서가 값을 주기까지의 시간입니다.' newline ...
+a2.Text = ['수송지연은 구동기 앞에 있습니다. 계산한 전압이 모터에 걸리기까지의 시간입니다.' newline ...
      '크기는 하나도 안 바뀌고 위상만 깎입니다. 깎는 양은 -w*Td 입니다.' newline ...
      'wc = 8.588 에서 -9.84 도 이므로 PM 60.6 도가 50.7 도로 떨어집니다.' newline ...
      'Td 를 0 으로 두면 앱의 결과와 정확히 같아집니다.'];
-a2.position = [X_C, Y_FB+45];
+a2.position = [X_DLY-160, Y_FB+45];
 a2.FontSize = 11;
 
 a3 = Simulink.Annotation([name '/a3']);
@@ -187,6 +191,12 @@ set_param(name, 'PreLoadFcn', preload);
 % 최대 시간간격을 지연의 1/10 보다 작게 묶어 둡니다 (강의노트 8-5 절).
 set_param(name, 'Solver','ode45', 'StopTime','t_end', ...
                 'SolverType','Variable-step', 'MaxStep','1e-3');
+
+% 기록은 0.001 초 간격으로 **균일하게** 남긴다.
+% lsim 은 시간 간격이 균일한 벡터만 받으므로,
+% 가변 스텝 솔버가 남긴 들쭉날쭉한 시각을 그대로 주면 오류가 난다.
+set_param(name, 'OutputOption','SpecifiedOutputTimes', ...
+                'OutputTimes','0:0.001:t_end');
 
 %% 블록 설명 주석 (common/model_blocks.m 에서 가져온다)
 %  같은 글을 .slx 주석 · 실행 스크립트 · 강의노트가 함께 씁니다.
