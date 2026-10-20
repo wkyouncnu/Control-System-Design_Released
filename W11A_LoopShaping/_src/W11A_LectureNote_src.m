@@ -692,7 +692,7 @@ table(zv, wc_f, wc_mea, wb_f, wb_mea, wb_f./wc_f, ...
 % 이 식을 $\zeta$ 에 대해 뒤집을 수가 없습니다. 그래서 **어림셈**을 씁니다.
 % 그런데 다행히 이 관계가 거의 직선입니다.
 %
-% $$\boxed{\;\zeta \;\approx\; \frac{\text{PM}}{100}\;}$$
+% $$\zeta \;\approx\; \frac{\text{PM}}{100}$$
 %
 % PM 을 도(degree) 로 넣습니다. PM 50 도면 $\zeta \approx 0.5$, PM 70 도면
 % $\zeta \approx 0.7$ 입니다. 외우기 쉽습니다.
