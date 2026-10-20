@@ -1,6 +1,42 @@
 %% 11B주차 — 주파수영역에서 제어기 설계하기 : `controlSystemDesigner`
 % **제어시스템설계** · 충남대학교 자율운항시스템공학과
 %
+%
+% **참고자료 — 먼저 볼 것**
+%
+% **1. 올해(2026) 수업 — 항상 이 두 곳에 올라옵니다**
+%
+% | 무엇 | 어디 |
+% |---|---|
+% | **수업 녹화 영상** | [충남대 제어시스템설계 2026 재생목록](https://youtube.com/playlist?list=PLJYbwklUIAsQ) |
+% | **실습 자료 전체** (이 강의노트 포함) | [GitHub — Control-System-Design_Released](https://github.com/wkyouncnu/Control-System-Design_Released) |
+%
+% 수업이 끝나면 그날 녹화가 재생목록에 올라가고, 자료를 고치면 GitHub 이 곧바로 갱신됩니다.
+% **빠진 수업이 있거나 따라가지 못한 곳이 있으면 이 둘을 먼저 보십시오.**
+% 강의노트 · 실습 스크립트 · Simulink 모델 · 숙제가 모두 GitHub 에 있습니다.
+%
+% **2. 담당교수가 직접 한 강의 다섯 과목**
+%
+% 기초부터 대학원 과정까지 이어지므로 부족한 곳부터 보면 됩니다.
+% 이 강의에서 쓰는 기호와 유도는 모두 그 안에서 자세히 다룹니다.
+%
+% | # | 과목 | 수준 | 언어 | 영상 | 강의자료·코드 |
+% |---|---|---|---|---|---|
+% | 1 | **제어공학** — 기초. 전달함수, 피드백, 안정도, 근궤적, PID | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvJMpF9HZS-Mp8tDv9dTdglk) | [드라이브](https://drive.google.com/drive/folders/1TNIPDNtS_Iy8li-olka5WJslSXDYf0aT) |
+% | 2 | **제어시스템설계** — 해석이 아니라 설계. 사양, 루프 성형, 이산 구현 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvIGroZ5rgn7x08F7C79d9WZ) | [드라이브](https://drive.google.com/drive/folders/11m5Xxl_PHJvxgHghLSP-jhCpmRpbvoXh) |
+% | 3 | **제어공학특론** — 좌표계, 6자유도 운동방정식, 회전행렬과 오일러각, 선형화 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvJmvF2ljx4KM5dj1P5jEcw0) | [드라이브](https://drive.google.com/drive/folders/1GUxbbONl916lNd0ggnFnXrNwNkd13-2-) |
+% | 4 | **센서신호처리 및 융합** — 센서 모델, 잡음, 추정, 다중센서 융합 | 대학원 | EN | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvK-aP2Gdoyp5-AWvMn7Fo8E) | [드라이브](https://drive.google.com/drive/folders/1MEVJP7TzMcm8w6TZwUjhWJtL34WeNY3u) |
+% | 5 | **캡스톤디자인** — 이동체 프로젝트를 처음부터 끝까지 | 학부 | KO | [재생목록](https://youtube.com/playlist?list=PLFaUxNRM4BvLu7L0pDoLzDXTv8mm6rCmj) | [드라이브](https://drive.google.com/drive/folders/1haIQejlJfrdhtOuof-MpffR9ydVscXZS) |
+%
+% **3. MATLAB 이나 Simulink 가 아직 익숙하지 않다면**
+%
+% 실습에 들어가기 전에 아래를 먼저 하십시오. 무료이고 각각 몇 시간이면 끝납니다.
+%
+% | 도구 | 시작할 곳 |
+% |---|---|
+% | MATLAB | [MATLAB Onramp](https://matlabacademy.mathworks.com/kr/details/matlab-onramp/gettingstarted) · [Core MATLAB Skills](https://matlabacademy.mathworks.com/details/core-matlab-skills/lpmlcms) |
+% | Simulink | [Simulink Onramp](https://matlabacademy.mathworks.com/kr/details/simulink-onramp/simulink) · 담당교수 Simulink 강의 [1편](https://youtu.be/a-afHg_fSaU) · [2편](https://youtu.be/070Yn0Hw5a0) |
+%
 % 11A주차에서 **어떤 모양이 좋은 모양인지** 배웠습니다. 저주파에서 $|L|$ 을 높이고
 % 고주파에서 낮추며 그 사이를 완만하게 지나가게 한다 — 이것이 루프 성형이었습니다.
 %
@@ -1667,7 +1703,7 @@ title('사양 4 — 한계 안에 들어온다');
 %%
 % 블록 하나씩 — **처음 나오는 블록**만 설명합니다.
 %
-% **`Ramp`** — 지금까지는 계단 지령만 썼습니다. 램프는 처음입니다.
+% `Ramp` — 지금까지는 계단 지령만 썼습니다. 램프는 처음입니다.
 %
 % - **하는 일** — 시각 `Start time` 부터 기울기 `Slope` 로 **계속 올라가는**
 %   신호를 만든다. 수식으로는 $r(t) = A t$, 라플라스로는 $A/s^2$
@@ -1678,7 +1714,7 @@ title('사양 4 — 한계 안에 들어온다');
 % - **주의** — 램프는 **끝없이 커집니다.** 시뮬레이션 시간을 길게 두면
 %   출력도 그만큼 커집니다. 우리는 $4$ 초만 봅니다
 %
-% **`Transfer Fcn` (지령 완만화 필터)** — 블록 자체는 2주차에서 썼습니다.
+% `Transfer Fcn` (지령 완만화 필터) — 블록 자체는 2주차에서 썼습니다.
 % 여기서 새로운 것은 **어디에 쓰는가** 입니다.
 %
 % - 제어기 앞이 아니라 **지령 뒤, 오차 계산 앞**에 있습니다. 즉 루프 바깥입니다
@@ -1692,9 +1728,9 @@ title('사양 4 — 한계 안에 들어온다');
 %
 % 손으로 확인 — $t$ 가 커지면 $e^{-t/\tau} \to 0$ 이므로 $r \to A(t - \tau)$,
 % 즉 **기울기는 그대로 $A$** 이고 $\tau$ 초만큼 늦어진 램프가 됩니다.
-% $t = 0$ 에서는 $r = 0$ 이고 $\dot{r} = 0$ 입니다. 그래서 출발이 둥급니다.
+% $t = 0$ 에서는 $r = 0$ 이고 $\dot{r} = 0$ 입니다. 그래서 출발이 둥글어집니다.
 %
-% **`Transport Delay`**
+% `Transport Delay` — 8-5절에서 식으로 다룬 그 지연입니다.
 %
 % - **하는 일** — 들어온 신호를 정해진 시간만큼 늦춰 그대로 내보낸다.
 %   전달함수로는 $e^{-sT_d}$
@@ -1711,7 +1747,7 @@ title('사양 4 — 한계 안에 들어온다');
 % - **대체품** — `Variable Transport Delay` (지연 시간이 변할 때),
 %   또는 `pade` 로 만든 전달함수 (해석용)
 %
-% **`Saturation`** — 7주차와 13주차에서 썼습니다. 여기서는 $\pm 12$ V 로 두고
+% `Saturation` — 7주차와 13주차에서 썼습니다. 여기서는 $\pm 12$ V 로 두고
 % **켜고 끄며** 비교합니다. 꺼 두면 앱의 결과와 정확히 같아야 하고,
 % 켜면 8-6절의 문제가 보입니다.
 %%
