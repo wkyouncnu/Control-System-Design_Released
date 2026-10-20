@@ -171,6 +171,22 @@ jobs = {
  'w11_lead_cost.png',    @() fig_w11_lead_cost(),     95
  'w11_lead_vs_lag.png',  @() fig_w11_lead_vs_lag(),   95
  'w11_dfilter.png',      @() fig_w11_dfilter(),       95
+% ---- 11A 주차 : 루프 성형 -----------------------------------------------
+ 'w11a_bands.png',       @() fig_w11a_bands(),        95
+ 'w11a_lst.png',         @() fig_w11a_lst(),         100
+ 'w11a_s_plus_t.png',    @() fig_w11a_s_plus_t(),    100
+ 'w11a_wc_wbw.png',      @() fig_w11a_wc_wbw(),      100
+ 'w11a_pm_zeta.png',     @() fig_w11a_pm_zeta(),     100
+ 'w11a_dist.png',        @() fig_w11a_dist(),        100
+ 'w11a_noise.png',       @() fig_w11a_noise(),       100
+% ---- 11B 주차 : controlSystemDesigner 로 설계하기 -----------------------
+ 'w11b_shapes.png',      @() fig_w11b_shapes(),      100
+ 'w11b_app_tour.png',    @() fig_w11b_app_tour(),     95
+ 'w11b_type_ramp.png',   @() fig_w11b_type_ramp(),   100
+ 'w11b_pd_vs_lead.png',  @() fig_w11b_pd_vs_lead(),  100
+ 'w11b_pi_vs_lag.png',   @() fig_w11b_pi_vs_lag(),   100
+ 'w11b_capstone.png',    @() fig_w11b_capstone(),    100
+ 'w11b_delay.png',       @() fig_w11b_delay(),       100
 % ---- 12주차 : 상태공간 해석 ---------------------------------------------
  'w12_transition.png',   @() fig_w12_transition(),   100
  'w12_diagonalize.png',  @() fig_w12_diagonalize(),  100
@@ -5319,4 +5335,669 @@ xlabel('시간 [s]'); ylabel('직립에서 기울어진 각도 [도]');
 ylim([-90 200]);
 legend('Location', 'northwest');
 title(sprintf('%d도에서 놓았을 때 — 토크가 모자라면 넘어간다', d0));
+end
+
+
+% ======================================================================
+%  11A 주차 : 루프 성형 (Loop shaping)
+% ======================================================================
+
+function fig_w11a_bands()
+% 주파수축을 셋으로 나눠 요구사항을 배치한다 — 오늘의 한 장
+w = logspace(-2, 3, 1200);
+L = 200 ./ ((1j*w) .* (1j*w/5 + 1) .* (1j*w/50 + 1));
+mag = 20*log10(abs(L));
+ic  = find(mag < 0, 1);  wc = w(ic);
+
+figure('Position', [60 60 980 440]);
+hold on;
+yl = [-80 90];
+patch([1e-2 1 1 1e-2],    [yl(1) yl(1) yl(2) yl(2)], [0.86 0.93 1.00], 'EdgeColor', 'none');
+patch([1 100 100 1],      [yl(1) yl(1) yl(2) yl(2)], [0.91 1.00 0.90], 'EdgeColor', 'none');
+patch([100 1e3 1e3 100],  [yl(1) yl(1) yl(2) yl(2)], [1.00 0.91 0.89], 'EdgeColor', 'none');
+set(gca, 'XScale', 'log', 'Layer', 'top'); grid on;
+plot(w, mag, 'LineWidth', 2.8, 'Color', [0 0.25 0.60]);
+yline(0, 'k--', 'LineWidth', 1.3);
+plot(wc, 0, 'ko', 'MarkerFaceColor', [1 0.85 0.2], 'MarkerSize', 10);
+text(wc*1.2, -14, '\omega_c (0 dB)', 'FontSize', 11, 'FontWeight', 'bold');
+xlim([1e-2 1e3]); ylim(yl);
+xlabel('주파수 [rad/s]'); ylabel('|L| = |PC|  [dB]');
+text(0.013, 72, {'저주파 : |L| 을 크게', '정상상태오차 작게', '외란을 억제'}, ...
+     'FontSize', 10, 'Color', [0 0.25 0.6], 'VerticalAlignment', 'top');
+text(1.3, 72, {'중간주파 : 기울기를 눕힌다', 'PM / GM 확보', '-20 dB/dec 로 지나가게'}, ...
+     'FontSize', 10, 'Color', [0 0.4 0.1], 'VerticalAlignment', 'top');
+text(130, 72, {'고주파 : |L| 을 작게', '센서 잡음 차단', '모르는 동특성 회피'}, ...
+     'FontSize', 10, 'Color', [0.6 0.1 0.1], 'VerticalAlignment', 'top');
+title('루프 성형 — 저주파는 올리고, 고주파는 내리고, 그 사이를 완만하게 지나간다');
+end
+
+
+function fig_w11a_s_plus_t()
+% S + T = 1 — 둘을 동시에 작게 만들 수 없다
+s = tf('s');
+P = 0.1/(0.5*s + 2);  C = (500*s + 2000)/s;
+L = P*C;  S = 1/(1+L);  T = L/(1+L);
+w = logspace(-1, 5, 1500);
+mS = 20*log10(squeeze(abs(freqresp(S, w))));
+mT = 20*log10(squeeze(abs(freqresp(T, w))));
+sumv = squeeze(freqresp(S, w)) + squeeze(freqresp(T, w));
+
+figure('Position', [60 60 980 380]);
+tiledlayout(1, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+semilogx(w, mS, 'LineWidth', 2.4, 'Color', [0 0.45 0.74]);
+semilogx(w, mT, 'LineWidth', 2.4, 'Color', [0.85 0.33 0.10]);
+set(gca, 'XScale', 'log');
+yline(0, 'k--'); xline(100, ':', 'Color', [0.4 0.4 0.4], 'LineWidth', 1.6);
+xlabel('주파수 [rad/s]'); ylabel('크기 [dB]'); ylim([-70 10]); xlim([0.1 1e5]);
+legend({'|S| — 오차가 남는 비율', '|T| — 지령을 따라가는 비율'}, 'Location', 'southwest');
+title('한쪽이 작으면 다른 쪽은 1 — 교차점이 \omega_c');
+
+nexttile; hold on; grid on;
+semilogx(w, 20*log10(abs(sumv)), 'LineWidth', 3, 'Color', [0.2 0.2 0.2]);
+set(gca, 'XScale', 'log');
+yline(0, 'r--', 'LineWidth', 1.6);
+xlabel('주파수 [rad/s]'); ylabel('|S + T|  [dB]'); ylim([-1 1]); xlim([0.1 1e5]);
+text(1, 0.45, 'S + T = 1  (0 dB) — 모든 주파수에서', 'FontSize', 11, 'FontWeight', 'bold');
+title('더하면 언제나 1 — 이것이 설계의 한계다');
+end
+
+
+function fig_w11a_lst()
+% DC 모터 예제 : L, S, T 를 한 그림에
+s = tf('s');
+P = 0.1/(0.5*s + 2);  C = (500*s + 2000)/s;
+L = P*C;  S = 1/(1+L);  T = L/(1+L);
+w = logspace(-1, 5, 1500);
+mL = 20*log10(squeeze(abs(freqresp(L, w))));
+mS = 20*log10(squeeze(abs(freqresp(S, w))));
+mT = 20*log10(squeeze(abs(freqresp(T, w))));
+[~, Pm, ~, wc] = margin(L);
+
+figure('Position', [60 60 980 500]);
+tiledlayout(2, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+semilogx(w, mL, 'LineWidth', 2.6, 'Color', [0 0.25 0.6]);
+semilogx(w, mS, 'LineWidth', 2, 'Color', [0 0.45 0.74]);
+semilogx(w, mT, 'LineWidth', 2, 'Color', [0.85 0.33 0.10]);
+set(gca, 'XScale', 'log'); yline(0, 'k--');
+plot(wc, 0, 'ko', 'MarkerFaceColor', [1 0.85 0.2], 'MarkerSize', 9);
+ylabel('크기 [dB]'); ylim([-80 80]); xlim([0.1 1e5]);
+legend({'|L| = |PC|', '|S|', '|T|'}, 'Location', 'southwest');
+title(sprintf('\\omega_c = %.0f rad/s 에서 셋이 만난다', wc));
+
+nexttile; hold on; grid on;
+semilogx(w, mS, 'LineWidth', 2.6, 'Color', [0 0.45 0.74]);
+semilogx(w, -mL, '--', 'LineWidth', 2, 'Color', [0.3 0.75 0.93]);
+semilogx(w, mT, 'LineWidth', 2.6, 'Color', [0.85 0.33 0.10]);
+semilogx(w, mL, '--', 'LineWidth', 2, 'Color', [0.95 0.6 0.4]);
+set(gca, 'XScale', 'log'); yline(0, 'k--');
+ylabel('크기 [dB]'); ylim([-80 80]); xlim([0.1 1e5]);
+legend({'|S| 실제', '1/|L| (저주파 근사)', '|T| 실제', '|L| (고주파 근사)'}, ...
+       'Location', 'southwest', 'FontSize', 8);
+title('근사식이 맞는 구간 — 저주파는 1/|L|, 고주파는 |L|');
+
+nexttile; hold on; grid on;
+t = (0:0.0005:0.1)';
+plot(t, step(T, t), 'LineWidth', 2.4, 'Color', [0.85 0.33 0.10]);
+plot(t, step(S, t), 'LineWidth', 2.4, 'Color', [0 0.45 0.74]);
+yline(1, 'k--'); yline(0, 'k:');
+xlabel('시간 [s]'); ylabel('응답');
+legend({'T : 지령 -> 출력', 'S : 지령 -> 오차'}, 'Location', 'east');
+title('시간영역에서 — 오차는 0 으로, 출력은 1 로');
+
+nexttile; hold on; grid on;
+ph = unwrap(squeeze(angle(freqresp(L, w))))*180/pi;
+semilogx(w, ph, 'LineWidth', 2.6, 'Color', [0 0.25 0.6]);
+set(gca, 'XScale', 'log'); yline(-180, 'r--', 'LineWidth', 1.4);
+xline(wc, ':', 'Color', [0.4 0.4 0.4], 'LineWidth', 1.6);
+xlabel('주파수 [rad/s]'); ylabel('위상 [도]'); ylim([-200 -60]); xlim([0.1 1e5]);
+title(sprintf('위상 — \\omega_c 에서 -180도까지 %.0f도 남았다 (PM)', Pm));
+end
+
+
+function fig_w11a_wc_wbw()
+% 교차주파수(개루프 0 dB) 와 대역폭(폐루프 -3 dB) 은 다른 것인데 거의 같다
+s = tf('s');
+zlist = [0.2 0.5 0.9];
+w = logspace(-1, 1, 1200);
+
+figure('Position', [60 60 980 490]);
+tiledlayout(2, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+L = 1/(s*(s+2*0.5));  T = feedback(L, 1);
+semilogx(w, 20*log10(squeeze(abs(freqresp(L, w)))), 'LineWidth', 2.6, 'Color', [0 0.25 0.6]);
+semilogx(w, 20*log10(squeeze(abs(freqresp(T, w)))), 'LineWidth', 2.6, 'Color', [0.85 0.33 0.10]);
+set(gca, 'XScale', 'log');
+yline(0, 'k--'); yline(-3, 'r:', 'LineWidth', 1.6);
+[~, ~, ~, wc] = margin(L); wb = bandwidth(T);
+plot(wc, 0, 'ko', 'MarkerFaceColor', [1 0.85 0.2], 'MarkerSize', 9);
+plot(wb, -3, 'ks', 'MarkerFaceColor', [0.95 0.5 0.3], 'MarkerSize', 9);
+xlabel('\omega / \omega_n'); ylabel('크기 [dB]'); ylim([-40 30]);
+legend({'|L| 개루프', '|T| 폐루프'}, 'Location', 'southwest');
+title(sprintf('\\zeta = 0.5 : \\omega_c = %.2f (0 dB),  \\omega_b = %.2f (-3 dB)', wc, wb));
+
+nexttile; hold on; grid on;
+zz = linspace(0.05, 1.2, 160);
+wcf = sqrt(sqrt(1+4*zz.^4) - 2*zz.^2);
+wbf = sqrt(1 - 2*zz.^2 + sqrt(2 - 4*zz.^2 + 4*zz.^4));
+plot(zz, wcf, 'LineWidth', 2.6, 'Color', [0 0.25 0.6]);
+plot(zz, wbf, 'LineWidth', 2.6, 'Color', [0.85 0.33 0.10]);
+zm = [0.1 0.3 0.5 0.7071 0.9]; wcm = zeros(size(zm)); wbm = zeros(size(zm));
+for k = 1:numel(zm)
+    Lk = 1/(s*(s+2*zm(k)));
+    [~, ~, ~, wcm(k)] = margin(Lk);  wbm(k) = bandwidth(feedback(Lk, 1));
+end
+plot(zm, wcm, 'ko', 'MarkerFaceColor', 'w', 'MarkerSize', 7);
+plot(zm, wbm, 'ks', 'MarkerFaceColor', 'w', 'MarkerSize', 7);
+xlabel('감쇠비 \zeta'); ylabel('\omega / \omega_n'); ylim([0 1.8]);
+legend({'\omega_c 식', '\omega_b 식', 'margin 실측', 'bandwidth 실측'}, 'Location', 'southwest', 'FontSize', 8);
+title('손으로 유도한 두 식이 MATLAB 실측과 겹친다');
+
+nexttile; hold on; grid on;
+plot(zz, wbf./wcf, 'LineWidth', 2.8, 'Color', [0.3 0.1 0.5]);
+yline(1, 'k--'); yline(1.6, 'r:', 'LineWidth', 1.6);
+xlabel('감쇠비 \zeta'); ylabel('\omega_b / \omega_c'); ylim([1 1.8]);
+text(0.55, 1.68, '항상 1 과 2 사이 — "거의 같다" 고 말하는 근거', 'FontSize', 10);
+title('비율은 1.3 ~ 1.62 — 자리만 보려면 \omega_c 로 충분하다');
+
+nexttile; hold on; grid on;
+t = (0:0.02:25)';
+col = [0 0.45 0.74; 0.47 0.67 0.19; 0.85 0.33 0.10];
+for k = 1:numel(zlist)
+    Lk = 1/(s*(s+2*zlist(k)));  Tk = feedback(Lk, 1);
+    wbk = bandwidth(Tk);
+    plot(t, step(Tk, t), 'LineWidth', 2.2, 'Color', col(k,:), ...
+         'DisplayName', sprintf('\\zeta = %.1f,  \\omega_b = %.2f', zlist(k), wbk));
+end
+yline(1, 'k--', 'HandleVisibility', 'off');
+xlabel('\omega_n t'); ylabel('출력'); legend('Location', 'southeast');
+title('대역폭이 넓으면 빠르다 — 대역폭은 빠르기의 주파수영역 표현');
+end
+
+
+function fig_w11a_pm_zeta()
+% 위상여유와 감쇠비 — 공식은 없지만 규칙은 있다
+s = tf('s');
+zz = linspace(0.05, 1.2, 240);
+pm = zeros(size(zz));  mr = nan(size(zz));
+for k = 1:numel(zz)
+    Lk = 1/(s*(s+2*zz(k)));
+    [~, pm(k)] = margin(Lk);
+    if zz(k) < 1/sqrt(2)
+        mr(k) = 20*log10(1/(2*zz(k)*sqrt(1-zz(k)^2)));
+    end
+end
+
+figure('Position', [60 60 980 470]);
+tiledlayout(2, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+plot(pm, zz, 'LineWidth', 3, 'Color', [0 0.25 0.6]);
+plot(pm, pm/100, '--', 'LineWidth', 2.2, 'Color', [0.85 0.33 0.10]);
+xlabel('위상여유 PM [도]'); ylabel('감쇠비 \zeta'); xlim([0 80]); ylim([0 1.2]);
+legend({'실제 (수치로 계산)', '어림셈  \zeta \approx PM/100'}, 'Location', 'northwest');
+title('거의 직선이다 — 그래서 어림셈이 통한다');
+
+nexttile; hold on; grid on;
+plot(pm, (pm/100 - zz), 'LineWidth', 2.6, 'Color', [0.6 0.1 0.1]);
+yline(0, 'k--'); yline([-0.05 0.05], ':', 'Color', [0.4 0.4 0.4]);
+xlabel('위상여유 PM [도]'); ylabel('어림셈 - 실제'); xlim([0 80]);
+title('오차는 \pm 0.05 안 — 설계 1단계 값으로는 충분');
+
+nexttile; hold on; grid on;
+plot(zz, mr, 'LineWidth', 2.8, 'Color', [0.47 0.18 0.55]);
+xline(1/sqrt(2), 'r--', 'LineWidth', 1.6);
+xlabel('감쇠비 \zeta'); ylabel('공명첨두 M_r  [dB]'); xlim([0 1.2]); ylim([0 20]);
+text(0.73, 15, '\zeta > 0.707 이면', 'FontSize', 10);
+text(0.73, 13.2, '봉우리가 아예 없다', 'FontSize', 10);
+title('공명첨두 M_r — \zeta < 0.707 일 때만 존재한다');
+
+nexttile; hold on; grid on;
+zos = linspace(0.05, 1, 200);
+plot(zos*100, 100*exp(-pi*zos./sqrt(1-zos.^2)), 'LineWidth', 2.8, 'Color', [0.2 0.5 0.2]);
+xlabel('위상여유 PM [도]  (\zeta \approx PM/100 으로 환산)'); ylabel('오버슈트 %OS');
+xlim([0 100]); ylim([0 80]);
+for pmk = [30 45 60]
+    zk = pmk/100;  osk = 100*exp(-pi*zk/sqrt(1-zk^2));
+    plot(pmk, osk, 'ko', 'MarkerFaceColor', [1 0.85 0.2], 'MarkerSize', 8);
+    text(pmk+2, osk+4, sprintf('PM %d도 -> %.0f%%', pmk, osk), 'FontSize', 9);
+end
+title('PM 을 정하면 오버슈트가 정해진다 — 사양을 번역하는 길');
+end
+
+
+function fig_w11a_dist()
+% 외란 — 왜 되먹임인가에 대한 답
+s = tf('s');
+P = 0.1/(0.5*s + 2);  C = (500*s + 2000)/s;
+L = P*C;  S = 1/(1+L);
+w = logspace(-2, 4, 1500);
+
+figure('Position', [60 60 980 500]);
+tiledlayout(2, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+semilogx(w, zeros(size(w)), 'LineWidth', 2.4, 'Color', [0.6 0.6 0.6]);
+semilogx(w, 20*log10(squeeze(abs(freqresp(S, w)))), 'LineWidth', 2.8, 'Color', [0 0.45 0.74]);
+set(gca, 'XScale', 'log'); yline(0, 'k--');
+xlabel('주파수 [rad/s]'); ylabel('|y / d_o|  [dB]'); ylim([-80 10]);
+legend({'개루프 : 1 (그대로 나온다)', '폐루프 : |S|'}, 'Location', 'southeast');
+title('출력외란 — 폐루프는 저주파에서 완전히 눌러 버린다');
+
+nexttile; hold on; grid on;
+semilogx(w, 20*log10(squeeze(abs(freqresp(P, w)))), 'LineWidth', 2.4, 'Color', [0.6 0.6 0.6]);
+semilogx(w, 20*log10(squeeze(abs(freqresp(P*S, w)))), 'LineWidth', 2.8, 'Color', [0.85 0.33 0.10]);
+set(gca, 'XScale', 'log');
+xlabel('주파수 [rad/s]'); ylabel('|y / d_i|  [dB]'); ylim([-110 -10]);
+legend({'개루프 : |P| — 분모에 1+PC 가 없다', '폐루프 : |P S|'}, 'Location', 'southwest');
+title('입력외란 — 개루프는 손쓸 방법이 아예 없다');
+
+nexttile; hold on; grid on;
+t = (0:0.001:1.2)';
+d = ones(size(t));
+plot(t, lsim(P, d, t), 'LineWidth', 2.4, 'Color', [0.6 0.6 0.6]);
+plot(t, lsim(P*S, d, t), 'LineWidth', 2.8, 'Color', [0.85 0.33 0.10]);
+yline(0, 'k--');
+xlabel('시간 [s]'); ylabel('출력 y');
+legend({'개루프 — 오차가 그대로 남는다', '폐루프 — 되돌아온다'}, 'Location', 'east');
+title('계단 입력외란 : 되먹임만이 0 으로 되돌린다');
+
+nexttile; hold on; grid on;
+t2 = (0:0.002:4)';
+d2 = sin(2*pi*t2);
+plot(t2, lsim(P, d2, t2), 'LineWidth', 2.2, 'Color', [0.6 0.6 0.6]);
+plot(t2, lsim(P*S, d2, t2), 'LineWidth', 2.4, 'Color', [0.85 0.33 0.10]);
+yline(0, 'k--');
+att = 20*log10(abs(freqresp(P, 2*pi))) - 20*log10(abs(freqresp(P*S, 2*pi)));
+xlabel('시간 [s]'); ylabel('출력 y');
+legend({'개루프', '폐루프'}, 'Location', 'northeast');
+title(sprintf('2\\pi rad/s 정현 외란 : 되먹임이 %.1f dB 만큼 줄인다', att));
+end
+
+
+function fig_w11a_noise()
+% 되먹임의 대가 — 센서 잡음은 T 를 타고 그대로 들어온다
+s = tf('s');
+P = 0.1/(0.5*s + 2);
+w = logspace(-1, 5, 1500);
+
+figure('Position', [60 60 980 380]);
+tiledlayout(1, 3, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+C = (500*s + 2000)/s;  L = P*C;  T = L/(1+L);
+semilogx(w, 20*log10(squeeze(abs(freqresp(T, w)))), 'LineWidth', 2.8, 'Color', [0.85 0.33 0.10]);
+set(gca, 'XScale', 'log'); yline(0, 'k--'); yline(-3, 'r:');
+xlabel('주파수 [rad/s]'); ylabel('크기 [dB]'); ylim([-60 10]);
+text(0.15, -12, {'저주파 : |T| = 1', '잡음이 100 % 통과'}, 'FontSize', 9.5);
+title({'지령 추종과 잡음 통과가', '같은 곡선 |T| 다'});
+
+nexttile; hold on; grid on;
+t = (0:0.0005:0.3)';
+rng(0);
+n = 0.05*randn(size(t));
+yc = step(T, t) + lsim(-T, n, t);
+plot(t, step(T, t), 'LineWidth', 2.4, 'Color', [0.2 0.2 0.2]);
+plot(t, yc, 'LineWidth', 1.2, 'Color', [0.85 0.33 0.10]);
+yline(1, 'k--');
+xlabel('시간 [s]'); ylabel('출력');
+legend({'잡음 없을 때', '센서 잡음이 있을 때'}, 'Location', 'southeast');
+title({'출력이 떨린다 —', '잡음에 -T 가 곱해져 나온다'});
+
+nexttile; hold on; grid on;
+for Kc = [50 500]
+    Cc = (Kc*s + 4*Kc)/s;  Lc = P*Cc;  Tc = Lc/(1+Lc);
+    yn = lsim(-Tc, n, t);
+    plot(t, step(Tc, t) + yn, 'LineWidth', 1.6, ...
+         'DisplayName', sprintf('\\omega_b = %.0f rad/s', bandwidth(Tc)));
+end
+yline(1, 'k--', 'HandleVisibility', 'off');
+xlabel('시간 [s]'); ylabel('출력'); legend('Location', 'southeast');
+title({'대역폭을 좁히면 잡음은 줄지만', '응답이 느려진다 — 맞바꿈'});
+end
+
+
+% ======================================================================
+%  11B 주차 : controlSystemDesigner 로 설계하기
+% ======================================================================
+
+function fig_w11b_shapes()
+% 외울 것은 이 다섯 개의 모양뿐이다 — 오늘의 한 장
+s = tf('s');
+w = logspace(-2, 3, 800);
+Td = 0.2;  Ti = 5;  al = 0.1;  T1 = 0.5;
+comps = {tf(1, 1), ...
+         (1 + 1/(Ti*s)), ...
+         (1 + Td*s), ...
+         (1 + T1*s)/(1 + al*T1*s), ...
+         (1 + T1*s)/(1 + T1*s/al)};
+names = {'P  (K 만)', 'PI', 'PD', 'Lead', 'Lag'};
+cols  = [0.35 0.35 0.35; 0 0.45 0.74; 0.47 0.67 0.19; 0.85 0.33 0.10; 0.49 0.18 0.56];
+note  = {'모양을 안 바꾼다', '저주파를 올린다', '고주파를 올린다', '위상을 올린다', '고주파를 내린다'};
+
+figure('Position', [40 40 1150 420]);
+tiledlayout(2, 5, 'TileSpacing', 'compact', 'Padding', 'compact');
+
+for k = 1:5
+    nexttile(k); hold on; grid on;
+    semilogx(w, 20*log10(squeeze(abs(freqresp(comps{k}, w)))), 'LineWidth', 2.6, 'Color', cols(k,:));
+    set(gca, 'XScale', 'log'); yline(0, 'k--');
+    ylim([-30 35]); xlim([1e-2 1e3]);
+    if k == 1, ylabel('크기 [dB]'); end
+    title({names{k}, note{k}}, 'FontSize', 10);
+end
+for k = 1:5
+    nexttile(5+k); hold on; grid on;
+    semilogx(w, unwrap(squeeze(angle(freqresp(comps{k}, w))))*180/pi, ...
+             'LineWidth', 2.6, 'Color', cols(k,:));
+    set(gca, 'XScale', 'log'); yline(0, 'k--');
+    ylim([-95 95]); xlim([1e-2 1e3]);
+    if k == 1, ylabel('위상 [도]'); end
+    xlabel('\omega [rad/s]');
+end
+end
+
+
+function fig_w11b_app_tour()
+% controlSystemDesigner 화면을 어디부터 보는가
+figure('Position', [60 60 940 430]);
+axes('Position', [0 0 1 1]); axis off; hold on;
+xlim([0 100]); ylim([0 100]);
+
+rectangle('Position', [2 84 96 13], 'FaceColor', [0.90 0.94 0.99], 'EdgeColor', [0.3 0.4 0.6], 'LineWidth', 1.4);
+text(50, 90.5, '리본 — [Edit Architecture] [New Plot] [Design Requirements] [Store Design]', ...
+     'HorizontalAlignment', 'center', 'FontSize', 10.5, 'FontWeight', 'bold');
+
+panes = {
+ [2  44 46 37], [0.98 0.98 0.92], '보드 선도 (개루프 L = PC)', ...
+   {'- 여기를 끌면 설계가 바뀐다', '- 곡선 몸통을 끌면 K', '- 동그라미(영점) x(극점) 를 끌면 위상', '- 0 dB 교차점에서 PM 을 읽는다'};
+ [52 44 46 37], [0.93 0.98 0.93], '계단응답 (폐루프 r -> y)', ...
+   {'- 결과를 보는 창', '- 축을 0~10 s, 0~1.5 로 고정해 둘 것', '- 자동 스케일을 끄지 않으면', '  이득을 바꿀 때마다 축이 뛴다'};
+ [2  5  46 34], [0.99 0.94 0.92], '근궤적 (s 평면)', ...
+   {'- 7주차에서 쓴 그림', '- 같은 설계를 다른 눈으로 본다', '- 극점이 사양 영역에 들어왔는지'};
+ [52 5  46 34], [0.94 0.93 0.99], '제어입력 (r -> u)', ...
+   {'- [New Plot] 에서 직접 추가한다', '- 이 창이 없으면 설계가 아니다', '- 모터가 낼 수 없는 전압이면', '  나머지 숫자는 의미가 없다'}};
+
+for k = 1:size(panes, 1)
+    pos = panes{k,1};
+    rectangle('Position', pos, 'FaceColor', panes{k,2}, 'EdgeColor', [0.35 0.35 0.35], 'LineWidth', 1.3);
+    text(pos(1)+2, pos(2)+pos(4)-3.2, panes{k,3}, 'FontSize', 11, 'FontWeight', 'bold');
+    txt = panes{k,4};
+    for q = 1:numel(txt)
+        text(pos(1)+2.5, pos(2)+pos(4)-8.5-3.6*(q-1), txt{q}, 'FontSize', 9.5);
+    end
+end
+text(50, 1.5, '처음 켜면 창이 둘뿐이다. 나머지 둘은 [New Plot] 으로 직접 추가한다.', ...
+     'HorizontalAlignment', 'center', 'FontSize', 10, 'FontAngle', 'italic');
+end
+
+
+function fig_w11b_type_ramp()
+% 시스템 형과 정상상태오차 — 램프 입력으로 본다
+s = tf('s');
+t = (0:0.01:10)';
+r = t;
+G = {10/((s+1)*(s+5)), 10/(s*(s+1)), 10/(s^2*(s+1))};
+nm = {'형 0 : 적분기 없음', '형 1 : 적분기 하나', '형 2 : 적분기 둘'};
+col = [0.85 0.33 0.10; 0 0.45 0.74; 0.47 0.67 0.19];
+
+figure('Position', [60 60 980 390]);
+tiledlayout(1, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+plot(t, r, 'k--', 'LineWidth', 1.8, 'DisplayName', '지령 r = t');
+for k = 1:3
+    Tk = feedback(G{k}, 1);
+    plot(t, lsim(Tk, r, t), 'LineWidth', 2.4, 'Color', col(k,:), 'DisplayName', nm{k});
+end
+xlabel('시간 [s]'); ylabel('출력'); ylim([0 10]);
+legend('Location', 'southeast', 'FontSize', 9);
+title('램프 지령을 따라가는가');
+
+nexttile; hold on; grid on;
+for k = 1:3
+    Sk = feedback(1, G{k});
+    plot(t, lsim(Sk, r, t), 'LineWidth', 2.4, 'Color', col(k,:), 'DisplayName', nm{k});
+end
+yline(0, 'k--', 'HandleVisibility', 'off');
+xlabel('시간 [s]'); ylabel('오차 e = r - y'); ylim([-0.5 4]);
+legend('Location', 'northwest', 'FontSize', 9);
+text(3.5, 3.2, '형 0 : 오차가 끝없이 커진다', 'FontSize', 9.5, 'Color', col(1,:));
+text(3.5, 1.3, '형 1 : 일정한 값으로 수렴 (= 1/K_v)', 'FontSize', 9.5, 'Color', col(2,:));
+text(3.5, 0.45, '형 2 : 0 으로 간다', 'FontSize', 9.5, 'Color', col(3,:));
+title('오차만 따로 그리면 세 가지가 확실히 갈린다');
+end
+
+
+function fig_w11b_pd_vs_lead()
+% PD 와 Lead — 위상은 똑같이 올리는데 대가가 다르다
+s = tf('s');
+G = 100/(s*(s+1));
+Td = 0.1;
+Cpd = 1 + Td*s;
+phi = 50;  al = (1-sind(phi))/(1+sind(phi));
+wmax = 16.7;  T1 = 1/(wmax*sqrt(al));
+Clead = (1 + T1*s)/(1 + al*T1*s);
+w = logspace(-1, 4, 1200);
+
+figure('Position', [60 60 980 500]);
+tiledlayout(2, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+semilogx(w, 20*log10(squeeze(abs(freqresp(Cpd, w)))), 'LineWidth', 2.6, 'Color', [0.47 0.67 0.19]);
+semilogx(w, 20*log10(squeeze(abs(freqresp(Clead, w)))), 'LineWidth', 2.6, 'Color', [0.85 0.33 0.10]);
+set(gca, 'XScale', 'log'); yline(0, 'k--');
+yline(20*log10(1/al), ':', 'Color', [0.6 0.2 0.1], 'LineWidth', 1.6);
+ylabel('|C| [dB]'); ylim([-5 60]);
+legend({'PD — 끝없이 올라간다', sprintf('Lead — %.0f dB 에서 멈춘다', 20*log10(1/al))}, ...
+       'Location', 'northwest');
+title('제어기 자신의 크기 — 고주파에서 갈린다');
+
+nexttile; hold on; grid on;
+semilogx(w, unwrap(squeeze(angle(freqresp(Cpd, w))))*180/pi, 'LineWidth', 2.6, 'Color', [0.47 0.67 0.19]);
+semilogx(w, unwrap(squeeze(angle(freqresp(Clead, w))))*180/pi, 'LineWidth', 2.6, 'Color', [0.85 0.33 0.10]);
+set(gca, 'XScale', 'log'); yline(0, 'k--');
+xline(wmax, ':', 'Color', [0.4 0.4 0.4], 'LineWidth', 1.6);
+ylabel('위상 [도]'); ylim([0 95]);
+text(wmax*1.3, 20, sprintf('\\omega_{max} = %.1f', wmax), 'FontSize', 9.5);
+title(sprintf('위상 — Lead 는 \\omega_{max} 에서 %.0f도가 최대', phi));
+
+nexttile; hold on; grid on;
+[~, p0] = margin(G);  [~, p1] = margin(Cpd*G);  [~, p2] = margin(Clead*G);
+t = (0:0.002:1.5)';
+plot(t, step(feedback(G, 1), t), 'LineWidth', 2, 'Color', [0.5 0.5 0.5]);
+plot(t, step(feedback(Cpd*G, 1), t), 'LineWidth', 2.4, 'Color', [0.47 0.67 0.19]);
+plot(t, step(feedback(Clead*G, 1), t), 'LineWidth', 2.4, 'Color', [0.85 0.33 0.10]);
+yline(1, 'k--');
+xlabel('시간 [s]'); ylabel('출력');
+legend({sprintf('보상 전 PM %.1f도', p0), sprintf('PD PM %.1f도', p1), ...
+        sprintf('Lead PM %.1f도', p2)}, 'Location', 'southeast', 'FontSize', 9);
+title('응답은 둘 다 좋아진다');
+
+nexttile; hold on; grid on;
+% PD 는 r->u 가 비적정(분자 차수 > 분모 차수)이라 step 으로 못 그린다.
+% 그래서 미분항에 극점을 하나 붙여(N 배 빠른 극점) 실제로 구현해 본다.
+umax = zeros(1,3);  Nlist = [10 50 200];
+cg = [0.75 0.88 0.55; 0.60 0.80 0.35; 0.30 0.55 0.10];
+for q = 1:3
+    Cq = (1 + Td*s)/(1 + Td*s/Nlist(q));
+    uq = step(Cq*feedback(1, Cq*G), t);
+    umax(q) = max(abs(uq));
+    plot(t, uq, 'LineWidth', 1.8, 'Color', cg(q,:), ...
+         'DisplayName', sprintf('PD (N = %d) : 최대 %.0f', Nlist(q), umax(q)));
+end
+ulead = step(Clead*feedback(1, Clead*G), t);
+plot(t, ulead, 'LineWidth', 2.6, 'Color', [0.85 0.33 0.10], ...
+     'DisplayName', sprintf('Lead : 최대 %.1f', max(abs(ulead))));
+xlabel('시간 [s]'); ylabel('제어입력 u'); xlim([0 0.1]);
+legend('Location', 'northeast', 'FontSize', 8.5);
+title('대가는 여기서 — PD 는 N 을 키울수록 u 가 끝없이 커진다');
+end
+
+
+function fig_w11b_pi_vs_lag()
+% PI 와 Lag — 둘 다 저주파를 올리지만 위상여유의 대가가 다르다
+s = tf('s');
+G = 1/((s+1)*(s/5+1));
+K = 10;
+Cpi  = K*(1 + 0.6/s);
+bet  = 10;  Tl = 2;
+Clag = K*(1 + Tl*s)/(1 + bet*Tl*s);
+w = logspace(-3, 3, 1200);
+
+figure('Position', [60 60 980 500]);
+tiledlayout(2, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+semilogx(w, 20*log10(squeeze(abs(freqresp(Cpi/K, w)))), 'LineWidth', 2.6, 'Color', [0 0.45 0.74]);
+semilogx(w, 20*log10(squeeze(abs(freqresp(Clag/K, w)))), 'LineWidth', 2.6, 'Color', [0.49 0.18 0.56]);
+set(gca, 'XScale', 'log'); yline(0, 'k--');
+ylabel('|C| / K  [dB]'); ylim([-5 50]);
+legend({'PI — DC 에서 무한', sprintf('Lag — %.0f dB 에서 멈춘다', 20*log10(bet))}, ...
+       'Location', 'northeast');
+title('저주파 이득 — PI 만 "무한" 을 만든다');
+
+nexttile; hold on; grid on;
+semilogx(w, unwrap(squeeze(angle(freqresp(Cpi, w))))*180/pi, 'LineWidth', 2.6, 'Color', [0 0.45 0.74]);
+semilogx(w, unwrap(squeeze(angle(freqresp(Clag, w))))*180/pi, 'LineWidth', 2.6, 'Color', [0.49 0.18 0.56]);
+set(gca, 'XScale', 'log'); yline(0, 'k--');
+ylabel('위상 [도]'); ylim([-95 5]);
+legend({'PI', 'Lag'}, 'Location', 'southeast');
+title('둘 다 위상을 깎는다 — 그래서 \omega_c 에서 멀리 둔다');
+
+nexttile; hold on; grid on;
+[~, p0] = margin(K*G); [~, p1] = margin(Cpi*G); [~, p2] = margin(Clag*G);
+t = (0:0.01:8)';
+plot(t, step(feedback(K*G, 1), t), 'LineWidth', 2, 'Color', [0.5 0.5 0.5]);
+plot(t, step(feedback(Cpi*G, 1), t), 'LineWidth', 2.4, 'Color', [0 0.45 0.74]);
+plot(t, step(feedback(Clag*G, 1), t), 'LineWidth', 2.4, 'Color', [0.49 0.18 0.56]);
+yline(1, 'k--');
+xlabel('시간 [s]'); ylabel('출력');
+legend({sprintf('K 만 : PM %.0f도, ess %.3f', p0, 1-dcgain(feedback(K*G,1))), ...
+        sprintf('PI : PM %.0f도, ess 0', p1), ...
+        sprintf('Lag : PM %.0f도', p2)}, 'Location', 'southeast', 'FontSize', 8.5);
+title('PI 는 오차를 0 으로 만들지만 위상여유를 내놓는다');
+
+nexttile; hold on; grid on;
+semilogx(w, 20*log10(squeeze(abs(freqresp(K*G, w)))), 'LineWidth', 2, 'Color', [0.5 0.5 0.5]);
+semilogx(w, 20*log10(squeeze(abs(freqresp(Clag*G, w)))), 'LineWidth', 2.6, 'Color', [0.49 0.18 0.56]);
+set(gca, 'XScale', 'log'); yline(0, 'k--');
+[~, ~, ~, wc0] = margin(K*G);  [~, ~, ~, wc2] = margin(Clag*G);
+xline(wc0, ':', 'Color', [0.4 0.4 0.4], 'LineWidth', 1.4);
+xline(wc2, ':', 'Color', [0.49 0.18 0.56], 'LineWidth', 1.8);
+xlabel('주파수 [rad/s]'); ylabel('|L| [dB]'); ylim([-40 50]);
+text(wc2*0.1, 30, sprintf('\\omega_c : %.1f -> %.1f', wc0, wc2), 'FontSize', 10);
+title('Lag 의 원리 — 위상을 올리는 게 아니라 \omega_c 를 왼쪽으로');
+end
+
+
+function fig_w11b_capstone()
+% 종합 설계 다섯 단계 — 사양을 하나씩 채워 간다
+s = tf('s');
+P = 1000/((s+1)*(s+8)*(s+20));
+K = 5;
+al = (1 - sind(50))/(1 + sind(50));
+C1 = (1 + 0.1306*s)/(1 + al*0.1306*s);
+C2 = (1 + 0.0753*s)/(1 + al*0.0753*s);
+Clag = (1 + 0.3878*s)/(1 + 1.49*0.3878*s);
+F = 1/(s/200 + 1);
+stage = {K*P, K*C1*P, K*C1*C2*P, K*C1*C2*Clag*P, K*C1*C2*Clag*F*P};
+nm = {'1. K', '2. +Lead', '3. +Lead', '4. +Lag', '5. +LPF'};
+w = logspace(-1, 4, 1500);
+cols = [0.60 0.60 0.60; 0.95 0.75 0.20; 0.47 0.67 0.19; 0 0.45 0.74; 0.85 0.33 0.10];
+
+figure('Position', [60 60 980 510]);
+tiledlayout(2, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+for k = 1:5
+    semilogx(w, 20*log10(squeeze(abs(freqresp(stage{k}, w)))), 'LineWidth', 2, ...
+             'Color', cols(k,:), 'DisplayName', nm{k});
+end
+set(gca, 'XScale', 'log'); yline(0, 'k--', 'HandleVisibility', 'off');
+ylabel('|L| [dB]'); ylim([-80 60]);
+legend('Location', 'southwest', 'FontSize', 8);
+title('크기 — 저주파는 건드리지 않고 중·고주파만 고친다');
+
+nexttile; hold on; grid on;
+for k = 1:5
+    semilogx(w, unwrap(squeeze(angle(freqresp(stage{k}, w))))*180/pi, ...
+             'LineWidth', 2, 'Color', cols(k,:));
+end
+set(gca, 'XScale', 'log'); yline(-180, 'r--', 'LineWidth', 1.4);
+ylabel('위상 [도]'); ylim([-280 -60]);
+title('위상 — Lead 두 단이 -180도 선에서 멀어지게 한다');
+
+nexttile; hold on; grid on;
+pmv = zeros(1,5); gmv = zeros(1,5);
+for k = 1:5
+    [g, p] = margin(stage{k});  gmv(k) = 20*log10(g);  pmv(k) = p;
+end
+b = bar([pmv; gmv]', 'grouped');
+b(1).FaceColor = [0 0.45 0.74];  b(2).FaceColor = [0.85 0.33 0.10];
+yline(50, '--', 'Color', [0 0.3 0.6], 'LineWidth', 1.6);
+yline(6, '--', 'Color', [0.6 0.2 0.1], 'LineWidth', 1.6);
+set(gca, 'XTickLabel', nm); ylabel('PM [도] / GM [dB]'); ylim([-5 70]);
+legend({'PM', 'GM'}, 'Location', 'northwest');
+title('사양선(PM 50도, GM 6 dB)을 단계마다 확인한다');
+
+nexttile; hold on; grid on;
+t = (0:0.001:0.6)';
+for k = [1 3 5]
+    plot(t, step(feedback(stage{k}, 1), t), 'LineWidth', 2.4, 'Color', cols(k,:), ...
+         'DisplayName', nm{k});
+end
+yline(1, 'k--', 'HandleVisibility', 'off');
+xlabel('시간 [s]'); ylabel('출력'); ylim([0 2]);
+legend('Location', 'southeast');
+title('같은 과정을 시간영역에서 보면');
+end
+
+
+function fig_w11b_delay()
+% 공칭 플랜트로 다 맞춰 놓고 실제 플랜트로 확인하면
+s = tf('s');
+P = 1000/((s+1)*(s+8)*(s+20));
+K = 5;  al = (1 - sind(50))/(1 + sind(50));
+C = K*(1+0.1306*s)/(1+al*0.1306*s)*(1+0.0753*s)/(1+al*0.0753*s) ...
+    *(1+0.3878*s)/(1+1.49*0.3878*s)*1/(s/200+1);
+tau = 0.004;
+Pact = P*exp(-tau*s);
+w = logspace(0, 4, 1200);
+
+figure('Position', [60 60 980 390]);
+tiledlayout(1, 3, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+semilogx(w, zeros(size(w)), 'LineWidth', 2.4, 'Color', [0 0.45 0.74]);
+set(gca, 'XScale', 'log');
+ylabel('|e^{-s\tau}|  [dB]'); ylim([-1 1]);
+xlabel('주파수 [rad/s]');
+title({'수송지연 : 크기는 언제나 1', '— 보드 크기선도에 안 보인다'});
+
+nexttile; hold on; grid on;
+semilogx(w, -tau*w*180/pi, 'LineWidth', 2.8, 'Color', [0.85 0.33 0.10]);
+set(gca, 'XScale', 'log'); yline(-180, 'r--');
+[~, ~, ~, wc] = margin(C*P);
+xline(wc, ':', 'Color', [0.4 0.4 0.4], 'LineWidth', 1.6);
+xlabel('주파수 [rad/s]'); ylabel('위상 [도]'); ylim([-250 10]);
+text(wc*1.2, -40, sprintf('\\omega_c = %.0f 에서\n-%.1f도', wc, tau*wc*180/pi), 'FontSize', 9.5);
+title({'위상은 주파수에 비례해 끝없이 깎인다', '— 고주파 설계일수록 치명적'});
+
+nexttile; hold on; grid on;
+[g1, p1] = margin(C*P);  [g2, p2] = margin(C*Pact);
+t = (0:0.001:0.6)';
+plot(t, step(feedback(C*P, 1), t), 'LineWidth', 2.4, 'Color', [0 0.45 0.74]);
+plot(t, step(feedback(C*Pact, 1), t), 'LineWidth', 2.4, 'Color', [0.85 0.33 0.10]);
+yline(1, 'k--');
+xlabel('시간 [s]'); ylabel('출력');
+legend({sprintf('공칭 : PM %.1f도, GM %.1f dB', p1, 20*log10(g1)), ...
+        sprintf('실제 : PM %.1f도, GM %.1f dB', p2, 20*log10(g2))}, ...
+       'Location', 'southeast', 'FontSize', 9);
+title({sprintf('지연 %.0f ms 가 위상여유 %.1f도를 먹는다', tau*1000, p1-p2), ...
+       '— 여유를 미리 남겨 두는 이유'});
 end
