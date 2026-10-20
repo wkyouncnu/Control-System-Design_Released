@@ -727,7 +727,9 @@ magKG = 20*log10(squeeze(abs(freqresp(100*G1, wgrid))));
 table(alpha_l, boost, wgrid(iw), ...
     'VariableNames', {'alpha', '올라가는_dB', 'wmax_찾은값'})
 %%
-% 읽는 법 — $\omega_{max} = 16.7$ rad/s 가 나옵니다. 수업 코드의 그 숫자입니다.
+% 읽는 법 — $\omega_{max} = 16.56$ rad/s 가 나옵니다. 수업 코드의 $16.7$ 과
+% 같은 자리입니다. 이 정도 차이는 설계에서 아무 의미가 없으므로 아래에서는
+% 수업 코드의 $16.7$ 을 그대로 씁니다.
 % 여기에 $8.78$ dB 를 보태면 그 자리가 정확히 $0$ dB, 즉 **새 교차주파수**가
 % 됩니다. 그리고 그 자리에서 Lead 가 위상을 $50^\circ$ 올려 줍니다.
 %
