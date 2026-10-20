@@ -68,40 +68,70 @@ yline(0.05, 'k:'); yline(-0.05, 'k:');
 xlabel('위상여유 [도]'); ylabel('어림셈 오차');
 title('오차가 +-0.05 안에 들어온다');
 
-%% 3. 어림셈이 깨지는 경우 — 지배 극점이 뚜렷하지 않으면
-% 폐루프 극점이 비슷한 거리에 둘 이상 있으면 2차 근사가 안 맞습니다.
+%% 3. 어림셈이 깨지는 경우 — 세 가지
+% 2절에서 본 어림셈은 루프가 **2차 표준형에 가까울 때만** 맞습니다.
+% 어긋나는 방식이 세 가지 있고, 셋 다 PM 은 비슷하게 좋아 보입니다.
+%
+%   (가) 2차에 가깝다        — 어림셈이 맞는다 (비교 기준)
+%   (나) 폐루프 영점이 있다   — 오버슈트가 예측보다 **커진다**
+%   (다) 공진이 숨어 있다     — 오버슈트는 0 인데 **끝없이 흔들린다**
+%
+% 비교 방법 : PM 에서 zeta = PM/100 을 얻고, 그 zeta 로 오버슈트를 예측해
+%             실제 오버슈트와 맞대 봅니다. 예측식은 4주차의 그 식입니다.
+%
+%   OS = 100*exp(-pi*zeta/sqrt(1-zeta^2))
 
-L_good = 100/(s*(s + 20));              % 지배 극점 쌍이 뚜렷
-L_bad  = 100/(s*(s + 2)*(s/12 + 1));    % 세 극점이 섞여 있다
+L_a = 100/(s*(s + 10));                     % (가) 극점 두 개, 2차 표준형
+L_b = 40*(s + 2)/(s^2*(s + 10));            % (나) 영점 s=-2 가 폐루프에 남는다
+L_c = 5*(s + 1)/(s*(s^2 + 0.4*s + 100));    % (다) 플랜트에 공진 (wn=10, zeta=0.02)
 
-names = {'지배 극점 뚜렷'; '극점이 섞임'};
-Ls = {L_good, L_bad};
-pm3 = zeros(2,1); os3 = zeros(2,1); z_rule = zeros(2,1); z_real = zeros(2,1);
+names = {'(가) 2차에 가깝다'; '(나) 폐루프 영점'; '(다) 숨은 공진'};
+Ls    = {L_a, L_b, L_c};
+t_end = [2 3 40];                           % 경우마다 볼 시간이 다르다
 
-for k = 1:2
+pm3 = zeros(3,1); zr3 = zeros(3,1);
+os_pred = zeros(3,1); os_meas = zeros(3,1); z_min = zeros(3,1);
+
+for k = 1:3
     [~, pm3(k)] = margin(Ls{k});
     Tk = feedback(Ls{k}, 1);
-    os3(k) = stepinfo(Tk).Overshoot;
-    z_rule(k) = pm3(k)/100;
-    % 실제 오버슈트에서 거꾸로 구한 감쇠비
-    lo = log(os3(k)/100);
-    z_real(k) = -lo/sqrt(pi^2 + lo^2);
+
+    zr3(k) = pm3(k)/100;                                        % 어림셈
+    os_pred(k) = 100*exp(-pi*zr3(k)/sqrt(1 - zr3(k)^2));        % 그 zeta 의 예측
+
+    tk = linspace(0, t_end(k), 4000)';
+    yk = step(Tk, tk);
+    os_meas(k) = (max(yk)/yk(end) - 1)*100;                     % 실측
+
+    [~, zk] = damp(Tk);
+    z_min(k) = min(zk);                                         % 가장 약하게 감쇠된 극점
 end
 
-table(names, pm3, z_rule, z_real, os3, ...
-    'VariableNames', {'경우', 'PM_deg', 'zeta_어림셈', 'zeta_실제응답', 'OS_퍼센트'})
+table(names, pm3, zr3, os_pred, os_meas, z_min, ...
+    'VariableNames', {'경우', 'PM_deg', 'zeta_어림셈', ...
+                      'OS_예측_퍼센트', 'OS_실측_퍼센트', 'zeta_폐루프_최소'})
 
-% 두 경우의 계단응답을 비교
-t = linspace(0, 3, 500)';
-hold on; grid on;
-plot(t, step(feedback(L_good,1), t), 'LineWidth', 2.5, ...
-    'DisplayName', sprintf('지배 극점 뚜렷 (PM %.0f 도)', pm3(1)));
-plot(t, step(feedback(L_bad,1), t), 'LineWidth', 2.5, ...
-    'DisplayName', sprintf('극점 섞임 (PM %.0f 도)', pm3(2)));
-yline(1, 'k:');
-xlabel('시간 [s]'); ylabel('출력');
-legend('Location', 'southeast');
-title('PM 이 비슷해도 응답 모양이 다를 수 있다');
+% 읽는 법
+%   (가) 예측 14.9 % 대 실측 16.3 %  -> 어림셈이 쓸 만하다
+%   (나) 예측 23.7 % 대 실측 37.3 %  -> 영점 때문에 1.6 배 커졌다
+%   (다) 예측 17.7 % 대 실측  0.0 %  -> 오버슈트는 없는데 마지막 열이 0.017 이다
+%        즉 PM 48 도를 믿고 "잘 설계했다" 고 하면 안 된다.
+%        PM 은 교차주파수 한 점만 보기 때문에 공진을 못 본다.
+
+tiledlayout(1, 3, 'TileSpacing', 'compact');
+
+for k = 1:3
+    nexttile; hold on; grid on;
+    tk = linspace(0, t_end(k), 4000)';
+    plot(tk, step(feedback(Ls{k},1), tk), 'LineWidth', 2.2);
+    yline(1, 'k:');
+    xlabel('시간 [s]'); ylabel('출력');
+    title(sprintf('%s\nPM %.0f 도 · 예측 %.0f %% · 실측 %.0f %%', ...
+        names{k}, pm3(k), os_pred(k), os_meas(k)));
+end
+
+% 오른쪽 그림의 잔물결 주기가 0.62 초인 것을 확인하세요.
+% 공진 주파수 10.2 rad/s 가 그대로 출력에 남아 있다는 뜻입니다.
 
 %% 4. 공명첨두 Mr — 주파수영역에서 보는 날카로움
 %   Mr = 1/(2*zeta*sqrt(1-zeta^2)),   wr = wn*sqrt(1-2*zeta^2)
@@ -109,8 +139,17 @@ title('PM 이 비슷해도 응답 모양이 다를 수 있다');
 
 zr = [0.1 0.2 0.3 0.4 0.5 0.6 0.707 0.8]';
 p = numel(zr);
-Mr_f = 1./(2*zr.*sqrt(1 - zr.^2));
-wr_f = real(sqrt(1 - 2*zr.^2));          % 음수면 봉우리 없음
+
+% [주의] 두 식은 zeta < 1/sqrt(2) = 0.7071 에서만 뜻이 있습니다.
+%        그 위에서는 봉우리가 아예 없어서 "봉우리 위치" 를 물을 수 없습니다.
+%        식을 그냥 계산하면 Mr 이 1 보다 큰 값으로 나와 실측과 어긋납니다.
+%        그래서 유효 구간 밖은 NaN 으로 비워 둡니다.
+yes = zr < 1/sqrt(2);
+
+Mr_f = nan(p,1); wr_f = nan(p,1);
+Mr_f(yes) = 1./(2*zr(yes).*sqrt(1 - zr(yes).^2));
+wr_f(yes) = sqrt(1 - 2*zr(yes).^2);     % wn = 1 로 두었으므로 그대로 wr
+
 Mr_m = zeros(p,1); wr_m = zeros(p,1);
 
 for k = 1:p
@@ -120,6 +159,12 @@ end
 
 table(zr, Mr_f, Mr_m, 20*log10(Mr_m), wr_f, wr_m, ...
     'VariableNames', {'zeta', 'Mr_식', 'Mr_실측', 'Mr_dB', 'wr_식', 'wr_실측'})
+
+% 읽는 법
+%   - zeta 0.6 까지는 식과 실측이 소수 넷째 자리까지 같다
+%   - zeta = 0.707 은 경계다. 식은 wr = 0.0174 라는 아주 작은 값을 주고
+%     실측은 0 을 준다. 봉우리가 막 사라지는 지점이라 그렇다
+%   - zeta = 0.8 은 NaN 이다. 봉우리가 없으니 Mr 은 그냥 1 (0 dB) 이다
 
 % zeta = 0.707 을 넘으면 식이 깨지는 것을 그림으로
 w = logspace(-1, 1, 400);

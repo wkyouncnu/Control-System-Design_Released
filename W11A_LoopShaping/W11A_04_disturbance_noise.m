@@ -69,6 +69,84 @@ xlabel('주파수 [rad/s]'); ylabel('y/d_o [dB]');
 legend('Location', 'southeast');
 title('고주파 외란은 억제할 수 없다');
 
+%% 1-1. 외란을 더 줄이려면 — PI 의 꺾이는 자리를 옮긴다
+% 1절에서 1 Hz 외란이 -24.05 dB 로 줄었습니다. 더 줄이고 싶다면
+% 그 주파수에서 |L| 을 더 올려야 합니다. 어떻게 올리는가가 설계입니다.
+%
+% PI 제어기를 담당교수 강의자료의 표기로 다시 씁니다.
+%
+%   C(s) = K*(Ti*s + 1)/(Ti*s),      Ki = K/Ti
+%
+% - K 는 고주파쪽 평평한 이득입니다 (교차주파수를 정합니다)
+% - 1/Ti 가 **꺾이는 자리**입니다. 이 왼쪽에서 기울기가 -20 dB/dec 로 올라갑니다
+% - 그래서 **1/Ti 를 오른쪽으로 옮기면** 저주파 이득이 통째로 올라갑니다
+%
+% 지금 쓰는 C = (500s + 2000)/s 는 K = 500, 1/Ti = 4 와 똑같습니다.
+% 확인 : 500*(s/4 + 1)/(s/4) = 500*(s + 4)/s = (500s + 2000)/s
+
+K_pi = 500;
+invTi_list = [4 10 20 40]';
+q = numel(invTi_list);
+pm1 = zeros(q,1); wc1 = zeros(q,1); wb1 = zeros(q,1);
+SdB1 = zeros(q,1); os1 = zeros(q,1); Ki1 = zeros(q,1);
+
+for k = 1:q
+    Ti = 1/invTi_list(k);
+    Ck = K_pi*(Ti*s + 1)/(Ti*s);
+    Ki1(k) = K_pi/Ti;
+
+    Lk = minreal(P*Ck);
+    Sk = 1/(1 + Lk);
+    Tk = Lk/(1 + Lk);
+
+    [~, pm1(k), ~, wc1(k)] = margin(Lk);
+    wb1(k) = bandwidth(Tk);
+    SdB1(k) = 20*log10(abs(freqresp(Sk, w_dist)));
+    os1(k) = stepinfo(Tk).Overshoot;
+end
+
+table(invTi_list, Ki1, pm1, wc1, wb1, SdB1, os1, ...
+    'VariableNames', {'꺾이는자리_rad_s', 'Ki', 'PM_deg', 'wc_rad_s', ...
+                      'wb_rad_s', '외란_1Hz_dB', 'OS_퍼센트'})
+
+% 읽는 법
+%   - 꺾이는 자리를 4 에서 20 으로 옮기면 1 Hz 외란이 -24.05 에서 -32.90 dB 로
+%     8.85 dB 더 줄어든다. 즉 외란이 추가로 2.8 배 작아진다
+%   - 그 대가는 PM 이 90 도에서 81 도로 9 도 줄고, 오버슈트가 0 에서 8.8 % 로 생기는 것
+%   - 교차주파수는 100 에서 102 로 거의 그대로다.
+%     저주파만 들어올렸기 때문이다. **이것이 loop shaping 이다**
+%   - 40 까지 더 가면 -38.67 dB 까지 되지만 오버슈트가 15.6 % 가 된다
+
+w1 = logspace(-1, 4, 500);
+tiledlayout(1, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+for k = 1:q
+    Ti = 1/invTi_list(k);
+    Lk = minreal(P*K_pi*(Ti*s + 1)/(Ti*s));
+    semilogx(w1, 20*log10(squeeze(abs(freqresp(Lk, w1)))), 'LineWidth', 2, ...
+        'DisplayName', sprintf('1/Ti = %g', invTi_list(k)));
+end
+set(gca, 'XScale', 'log');
+yline(0, 'k--'); xline(w_dist, 'k:');
+xlabel('주파수 [rad/s]'); ylabel('|L| [dB]');
+legend('Location', 'southwest');
+title('저주파만 올라가고 교차주파수는 그대로다');
+
+nexttile; hold on; grid on;
+for k = 1:q
+    Ti = 1/invTi_list(k);
+    Lk = minreal(P*K_pi*(Ti*s + 1)/(Ti*s));
+    Sk = 1/(1 + Lk);
+    semilogx(w1, 20*log10(squeeze(abs(freqresp(Sk, w1)))), 'LineWidth', 2, ...
+        'DisplayName', sprintf('1/Ti = %g', invTi_list(k)));
+end
+set(gca, 'XScale', 'log');
+yline(0, 'k--'); xline(w_dist, 'k:', '1 Hz');
+xlabel('주파수 [rad/s]'); ylabel('|S| = y/d_o [dB]');
+legend('Location', 'southeast');
+title('1 Hz 에서 더 깊이 내려간다');
+
 %% 2. 입력외란 — 개루프는 제어기로 어쩔 수가 없다
 % 개루프 y/d_i = P        <- C 가 아예 나타나지 않는다
 % 폐루프 y/d_i = P*S
@@ -108,18 +186,50 @@ title('계단 입력외란 — 적분기가 있어 정상상태 오차가 0 이 
 % 다행히 센서 잡음은 대개 고주파입니다.
 
 noise_std = 0.02;               % <-- 0.05, 0.1 로 키워 보기
+noise_ts  = 1e-4;               % 잡음 샘플 간격
 rng(0);                         % 재현 가능하게
 
-t3 = (0:1e-4:0.5)';
+t3 = (0:noise_ts:0.5)';
 n_sig = noise_std*randn(size(t3));
 
 y_ref   = lsim(T,  ones(size(t3)), t3);      % 계단 지령에 대한 응답
 y_noise = lsim(-T, n_sig, t3);               % 잡음이 만든 출력
 y_total = y_ref + y_noise;
 
-fprintf('\n잡음 입력 표준편차 : %.4f\n', std(n_sig));
-fprintf('출력에 나온 표준편차 : %.4f\n', std(y_noise(t3 > 0.2)));
-fprintf('  -> 저주파 성분은 |T| = 1 로 100 %% 통과한다\n');
+% 나온 값이 맞는지 식으로 확인한다
+%
+%   샘플 간격 noise_ts 로 만든 백색잡음은 0 부터 pi/noise_ts 까지
+%   **고르게 퍼져** 있습니다. 여기서는 0 ~ 31416 rad/s 입니다.
+%   그런데 -T 는 대역폭 100 rad/s 까지만 통과시킵니다.
+%   그래서 띠의 아주 일부만 출력에 나옵니다.
+%
+%   출력 분산 = (입력 분산 x noise_ts / (2*pi)) x 적분 |T(jw)|^2 dw
+%               (적분 구간은 -pi/noise_ts ~ +pi/noise_ts)
+%
+%   적분은 손으로 하지 않고 trapz 로 수치적으로 합니다.
+
+w_band = linspace(-pi/noise_ts, pi/noise_ts, 400001);
+T2 = squeeze(abs(freqresp(T, abs(w_band)))).^2;
+var_pred = noise_std^2*noise_ts/(2*pi)*trapz(w_band, T2);
+
+% [주의] 표준편차를 재려면 기록이 충분히 길어야 합니다.
+%        위의 0.5 초짜리 t3 는 그림을 보기에는 좋지만, 대역폭 100 rad/s 기준
+%        독립된 표본이 열 개 남짓이라 표준편차가 30 % 넘게 틀어집니다.
+%        그래서 숫자 확인은 20 초짜리 긴 기록으로 따로 합니다.
+t3_long = (0:noise_ts:20)';
+rng(0);
+n_long = noise_std*randn(size(t3_long));
+y_long = lsim(-T, n_long, t3_long);
+std_meas = std(y_long(t3_long > 0.2));
+
+fprintf('\n잡음 입력 표준편차 : %.4f   (띠 폭 0 ~ %.0f rad/s)\n', ...
+    std(n_long), pi/noise_ts);
+fprintf('출력 표준편차 : 식 %.6f  대  실측 %.6f  (차이 %.1f %%)\n', ...
+    sqrt(var_pred), std_meas, 100*abs(std_meas - sqrt(var_pred))/sqrt(var_pred));
+fprintf('  -> 입력의 %.1f %% 만 남았다 (대역폭 %.0f rad/s 밖은 막혔다)\n', ...
+    100*std_meas/std(n_long), bandwidth(T));
+fprintf('  -> 다만 **대역폭 안의** 잡음은 |T| = 1 이므로 그대로 통과한다.\n');
+fprintf('     막을 방법이 없고, 대역폭을 줄이는 것 말고는 손쓸 데가 없다.\n');
 
 tiledlayout(1, 2, 'TileSpacing', 'compact');
 
