@@ -6241,19 +6241,21 @@ for k = 1:2
     yline(0, 'k--', 'LineWidth', 1.3);
     yline(-3, 'r:', 'LineWidth', 1.6);
     [~, ~, ~, wc] = margin(L);  wb = bandwidth(T);
-    plot(wc, 0,  'ko', 'MarkerFaceColor', [1 0.85 0.2], 'MarkerSize', 10);
-    plot(wb, -3, 'ks', 'MarkerFaceColor', [0.95 0.5 0.3], 'MarkerSize', 10);
     xlabel('주파수 [rad s^{-1}]'); ylabel('크기 [dB]');
-    ylim([-90 70]);
+    ylim([-90 70]); xlim([1e-2 1e2]);
     if k == 1
+        plot(wc, 0,  'ko', 'MarkerFaceColor', [1 0.85 0.2], 'MarkerSize', 10);
+        plot(wb, -3, 'ks', 'MarkerFaceColor', [0.95 0.5 0.3], 'MarkerSize', 10);
         legend({'|L| 개루프', '|T| 폐루프', '0 dB', '-3 dB'}, ...
                'Location', 'southwest', 'FontSize', 9);
         title(sprintf('K = 1 : \\omega_c = %.2f,  \\omega_{BW} = %.2f  (비 %.2f)', wc, wb, wb/wc));
     else
-        text(0.02, 50, '|L| 이 어디서나 1 보다 훨씬 작다', 'FontSize', 10.5, 'Color', [0.7 0.35 0]);
-        text(0.02, 40, '\rightarrow 두 곡선이 완전히 겹친다 (T \approx L)', ...
+        text(0.013, 54, '|L| 이 어디서나 1 보다 훨씬 작다', 'FontSize', 10.5, 'Color', [0.7 0.35 0]);
+        text(0.013, 42, '\rightarrow 두 곡선이 완전히 겹친다 (T \approx L)', ...
              'FontSize', 10.5, 'Color', [0.7 0.35 0]);
-        title(sprintf('K = 0.001 : \\omega_c = %.3f,  \\omega_{BW} = %.3f', wc, wb));
+        text(0.013, 30, sprintf('\\omega_c = %.4f,  \\omega_{BW} = %.4f  (화면 왼쪽 밖)', wc, wb), ...
+             'FontSize', 10, 'Color', [0.4 0.4 0.4]);
+        title('K = 0.001 : 개루프와 폐루프가 구별되지 않는다');
     end
 end
 end
@@ -6268,10 +6270,12 @@ nexttile; hold on; grid on; set(gca, 'XScale', 'log');
 zs  = [0.1 0.2 0.4 0.707 1.0];
 wn  = 1;  wr = logspace(-1, 1, 900);
 cmap = lines(numel(zs));
+hL = gobjects(1, numel(zs));
 for i = 1:numel(zs)
     z = zs(i);
     Tz = tf(wn^2, [1 2*z*wn wn^2]);
-    plot(wr, 20*log10(squeeze(abs(freqresp(Tz, wr)))), 'LineWidth', 2.4, 'Color', cmap(i,:));
+    hL(i) = plot(wr, 20*log10(squeeze(abs(freqresp(Tz, wr)))), ...
+                 'LineWidth', 2.4, 'Color', cmap(i,:));
     if z < 1/sqrt(2)
         wpk = wn*sqrt(1 - 2*z^2);
         Mpk = 20*log10(1/(2*z*sqrt(1-z^2)));
@@ -6279,11 +6283,11 @@ for i = 1:numel(zs)
     end
 end
 yline(0, 'k--'); yline(-3, 'r:', 'LineWidth', 1.5);
-ylim([-40 18]);
+ylim([-40 18]); xlim([wr(1) wr(end)]);
 xlabel('\omega / \omega_n'); ylabel('|T| [dB]');
-legend(arrayfun(@(z) sprintf('\\zeta = %.3g', z), zs, 'UniformOutput', false), ...
+legend(hL, arrayfun(@(z) sprintf('\\zeta = %.3g', z), zs, 'UniformOutput', false), ...
        'Location', 'southwest', 'FontSize', 9);
-title('\zeta 가 작을수록 봉우리가 높아진다');
+title('\zeta 가 작을수록 봉우리가 높아진다 (역삼각 = 봉우리 꼭대기)');
 
 nexttile; hold on; grid on;
 zz = linspace(0.02, 1.0, 400);
@@ -6295,11 +6299,11 @@ plot(zz, Mr,  'LineWidth', 2.8, 'Color', [0.85 0.10 0.10]);
 plot(zz, wrr, 'LineWidth', 2.8, 'Color', [0 0.25 0.6]);
 xline(1/sqrt(2), 'k--', 'LineWidth', 2);
 ylim([0 5]); xlim([0 1]);
-text(0.72, 4.5, '\zeta = 0.707', 'FontSize', 11);
-text(0.72, 4.1, '\rightarrow 봉우리 소멸', 'FontSize', 11);
+text(0.72, 2.2, '\zeta = 0.707', 'FontSize', 11);
+text(0.72, 1.9, '\rightarrow 봉우리 소멸', 'FontSize', 11);
 xlabel('감쇠비 \zeta'); ylabel('값');
 legend({'공진봉우리 M_r (배)', '공진주파수 \omega_r/\omega_n'}, ...
-       'Location', 'northeast', 'FontSize', 9.5);
+       'Location', 'north', 'FontSize', 9.5);
 title('\zeta \geq 0.707 이면 \omega_r 이 허수 \rightarrow 봉우리가 없다');
 end
 
@@ -6475,7 +6479,7 @@ for i = 1:3
 end
 b = bar([gmv; pmv]', 'grouped');
 b(1).FaceColor = [0 0.35 0.65];  b(2).FaceColor = [0.93 0.69 0.13];
-set(gca, 'XTickLabel', {'K = 0.7', 'K = 1', 'K = 1.2'});
+set(gca, 'XTick', 1:3, 'XTickLabel', {'K = 0.7', 'K = 1', 'K = 1.2'});
 ylabel('여유'); ylim([0 80]);
 for i = 1:3
     text(i-0.26, gmv(i)+3, sprintf('%.1f', gmv(i)), 'FontSize', 9.5, 'HorizontalAlignment','center');
