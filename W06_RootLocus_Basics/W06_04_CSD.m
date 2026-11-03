@@ -59,3 +59,5 @@ Gpd  = 1/(s*(s+4));
 %%
 
 controlSystemDesigner(Gpd)
+
+controlSystemDesigner()
