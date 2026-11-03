@@ -158,6 +158,16 @@ T = {
 'Mux / Scope',   '묶어서 그래프로',                            '입력과 출력을 겹쳐 보면 지연이 눈에 보인다'
 };
 
+case 'W09_RC_SineCompare'
+T = {
+'1Hz 사인',      'Sine Wave. 정해진 주파수의 사인파를 낸다',   'Frequency 에 2*pi 를 넣는다. 단위가 **Hz 가 아니라 rad/s** 다'
+'3Hz 사인',      'Sine Wave',                                 'Frequency 에 6*pi. 바뀌는 것은 **주파수 하나뿐**이다'
+'RC 회로 1Hz',   'Transfer Fcn. 분자·분모 계수로 동작한다',     '1/(0.1s+1). R=100, C=0.001 에서 나온 그 회로'
+'RC 회로 3Hz',   'Transfer Fcn',                              '**위와 완전히 같은 회로다.** 다른 것은 넣는 주파수뿐'
+'Mux / Scope',  '묶어서 그래프로',                             '입력과 출력을 겹쳐 봐야 줄어든 양과 늦은 양이 보인다'
+'To Workspace', '작업공간으로',                                '크기비와 위상차를 숫자로 재려면 값이 필요하다'
+};
+
 case 'W10_Margin_Check'
 T = {
 '목표값 r',      'Step',                                        '지령'
