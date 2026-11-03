@@ -151,6 +151,11 @@ jobs = {
  'w09_tau_time.png',     @() fig_tau_time(),          95
  'w09_tau_freq.png',     @() fig_tau_freq(),          95
  'w09_bw_order.png',     @() fig_bw_order(),          95
+% ---- 9주차 : 교수자 강의자료 06_FrequencyResponse slide 1~16 ------------
+ 'w09_sine_io_block.png',@() fig_w09_sine_io_block(),100
+ 'w09_rc_sine.png',      @() fig_w09_rc_sine(),      100
+ 'w09_linear_vs_log.png',@() fig_w09_linear_vs_log(),100
+ 'w09_gain_shift.png',   @() fig_w09_gain_shift(),   100
  'w10_margin_read.png',  @() dg_margin(tf(0.5,[1 2 1 0]), ...
                               '읽는 자리 : 이득여유와 위상여유'),  95
  'w10_nyquist_K.png',    @() fig_nyquist_K(),        100
@@ -6504,4 +6509,234 @@ for i = 1:3
 end
 legend(lbl, 'Location', 'southeast', 'FontSize', 8.5);
 title('위상여유가 작을수록 오버슈트가 크다');
+end
+
+
+% ======================================================================
+%  9주차 : 교수자 강의자료 06_FrequencyResponse slide 1~16
+% ======================================================================
+
+function fig_w09_sine_io_block()
+% slide 2 : A sin(wt) 가 들어가면 A|G| sin(wt + angle G) 가 나온다
+A  = 2;                         % 입력 진폭 (1 이 아닌 값으로 둬서 A 가 보이게)
+G  = tf(1, [1 1]);
+w  = 1;
+Gj = freqresp(G, w);
+m  = abs(Gj);                   % 0.7071
+p  = angle(Gj);                 % -0.7854 rad = -45 도
+
+figure('Position', [60 60 1030 400]);
+tiledlayout(1, 2, 'TileSpacing', 'compact');
+
+% (1) 블록선도 — 신호 이름을 수식과 똑같이 적는다
+nexttile; hold on; axis off; axis equal;
+xlim([0 10]); ylim([0 4]);
+rectangle('Position', [4 1.4 2 1.2], 'LineWidth', 2, 'Curvature', 0.04);
+text(5, 2.0, 'G(s)', 'FontSize', 15, 'FontWeight', 'bold', ...
+     'HorizontalAlignment', 'center');
+quiver(1.1, 2.0, 2.7, 0, 0, 'k', 'LineWidth', 1.8, 'MaxHeadSize', 0.5);
+quiver(6.1, 2.0, 2.7, 0, 0, 'k', 'LineWidth', 1.8, 'MaxHeadSize', 0.5);
+text(2.4, 2.45, 'u(t)', 'FontSize', 12, 'HorizontalAlignment', 'center');
+text(2.4, 1.05, 'A sin\omega t', 'FontSize', 12, 'Color', [0.15 0.35 0.75], ...
+     'FontWeight', 'bold', 'HorizontalAlignment', 'center');
+text(7.5, 2.45, 'y(t)', 'FontSize', 12, 'HorizontalAlignment', 'center');
+text(7.5, 1.05, 'A|G(j\omega)| sin(\omega t + \angle G(j\omega))', ...
+     'FontSize', 11, 'Color', [0.85 0.25 0.15], 'FontWeight', 'bold', ...
+     'HorizontalAlignment', 'center');
+text(5, 3.4, '같은 주파수의 사인이 나온다', 'FontSize', 12.5, ...
+     'FontWeight', 'bold', 'HorizontalAlignment', 'center');
+text(5, 0.35, '달라지는 것은 진폭과 위상, 두 개뿐', 'FontSize', 11, ...
+     'Color', [0.45 0.45 0.45], 'HorizontalAlignment', 'center');
+
+% (2) 두 사인을 wt 축 위에 겹쳐 그린다
+nexttile; hold on; grid on;
+wt = linspace(0, 4*pi, 1200);
+u  = A*sin(wt);
+y  = A*m*sin(wt + p);
+plot(wt, u, 'LineWidth', 2.6, 'Color', [0.15 0.35 0.75]);
+plot(wt, y, 'LineWidth', 2.6, 'Color', [0.85 0.25 0.15]);
+yline(0, 'k-');
+
+% 진폭 두 개를 세로 막대로
+plot([pi/2 pi/2], [0 A], '-', 'Color', [0.15 0.35 0.75], 'LineWidth', 2.6);
+text(pi/2 - 0.15, A + 0.22, 'A', 'FontSize', 13, 'FontWeight', 'bold', ...
+     'Color', [0.15 0.35 0.75], 'HorizontalAlignment', 'right');
+wtp = pi/2 - p;                         % 출력 꼭짓점 위치 (위상만큼 늦다)
+plot([wtp wtp], [0 A*m], '-', 'Color', [0.85 0.25 0.15], 'LineWidth', 2.6);
+text(wtp + 0.18, A*m + 0.22, sprintf('A|G(j\\omega)| = %.3f', A*m), ...
+     'FontSize', 11.5, 'FontWeight', 'bold', 'Color', [0.85 0.25 0.15]);
+
+% 위상을 영점통과 사이의 가로 간격으로
+yb = -A - 0.55;
+plot([0 -p], [yb yb], 'k-', 'LineWidth', 1.6);
+plot([0 0], [yb-0.12 yb+0.12], 'k-', 'LineWidth', 1.6);
+plot([-p -p], [yb-0.12 yb+0.12], 'k-', 'LineWidth', 1.6);
+text(-p + 0.2, yb, sprintf('\\angle G(j\\omega) = %.0f도', rad2deg(p)), ...
+     'FontSize', 11.5, 'FontWeight', 'bold');
+
+xlim([0 4*pi]); ylim([-A-1.1 A+0.9]);
+set(gca, 'XTick', 0:pi:4*pi, ...
+         'XTickLabel', {'0', '\pi', '2\pi', '3\pi', '4\pi'});
+xlabel('\omega t [rad]'); ylabel('신호');
+legend({'입력 u(t)', '출력 y(t)'}, 'Location', 'northeast', 'FontSize', 9.5);
+title(sprintf('G = 1/(s+1), \\omega = 1, A = %g', A));
+end
+
+
+function fig_w09_rc_sine()
+% slide 3 : R = 100옴, C = 0.001F -> G = 1/(0.1s+1). 1 Hz 와 3 Hz 를 넣어 본다
+R = 100;  C = 0.001;  tau = R*C;        % 0.1 s
+G = tf(1, [tau 1]);
+fs = [1 3];                             % [Hz]
+ws = 2*pi*fs;                           % [rad/s]
+col = [0 0.45 0.74; 0.85 0.10 0.10];
+
+figure('Position', [60 60 1020 620]);
+tiledlayout(2, 2, 'TileSpacing', 'compact');
+
+% (1), (2) 시간응답 — Simulink Scope 가 보여 주는 것
+for i = 1:2
+    nexttile; hold on; grid on;
+    t = (0:0.001:2)';
+    u = sin(ws(i)*t);
+    y = lsim(G, u, t);
+    plot(t, u, 'LineWidth', 2.2, 'Color', [0.5 0.5 0.5]);
+    plot(t, y, 'LineWidth', 2.6, 'Color', col(i,:));
+    Gj = freqresp(G, ws(i));
+    yline( abs(Gj), 'k:', 'LineWidth', 1.4);
+    yline(-abs(Gj), 'k:', 'LineWidth', 1.4);
+    xlim([0 2]); ylim([-1.25 1.25]);
+    xlabel('시간 [s]'); ylabel('신호');
+    legend({'입력 sin(2\pi f t)', '출력'}, 'Location', 'southeast', 'FontSize', 9);
+    title(sprintf('f = %g Hz (\\omega = %.3f) : 크기 %.3f, 위상 %.0f도', ...
+          fs(i), ws(i), abs(Gj), rad2deg(angle(Gj))));
+end
+
+% (3) 크기 — 가로축이 선형인 그림 (강의자료 3쪽과 같은 모양)
+nexttile; hold on; grid on;
+w = linspace(0, 60, 1200);
+mg = squeeze(abs(freqresp(G, w)));
+plot(w, mg, 'LineWidth', 2.6, 'Color', [0.2 0.2 0.2]);
+for i = 1:2
+    Gj = freqresp(G, ws(i));
+    plot(ws(i), abs(Gj), 'o', 'MarkerSize', 10, 'LineWidth', 2.2, ...
+         'MarkerEdgeColor', col(i,:), 'MarkerFaceColor', 'w');
+    plot([ws(i) ws(i)], [0 abs(Gj)], ':', 'Color', col(i,:), 'LineWidth', 1.6);
+    text(ws(i) + 1.5, abs(Gj) + 0.04, sprintf('%.3f', abs(Gj)), ...
+         'FontSize', 11, 'FontWeight', 'bold', 'Color', col(i,:));
+end
+xlim([0 60]); ylim([0 1.1]);
+xlabel('\omega [rad s^{-1}]'); ylabel('|G(j\omega)|');
+title('크기 : \omega = 2\pi 에서 0.847, \omega = 6\pi 에서 0.469');
+
+% (4) 위상
+nexttile; hold on; grid on;
+ph = rad2deg(unwrap(angle(squeeze(freqresp(G, w)))));
+plot(w, ph, 'LineWidth', 2.6, 'Color', [0.2 0.2 0.2]);
+for i = 1:2
+    Gj = freqresp(G, ws(i));
+    pd = rad2deg(angle(Gj));
+    plot(ws(i), pd, 'o', 'MarkerSize', 10, 'LineWidth', 2.2, ...
+         'MarkerEdgeColor', col(i,:), 'MarkerFaceColor', 'w');
+    plot([ws(i) ws(i)], [-90 pd], ':', 'Color', col(i,:), 'LineWidth', 1.6);
+    text(ws(i) + 1.5, pd + 5, sprintf('%.0f도', pd), ...
+         'FontSize', 11, 'FontWeight', 'bold', 'Color', col(i,:));
+end
+xlim([0 60]); ylim([-95 5]);
+xlabel('\omega [rad s^{-1}]'); ylabel('\angle G(j\omega) [도]');
+title('위상 : -32도, -62도 (늦는 쪽)');
+end
+
+
+function fig_w09_linear_vs_log()
+% slide 12 : 왜 가로축은 로그, 세로축은 dB 인가
+G = tf(1, conv([1 1], [0.01 1]));       % 극점 -1 과 -100
+
+figure('Position', [60 60 1020 400]);
+tiledlayout(1, 2, 'TileSpacing', 'compact');
+
+% (1) 선형 가로축 + 배수 세로축 : 거의 다 짓눌린다
+nexttile; hold on; grid on;
+w1 = linspace(0.01, 200, 4000);
+plot(w1, squeeze(abs(freqresp(G, w1))), 'LineWidth', 2.6, 'Color', [0.2 0.2 0.2]);
+xlim([0 200]); ylim([0 1.05]);
+xlabel('\omega [rad s^{-1}]  (선형)'); ylabel('|G(j\omega)|  (배수)');
+title('선형축 : 쓸모 있는 정보가 왼쪽 끝에 몰린다');
+text(60, 0.6, {'\omega = 1 과 \omega = 100 에서', ...
+               '무슨 일이 일어나는지', '한 장에 담을 수 없다'}, ...
+     'FontSize', 11, 'Color', [0.6 0.1 0.1]);
+
+% (2) 로그 가로축 + dB 세로축 : 직선 두 토막이 된다
+nexttile; hold on; grid on; set(gca, 'XScale', 'log');
+w2 = logspace(-2, 4, 1200);
+plot(w2, 20*log10(squeeze(abs(freqresp(G, w2)))), 'LineWidth', 2.6, ...
+     'Color', [0 0.45 0.74]);
+plot([0.01 1], [0 0], 'r--', 'LineWidth', 1.8);
+plot([1 100], [0 -40], 'r--', 'LineWidth', 1.8);
+plot([100 10000], [-40 -120], 'r--', 'LineWidth', 1.8);
+xline(1,   'k:', 'LineWidth', 1.4);
+xline(100, 'k:', 'LineWidth', 1.4);
+xlim([0.01 10000]); ylim([-140 15]);
+xlabel('\omega [rad s^{-1}]  (로그)'); ylabel('|G(j\omega)|_{dB} = 20log_{10}|G|');
+legend({'실제', '점근선'}, 'Location', 'southwest', 'FontSize', 9.5);
+title('로그축 + dB : 기울기 0 \rightarrow -20 \rightarrow -40 dB/dec');
+text(0.02, -95, {'20log_{10}|G_1G_2|', '= 20log_{10}|G_1| + 20log_{10}|G_2|', ...
+                 '곱이 덧셈이 된다'}, 'FontSize', 10.5, 'Color', [0.1 0.35 0.1]);
+end
+
+
+function fig_w09_gain_shift()
+% K 를 바꾸면 크기 선도는 통째로 위아래로, 위상 선도는 꼼짝도 않는다
+G  = tf(1, [1 1 0]);                    % 1/(s(s+1))
+Ks = [0.5 2 8];
+col = [0 0.45 0.74; 0.93 0.69 0.13; 0.85 0.10 0.10];
+w  = logspace(-1.5, 2, 1000);
+
+figure('Position', [60 60 1030 420]);
+tiledlayout(1, 3, 'TileSpacing', 'compact');
+
+% (1) 크기 — 20log10(K) 만큼 평행이동
+nexttile; hold on; grid on; set(gca, 'XScale', 'log');
+for i = 1:3
+    plot(w, 20*log10(Ks(i))+20*log10(squeeze(abs(freqresp(G, w)))), ...
+         'LineWidth', 2.6, 'Color', col(i,:));
+    [~, ~, ~, wc] = margin(Ks(i)*G);
+    plot(wc, 0, 'ko', 'MarkerFaceColor', col(i,:), 'MarkerSize', 9);
+    text(6, 36-9*i, sprintf('K = %.1f \\rightarrow \\omega_c = %.2f', Ks(i), wc), ...
+         'FontSize', 9.5, 'FontWeight', 'bold', 'Color', col(i,:));
+end
+yline(0, 'k--', 'LineWidth', 1.4);
+xlim([0.03 100]); ylim([-70 40]);
+xlabel('\omega [rad s^{-1}]'); ylabel('|KG| [dB]');
+legend({'K = 0.5','','K = 2','','K = 8',''}, 'Location', 'southwest', 'FontSize', 9);
+title('크기 : 모양 그대로, 위아래로만 이동');
+
+% (2) 위상 — 세 개가 완전히 겹친다
+nexttile; hold on; grid on; set(gca, 'XScale', 'log');
+ph = rad2deg(unwrap(angle(squeeze(freqresp(G, w)))));
+lw = [8 4.5 2];                         % 겹쳐 있음을 보이려고 굵기를 달리한다
+for i = 1:3
+    plot(w, ph, 'LineWidth', lw(i), 'Color', col(i,:));
+end
+yline(-180, 'r:', 'LineWidth', 1.6);
+xlim([0.03 100]); ylim([-190 -80]);
+set(gca, 'YTick', -180:30:-90);
+xlabel('\omega [rad s^{-1}]'); ylabel('\angle KG [도]');
+legend({'K = 0.5', 'K = 2', 'K = 8'}, 'Location', 'southwest', 'FontSize', 9);
+title('위상 : 세 곡선이 완전히 겹친다');
+
+% (3) 교차주파수가 커지면 폐루프가 빨라진다
+nexttile; hold on; grid on;
+t = (0:0.01:25)';
+lbl = cell(1,3);
+for i = 1:3
+    Ti = feedback(Ks(i)*G, 1);
+    plot(t, step(Ti, t), 'LineWidth', 2.6, 'Color', col(i,:));
+    lbl{i} = sprintf('K = %.1f : \\omega_{BW} %.2f, t_r %.2f s', ...
+                     Ks(i), bandwidth(Ti), stepinfo(Ti).RiseTime);
+end
+yline(1, 'k--'); xlim([0 25]); ylim([0 2.1]);
+xlabel('시간 [s]'); ylabel('출력');
+legend(lbl, 'Location', 'southeast', 'FontSize', 8.5);
+title('\omega_c \uparrow \Rightarrow \omega_{BW} \uparrow \Rightarrow 빨라진다');
 end
