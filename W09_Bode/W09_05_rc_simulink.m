@@ -127,12 +127,14 @@ ph_bode  = squeeze(p_b);
 mag_sim = [mag_1Hz_sim; mag_3Hz_sim];
 ph_sim  = [ph_1Hz_sim;  ph_3Hz_sim];
 
-주파수 = ["1 Hz"; "3 Hz"];
-강의자료_크기 = [0.847; 0.469];
-강의자료_위상 = [-32; -62];
+f_name   = ["1 Hz"; "3 Hz"];      % 변수 이름은 영문만 쓴다 (MATLAB 규칙)
+mag_note = [0.847; 0.469];        % 강의자료에 적힌 크기
+ph_note  = [-32;   -62];          % 강의자료에 적힌 위상 [도]
 
-T_mag = table(주파수, 강의자료_크기, mag_hand, mag_sim, mag_bode);
-T_ph  = table(주파수, 강의자료_위상, ph_hand,  ph_sim,  ph_bode);
+T_mag = table(f_name, mag_note, mag_hand, mag_sim, mag_bode, ...
+    'VariableNames', {'주파수','강의자료','손계산','Simulink','bode'});
+T_ph  = table(f_name, ph_note,  ph_hand,  ph_sim,  ph_bode, ...
+    'VariableNames', {'주파수','강의자료','손계산','Simulink','bode'});
 
 disp(' ');
 disp('크기 — 강의자료 · 손계산 · Simulink · bode');
