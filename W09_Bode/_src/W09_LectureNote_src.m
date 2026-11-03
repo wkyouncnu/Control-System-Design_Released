@@ -336,7 +336,7 @@ table(w, delay)
 % | $3$ | $0.333$ | $18.85$ | 1 초에 세 번 |
 % | $60$ | $0.0167$ | $377$ | 상용 전원 잡음 |
 %
-% **Simulink 에서 틀리기 쉬운 자리 — `Sine Wave` 블록**
+% **Simulink 에서 틀리기 쉬운 자리 — Sine Wave 블록**
 %
 % - `Sine Wave` 블록의 `Frequency` 칸은 **rad/s** 를 받습니다. Hz 가 아닙니다
 % - 그러므로 $1$ Hz 짜리 사인을 넣고 싶으면 그 칸에 `1` 이 아니라
@@ -938,7 +938,8 @@ pm_margin                     % margin 이 구한 값
 %   (10주차에서 $\omega_c \le \omega_{BW} \le 2\omega_c$ 임을 배웁니다)
 % - 대역폭이 커지면 **빠른 지령까지 따라갈 수 있게** 되므로 응답이 빨라집니다
 %
-% $$K \uparrow \quad \Rightarrow \quad \omega_c \uparrow \quad \Rightarrow \quad \omega_{BW} \uparrow \quad \Rightarrow \quad t_r,\ t_s,\ T_p \downarrow$$
+% **$K$ 를 키우면 $\Rightarrow$ $\omega_c$ 커짐 $\Rightarrow$ $\omega_{BW}$ 커짐
+% $\Rightarrow$ $t_r$, $t_s$, $T_p$ 줄어듦 (= 응답이 빨라짐)**
 %
 % **반응속도를 올리고 싶으면 대역폭(또는 교차주파수)을 올려야 합니다.**
 % 이것이 주파수영역 설계의 출발점이고, 11주차에서 보상기를 설계하는 이유입니다.
@@ -1639,7 +1640,7 @@ bw = bandwidth(Gb)            % 이득이 -3 dB 로 떨어지는 주파수
 % - 크기는 dB, 주파수는 로그로 그린다. **곱셈이 덧셈이 되기 때문**이다
 % - **이득 $K$ 를 키우면 크기 선도는 $20\log_{10}K$ 만큼 통째로 올라가고
 %   모양은 그대로다. 위상 선도는 꼼짝도 하지 않는다** ($K>0$)
-% - 그래서 $K \uparrow$ 이면 $\omega_c \uparrow$, $\omega_{BW} \uparrow$,
+% - 그래서 $K$ 를 키우면 $\omega_c$ 와 $\omega_{BW}$ 가 커지고
 %   **응답이 빨라진다** ($t_r \approx 1.8/\omega_{BW}$).
 %   대신 위상이 그대로이므로 위상여유가 줄어 **오버슈트가 커진다**
 % - 전달함수는 **상수 · 적분기 · 1차 · 2차** 네 조각의 곱이고,
