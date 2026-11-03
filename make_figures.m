@@ -159,6 +159,18 @@ jobs = {
  'w10_why_minus1.png',   @() fig_w10_why_minus_one(), 95
  'w10_delay.png',        @() fig_w10_delay(),         95
  'w10_sensitivity.png',  @() fig_w10_sensitivity(),   95
+% ---- 10주차 : 교수자 강의자료 06_FrequencyResponse slide 29~72 ----------
+ 'w10_why_unstable.png', @() fig_w10_why_unstable(),  95
+ 'w10_gm_pm_build.png',  @() fig_w10_gm_pm_build(),  100
+ 'w10_gm_pm_three.png',  @() fig_w10_gm_pm_three(),  100
+ 'w10_L_to_T.png',       @() fig_w10_L_to_T(),       100
+ 'w10_OL_CL.png',        @() fig_w10_OL_CL(),        100
+ 'w10_Mr_zeta.png',      @() fig_w10_Mr_zeta(),      100
+ 'w10_bw_zeta.png',      @() fig_w10_bw_zeta(),      100
+ 'w10_pm_zeta_exact.png',@() fig_w10_pm_zeta_exact(),100
+ 'w10_arrows.png',       @() fig_w10_arrows(),        95
+ 'w10_wn_speed.png',     @() fig_w10_wn_speed(),     100
+ 'w10_margin_K3.png',    @() fig_w10_margin_K3(),    100
 % ---- 11주차 : 주파수영역 설계와 PID ------------------------------------
  'w11_lead_bode.png',    @() fig_lead_bode(),        100
  'w11_lag_bode.png',     @() fig_lag_bode(),         100
@@ -6000,4 +6012,492 @@ legend({sprintf('공칭 : PM %.1f도, GM %.1f dB', p1, 20*log10(g1)), ...
        'Location', 'southeast', 'FontSize', 9);
 title({sprintf('지연 %.0f ms 가 위상여유 %.1f도를 먹는다', tau*1000, p1-p2), ...
        '— 여유를 미리 남겨 두는 이유'});
+end
+
+
+% ========================================================================
+%  10주차 추가 그림 — 교수자 강의자료 06_FrequencyResponse slide 29~72
+% ========================================================================
+
+function fig_w10_why_unstable()
+% slide 29~30 : 왜 |L|=1 이고 각이 -180도면 폐루프가 불안정한가
+figure('Position', [60 60 980 420]);
+tiledlayout(1, 2, 'TileSpacing', 'compact');
+
+% (1) 분모가 0 이 되면 이득이 무한대가 된다
+nexttile; hold on; grid on;
+Lr = linspace(-2.4, -0.02, 600);          % 실수축 위를 지나가는 L(jw)
+plot(Lr, abs(Lr./(1+Lr)), 'LineWidth', 2.8, 'Color', [0 0.25 0.6]);
+xline(-1, 'r--', 'LineWidth', 2.2);
+ylim([0 14]); xlim([-2.4 0]);
+xlabel('L(j\omega) 의 값 (실수축 위를 지나갈 때)');
+ylabel('|T| = |L / (1+L)|');
+text(-2.32, 12.6, 'L = -1 이면 1 + L = 0', 'FontSize', 11, 'Color', [0.75 0 0]);
+text(-2.32, 11.2, '\rightarrow 폐루프 이득이 무한대', 'FontSize', 11, 'Color', [0.75 0 0]);
+text(-2.32, 9.8,  '\rightarrow 입력이 없어도 출력이 난다', 'FontSize', 11, 'Color', [0.75 0 0]);
+title('폐루프 이득 T = L/(1+L) 이 치솟는 자리');
+
+% (2) -1 이 두 번 겹친다
+nexttile; hold on; grid on;
+t = linspace(0, 4*pi, 500);
+plot(t, sin(t), 'k', 'LineWidth', 3);
+plot(t, -sin(t), 'LineWidth', 2.6, 'Color', [0.85 0.33 0.10]);
+plot(t, sin(t), '--', 'LineWidth', 2.6, 'Color', [0.1 0.6 0.2]);
+ylim([-1.9 2.6]); xlim([0 4*pi]);
+set(gca, 'XTick', []);
+xlabel('시간'); ylabel('진폭');
+legend({'① 들어간 신호 e', '② 위상 -180도 = 뒤집힌다 (-1 배)', ...
+        '③ 되먹임에서 빼기 = 또 -1 배'}, 'Location', 'north', 'FontSize', 9);
+text(0.3, -1.6, '(-1) \times (-1) = +1   \rightarrow   원래 신호와 똑같은 부호로 더해진다', ...
+     'FontSize', 10.5, 'Color', [0.75 0 0]);
+title('-1 은 두 군데서 온다. 그래서 같은 -1 이다');
+end
+
+
+function fig_w10_gm_pm_build()
+% slide 31~32 : 이득여유와 위상여유가 보드 선도에서 만들어지는 과정
+s = tf('s');  G = 1/(s*(s+1)^2);
+w = logspace(-1.1, 1, 900);
+wlim = [w(1) w(end)];
+magdB = @(sys) 20*log10(squeeze(abs(freqresp(sys, w))));
+phdeg = @(sys) unwrap(squeeze(angle(freqresp(sys, w))))*180/pi;
+
+K1 = 0.5;  K2 = 2;
+[gm, pm, wcg, wcp] = margin(K1*G);
+
+figure('Position', [60 60 1000 560]);
+tiledlayout(2, 2, 'TileSpacing', 'compact');
+
+% --- 왼쪽 위 : 크기. K 를 키우면 통째로 올라간다
+nexttile; hold on; grid on; set(gca, 'XScale', 'log');
+plot(w, magdB(K1*G), 'LineWidth', 2.8, 'Color', [0 0.25 0.6]);
+plot(w, magdB(K2*G), 'LineWidth', 2.4, 'Color', [0.85 0.33 0.10]);
+yline(0, 'k--', 'LineWidth', 1.4);
+xline(wcg, ':', 'Color', [0.4 0.4 0.4], 'LineWidth', 1.8);
+gdB = 20*log10(gm);
+plot([wcg wcg], [-gdB 0], 'r', 'LineWidth', 3.2);
+plot(wcg, -gdB, 'rv', 'MarkerFaceColor', 'r', 'MarkerSize', 8);
+text(wcg*1.45, -gdB/2, sprintf('이득여유\n%.1f dB', gdB), 'FontSize', 10, 'Color', [0.75 0 0]);
+ylabel('크기 [dB]'); ylim([-45 25]); xlim(wlim);
+legend({'K = 0.5', 'K = 2'}, 'Location', 'southwest', 'FontSize', 9);
+title('① K 를 키우면 크기 곡선이 통째로 올라간다');
+
+% --- 오른쪽 위 : 크기. 0 dB 교차점에서 위상여유를 읽는다
+nexttile; hold on; grid on; set(gca, 'XScale', 'log');
+plot(w, magdB(K1*G), 'LineWidth', 2.8, 'Color', [0 0.25 0.6]);
+yline(0, 'k--', 'LineWidth', 1.4);
+xline(wcp, ':', 'Color', [0.4 0.4 0.4], 'LineWidth', 1.8);
+plot(wcp, 0, 'ko', 'MarkerFaceColor', [1 0.85 0.2], 'MarkerSize', 10);
+text(wcp*1.18, 10, sprintf('\\omega_{cp} = %.2f\n(크기가 1)', wcp), 'FontSize', 10);
+ylabel('크기 [dB]'); ylim([-45 25]); xlim(wlim);
+title('② 크기가 0 dB 인 주파수를 먼저 찾는다');
+
+% --- 왼쪽 아래 : 위상. -180도 인 곳이 이득여유를 읽을 주파수
+nexttile; hold on; grid on; set(gca, 'XScale', 'log');
+plot(w, phdeg(K1*G), 'LineWidth', 2.8, 'Color', [0 0.25 0.6]);
+yline(-180, 'r--', 'LineWidth', 1.6);
+xline(wcg, ':', 'Color', [0.4 0.4 0.4], 'LineWidth', 1.8);
+plot(wcg, -180, 'ks', 'MarkerFaceColor', [0.95 0.5 0.3], 'MarkerSize', 10);
+text(wcg*1.18, -125, sprintf('\\omega_{cg} = %.2f\n(위상이 -180도)', wcg), 'FontSize', 10);
+xlabel('주파수 [rad s^{-1}]'); ylabel('위상 [도]'); ylim([-280 -80]); xlim(wlim);
+title('위상이 -180도인 곳 \rightarrow 거기서 위 그림을 본다');
+
+% --- 오른쪽 아래 : 위상. 0 dB 주파수에서 -180도까지 남은 각
+nexttile; hold on; grid on; set(gca, 'XScale', 'log');
+plot(w, phdeg(K1*G), 'LineWidth', 2.8, 'Color', [0 0.25 0.6]);
+yline(-180, 'r--', 'LineWidth', 1.6);
+xline(wcp, ':', 'Color', [0.4 0.4 0.4], 'LineWidth', 1.8);
+ph_at = interp1(w, phdeg(K1*G), wcp);
+plot([wcp wcp], [-180 ph_at], 'r', 'LineWidth', 3.2);
+plot(wcp, ph_at, 'r^', 'MarkerFaceColor', 'r', 'MarkerSize', 8);
+text(wcp*1.45, (ph_at-180)/2, sprintf('위상여유\n%.1f도', pm), 'FontSize', 10, 'Color', [0.75 0 0]);
+xlabel('주파수 [rad s^{-1}]'); ylabel('위상 [도]'); ylim([-280 -80]); xlim(wlim);
+title('③ 거기서 -180도까지 몇 도 남았나 = 위상여유');
+end
+
+
+function fig_w10_gm_pm_three()
+% slide 33~43 : K = 0.5 / 2 / 3 을 나이퀴스트 · 여유 · 계단응답으로 한 번에
+s = tf('s');  G = 1/(s*(s+1)^2);
+Ks  = [0.5 2 3];
+col = [0 0.45 0.74; 0.93 0.69 0.13; 0.85 0.10 0.10];
+
+figure('Position', [60 60 1020 400]);
+tiledlayout(1, 3, 'TileSpacing', 'compact');
+
+% (1) 나이퀴스트 — -1 점을 지나는가
+nexttile; hold on; grid on; axis equal;
+wv = [logspace(-1.3, 1.6, 2000)];
+for i = 1:3
+    Lw = squeeze(freqresp(Ks(i)*G, wv));
+    plot(real(Lw), imag(Lw), 'LineWidth', 2.4, 'Color', col(i,:));
+    plot(real(Lw), -imag(Lw), ':', 'LineWidth', 1.4, 'Color', col(i,:));
+end
+plot(-1, 0, 'kp', 'MarkerFaceColor', 'r', 'MarkerSize', 15);
+text(-0.95, 0.28, '-1 점', 'FontSize', 11, 'Color', [0.75 0 0]);
+xlim([-3.2 0.6]); ylim([-1.6 1.6]);
+xlabel('실수부'); ylabel('허수부');
+legend({'K = 0.5', '', 'K = 2', '', 'K = 3', ''}, 'Location', 'southwest', 'FontSize', 9);
+title('K = 2 에서 궤적이 -1 을 정확히 지난다');
+
+% (2) 여유를 막대로
+nexttile; hold on; grid on;
+gmv = zeros(1,3); pmv = zeros(1,3);
+ws = warning('off', 'Control:analysis:MarginUnstable');
+for i = 1:3
+    [g, p] = margin(Ks(i)*G);
+    gmv(i) = 20*log10(g);  pmv(i) = p;
+end
+warning(ws);
+b = bar([gmv; pmv]', 'grouped');
+b(1).FaceColor = [0 0.35 0.65];  b(2).FaceColor = [0.93 0.69 0.13];
+yline(0, 'k-', 'LineWidth', 1.6);
+set(gca, 'XTick', 1:3, 'XTickLabel', {'K = 0.5', 'K = 2', 'K = 3'});
+ylim([-20 55]);
+for i = 1:3
+    text(i-0.22, gmv(i) + 3*sign(gmv(i) + 0.1), sprintf('%.1f', gmv(i)), ...
+         'FontSize', 9, 'HorizontalAlignment', 'center');
+    text(i+0.22, pmv(i) + 3*sign(pmv(i) + 0.1), sprintf('%.1f', pmv(i)), ...
+         'FontSize', 9, 'HorizontalAlignment', 'center');
+end
+text(1.45, 27, {'K = 2 는 막대가 없다.', '둘 다 정확히 0 이기 때문이다.'}, ...
+     'FontSize', 9.5, 'Color', [0.75 0 0]);
+ylabel('여유');
+legend({'이득여유 [dB]', '위상여유 [도]'}, 'Location', 'northeast', 'FontSize', 9);
+title('K = 2 에서 둘 다 정확히 0 이 된다');
+
+% (3) 계단응답
+nexttile; hold on; grid on;
+t = (0:0.02:30)';
+for i = 1:3
+    y = step(feedback(Ks(i)*G, 1), t);
+    plot(t, y, 'LineWidth', 2.4, 'Color', col(i,:));
+end
+yline(1, 'k--');
+ylim([-1.5 3.5]); xlim([0 30]);
+xlabel('시간 [s]'); ylabel('출력');
+legend({'K = 0.5 : 안착', 'K = 2 : 지속진동', 'K = 3 : 발산'}, ...
+       'Location', 'southwest', 'FontSize', 9);
+title('여유가 0 이 되는 순간이 안정 한계');
+end
+
+
+function fig_w10_L_to_T()
+% slide 44~46 : L 이 크면 T=1, L 이 작으면 T=L
+s = tf('s');
+L = 1/s;                         % 교수자 강의자료의 가장 작은 예
+T = feedback(L, 1);
+w = logspace(-2, 3, 900);
+Lm = squeeze(abs(freqresp(L, w)));
+Tm = squeeze(abs(freqresp(T, w)));
+
+figure('Position', [60 60 1000 420]);
+tiledlayout(1, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on; set(gca, 'XScale', 'log');
+area([1e-2 1], [60 60], -60, 'FaceColor', [0.2 0.5 0.9], 'FaceAlpha', 0.10, 'EdgeColor', 'none');
+area([1 1e3],  [60 60], -60, 'FaceColor', [0.9 0.5 0.2], 'FaceAlpha', 0.10, 'EdgeColor', 'none');
+plot(w, 20*log10(Lm), 'LineWidth', 2.8, 'Color', [0 0.25 0.6]);
+plot(w, 20*log10(Tm), '--', 'LineWidth', 2.8, 'Color', [0.85 0.10 0.10]);
+yline(0, 'k--', 'LineWidth', 1.4);
+xline(1, 'k:', 'LineWidth', 2);
+ylim([-60 60]);
+text(0.015, 46, '|L| 이 1 보다 훨씬 큰 곳', 'FontSize', 11, 'Color', [0 0.2 0.6]);
+text(0.015, 38, 'T = L/(1+L) \approx L/L = 1', 'FontSize', 11, 'Color', [0 0.2 0.6]);
+text(3, -34, '|L| 이 1 보다 훨씬 작은 곳', 'FontSize', 11, 'Color', [0.7 0.35 0]);
+text(3, -42, 'T = L/(1+L) \approx L/1 = L', 'FontSize', 11, 'Color', [0.7 0.35 0]);
+xlabel('주파수 [rad s^{-1}]'); ylabel('크기 [dB]');
+legend({'', '', '|L| 개루프', '|T| 폐루프'}, 'Location', 'southwest', 'FontSize', 9.5);
+title('L(s) = 1/s : 저주파는 T\approx1, 고주파는 T\approx L');
+
+nexttile; hold on; grid on;
+Lv = [0.001 0.01 0.1 1 10 100 1000]';
+Tv = Lv./(1+Lv);
+plot(1:numel(Lv), Tv, 'o-', 'LineWidth', 2.6, 'MarkerSize', 9, ...
+     'MarkerFaceColor', [1 0.85 0.2], 'Color', [0 0.25 0.6]);
+yline(1, 'k--'); ylim([-0.05 1.15]);
+set(gca, 'XTick', 1:numel(Lv), 'XTickLabel', ...
+    {'0.001','0.01','0.1','1','10','100','1000'});
+xlabel('그 주파수에서의 |L|'); ylabel('|T| = |L/(1+L)|');
+text(1.6, 0.72, 'L = 100 \rightarrow T = 100/101 = 0.99', 'FontSize', 11, 'Color', [0.75 0 0]);
+text(1.6, 0.62, 'L = 0.01 \rightarrow T = 0.01/1.01 = 0.0099', 'FontSize', 11, 'Color', [0.75 0 0]);
+title('숫자로 보면 더 분명하다');
+end
+
+
+function fig_w10_OL_CL()
+% slide 47~48, 63 : 개루프 교차주파수와 폐루프 대역폭
+s = tf('s');  G = (0.5*s + 1.3)/(s^3 + 1.2*s^2 + 1.6*s);
+w = logspace(-2, 2, 1200);
+figure('Position', [60 60 1000 430]);
+tiledlayout(1, 2, 'TileSpacing', 'compact');
+
+for k = 1:2
+    if k == 1, K = 1; else, K = 0.001; end
+    L = K*G;  T = feedback(L, 1);
+    nexttile; hold on; grid on; set(gca, 'XScale', 'log');
+    plot(w, 20*log10(squeeze(abs(freqresp(L, w)))), 'LineWidth', 2.8, 'Color', [0 0.25 0.6]);
+    plot(w, 20*log10(squeeze(abs(freqresp(T, w)))), 'LineWidth', 2.8, 'Color', [0.85 0.33 0.10]);
+    yline(0, 'k--', 'LineWidth', 1.3);
+    yline(-3, 'r:', 'LineWidth', 1.6);
+    [~, ~, ~, wc] = margin(L);  wb = bandwidth(T);
+    plot(wc, 0,  'ko', 'MarkerFaceColor', [1 0.85 0.2], 'MarkerSize', 10);
+    plot(wb, -3, 'ks', 'MarkerFaceColor', [0.95 0.5 0.3], 'MarkerSize', 10);
+    xlabel('주파수 [rad s^{-1}]'); ylabel('크기 [dB]');
+    ylim([-90 70]);
+    if k == 1
+        legend({'|L| 개루프', '|T| 폐루프', '0 dB', '-3 dB'}, ...
+               'Location', 'southwest', 'FontSize', 9);
+        title(sprintf('K = 1 : \\omega_c = %.2f,  \\omega_{BW} = %.2f  (비 %.2f)', wc, wb, wb/wc));
+    else
+        text(0.02, 50, '|L| 이 어디서나 1 보다 훨씬 작다', 'FontSize', 10.5, 'Color', [0.7 0.35 0]);
+        text(0.02, 40, '\rightarrow 두 곡선이 완전히 겹친다 (T \approx L)', ...
+             'FontSize', 10.5, 'Color', [0.7 0.35 0]);
+        title(sprintf('K = 0.001 : \\omega_c = %.3f,  \\omega_{BW} = %.3f', wc, wb));
+    end
+end
+end
+
+
+function fig_w10_Mr_zeta()
+% slide 50~53, 66 : 공진봉우리와 감쇠비
+figure('Position', [60 60 1010 430]);
+tiledlayout(1, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on; set(gca, 'XScale', 'log');
+zs  = [0.1 0.2 0.4 0.707 1.0];
+wn  = 1;  wr = logspace(-1, 1, 900);
+cmap = lines(numel(zs));
+for i = 1:numel(zs)
+    z = zs(i);
+    Tz = tf(wn^2, [1 2*z*wn wn^2]);
+    plot(wr, 20*log10(squeeze(abs(freqresp(Tz, wr)))), 'LineWidth', 2.4, 'Color', cmap(i,:));
+    if z < 1/sqrt(2)
+        wpk = wn*sqrt(1 - 2*z^2);
+        Mpk = 20*log10(1/(2*z*sqrt(1-z^2)));
+        plot(wpk, Mpk, 'kv', 'MarkerFaceColor', cmap(i,:), 'MarkerSize', 8);
+    end
+end
+yline(0, 'k--'); yline(-3, 'r:', 'LineWidth', 1.5);
+ylim([-40 18]);
+xlabel('\omega / \omega_n'); ylabel('|T| [dB]');
+legend(arrayfun(@(z) sprintf('\\zeta = %.3g', z), zs, 'UniformOutput', false), ...
+       'Location', 'southwest', 'FontSize', 9);
+title('\zeta 가 작을수록 봉우리가 높아진다');
+
+nexttile; hold on; grid on;
+zz = linspace(0.02, 1.0, 400);
+Mr = nan(size(zz));  wrr = nan(size(zz));
+ok = zz < 1/sqrt(2);
+Mr(ok)  = 1./(2*zz(ok).*sqrt(1-zz(ok).^2));
+wrr(ok) = sqrt(1 - 2*zz(ok).^2);
+plot(zz, Mr,  'LineWidth', 2.8, 'Color', [0.85 0.10 0.10]);
+plot(zz, wrr, 'LineWidth', 2.8, 'Color', [0 0.25 0.6]);
+xline(1/sqrt(2), 'k--', 'LineWidth', 2);
+ylim([0 5]); xlim([0 1]);
+text(0.72, 4.5, '\zeta = 0.707', 'FontSize', 11);
+text(0.72, 4.1, '\rightarrow 봉우리 소멸', 'FontSize', 11);
+xlabel('감쇠비 \zeta'); ylabel('값');
+legend({'공진봉우리 M_r (배)', '공진주파수 \omega_r/\omega_n'}, ...
+       'Location', 'northeast', 'FontSize', 9.5);
+title('\zeta \geq 0.707 이면 \omega_r 이 허수 \rightarrow 봉우리가 없다');
+end
+
+
+function fig_w10_bw_zeta()
+% slide 54~56 : 대역폭은 wn 에 비례하고 zeta 가 커지면 줄어든다
+figure('Position', [60 60 1010 430]);
+tiledlayout(1, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+zz  = linspace(0.05, 1.2, 400);
+rat = sqrt(1 - 2*zz.^2 + sqrt(4*zz.^4 - 4*zz.^2 + 2));
+plot(zz, rat, 'LineWidth', 2.8, 'Color', [0 0.25 0.6]);
+zm = [0.1 0.3 0.5 0.707 0.9]; bm = zeros(size(zm));
+for i = 1:numel(zm)
+    bm(i) = bandwidth(tf(1, [1 2*zm(i) 1]));
+end
+plot(zm, bm, 'ko', 'MarkerFaceColor', [1 0.85 0.2], 'MarkerSize', 9);
+xlabel('감쇠비 \zeta'); ylabel('\omega_{BW} / \omega_n');
+legend({'공식', 'bandwidth() 실측'}, 'Location', 'southwest', 'FontSize', 9.5);
+ylim([0 1.8]);
+title('\zeta 가 커지면 대역폭이 줄어든다 (\omega_n 은 고정)');
+
+nexttile; hold on; grid on;
+wnv = logspace(-0.5, 1, 40);  z = 0.5;
+bw = zeros(size(wnv)); tr = bw; ts = bw; tp = bw;
+for i = 1:numel(wnv)
+    Ti = tf(wnv(i)^2, [1 2*z*wnv(i) wnv(i)^2]);
+    bw(i) = bandwidth(Ti);
+    S = stepinfo(Ti);
+    tr(i) = S.RiseTime;  ts(i) = S.SettlingTime;  tp(i) = S.PeakTime;
+end
+loglog(bw, tr, 'LineWidth', 2.6, 'Color', [0 0.45 0.74]); hold on;
+loglog(bw, tp, 'LineWidth', 2.6, 'Color', [0.93 0.69 0.13]);
+loglog(bw, ts, 'LineWidth', 2.6, 'Color', [0.85 0.10 0.10]);
+set(gca, 'XScale', 'log', 'YScale', 'log'); grid on;
+xlabel('대역폭 \omega_{BW} [rad s^{-1}]'); ylabel('시간 [s]');
+legend({'상승시간 t_r', '첨두시간 T_p', '정착시간 t_s'}, ...
+       'Location', 'southwest', 'FontSize', 9.5);
+title('셋 다 대역폭에 반비례한다 (기울기 -1 인 직선)');
+end
+
+
+function fig_w10_pm_zeta_exact()
+% slide 57~60 : 위상여유와 감쇠비의 정확한 관계
+zz = linspace(0.01, 1.0, 500);
+pm_exact = atan2(2*zz, sqrt(sqrt(1 + 4*zz.^4) - 2*zz.^2))*180/pi;
+os = 100*exp(-pi*zz./sqrt(1 - zz.^2));
+
+figure('Position', [60 60 1010 430]);
+tiledlayout(1, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+plot(zz, pm_exact, 'LineWidth', 2.8, 'Color', [0 0.25 0.6]);
+plot(zz, 100*zz, '--', 'LineWidth', 2.6, 'Color', [0.85 0.10 0.10]);
+xline(0.6, 'k:', 'LineWidth', 1.6);
+xlim([0 1]); ylim([0 90]);
+xlabel('감쇠비 \zeta'); ylabel('위상여유 [도]');
+legend({'정확한 식', '어림 규칙 PM = 100\zeta'}, 'Location', 'southeast', 'FontSize', 9.5);
+text(0.06, 80, '\zeta \leq 0.6 에서는', 'FontSize', 10.5);
+text(0.06, 73, '두 선이 거의 겹친다', 'FontSize', 10.5);
+title('위상여유가 커지면 \zeta 도 커진다');
+
+nexttile; hold on; grid on;
+plot(pm_exact, os, 'LineWidth', 2.8, 'Color', [0.85 0.33 0.10]);
+for p = [30 45 60]
+    zp = interp1(pm_exact, zz, p);
+    op = 100*exp(-pi*zp/sqrt(1-zp^2));
+    plot(p, op, 'ko', 'MarkerFaceColor', [1 0.85 0.2], 'MarkerSize', 9);
+    text(p+1.5, op+3, sprintf('PM %d도\n\\zeta %.2f\nOS %.0f %%', p, zp, op), 'FontSize', 9.5);
+end
+xlim([0 85]); ylim([0 100]);
+xlabel('위상여유 [도]'); ylabel('오버슈트 [%]');
+title('그래서 위상여유가 커지면 오버슈트가 줄어든다');
+end
+
+
+function fig_w10_arrows()
+% slide 61 : 세 가지 관계를 화살표 한 장으로
+figure('Position', [60 60 980 420]);
+axes('Position', [0.02 0.02 0.96 0.9]); hold on; axis off;
+xlim([0 10]); ylim([0 6]);
+
+rows = { 4.3, '\Phi_M  (위상여유)  \uparrow',   '\zeta  (감쇠비)  \uparrow', '%OS  (오버슈트)  \downarrow'; ...
+         3.1, '\omega_b  (대역폭)  \uparrow',  't_s , t_r , T_p  \downarrow', '응답이 빨라진다'; ...
+         1.7, 'M_p  (공진봉우리)  \downarrow', '\zeta  (감쇠비)  \uparrow', '%OS  (오버슈트)  \downarrow'};
+for i = 1:size(rows,1)
+    y = rows{i,1};
+    text(0.4, y, rows{i,2}, 'FontSize', 14, 'FontWeight', 'bold', 'Color', [0 0.25 0.6]);
+    text(3.9, y, '\Rightarrow', 'FontSize', 19, 'Color', [0.85 0.33 0.10]);
+    text(4.7, y, rows{i,3}, 'FontSize', 14, 'FontWeight', 'bold', 'Color', [0 0.25 0.6]);
+    text(7.2, y, '\Rightarrow', 'FontSize', 19, 'Color', [0.85 0.33 0.10]);
+    text(8.0, y, rows{i,4}, 'FontSize', 14, 'FontWeight', 'bold', 'Color', [0.1 0.5 0.2]);
+end
+text(0.4, 2.5, '\omega_b  \propto  \omega_c  (개루프 교차주파수)', 'FontSize', 12, 'Color', [0.4 0.4 0.4]);
+
+text(0.4, 5.4, '주파수영역에서 읽는 값', 'FontSize', 13, 'FontWeight', 'bold');
+text(4.7, 5.4, '2차 표준형의 \zeta 또는 시간상수', 'FontSize', 13, 'FontWeight', 'bold');
+text(8.0, 5.4, '시간영역 결과', 'FontSize', 13, 'FontWeight', 'bold');
+plot([0.3 9.9], [5.1 5.1], 'k-', 'LineWidth', 1.2);
+plot([0.3 9.9], [1.0 1.0], 'k-', 'LineWidth', 1.2);
+text(0.4, 0.55, '세 가지 모두 \zeta 를 거쳐 간다. \zeta 하나가 주파수영역과 시간영역을 잇는 다리다.', ...
+     'FontSize', 12, 'Color', [0.75 0 0]);
+title('주파수응답과 시간응답의 대응 — 한 장 요약', 'FontSize', 14);
+end
+
+
+function fig_w10_wn_speed()
+% slide 64 : zeta 를 고정하고 wn 만 키우면 대역폭과 빠르기가 함께 커진다
+z   = 0.2;
+wnv = [1, sqrt(10), 10];
+col = [0 0.45 0.74; 0.93 0.69 0.13; 0.85 0.10 0.10];
+
+figure('Position', [60 60 1010 420]);
+tiledlayout(1, 2, 'TileSpacing', 'compact');
+
+nexttile; hold on; grid on;
+t = (0:0.005:10)';
+for i = 1:3
+    Ti = tf(wnv(i)^2, [1 2*z*wnv(i) wnv(i)^2]);
+    plot(t, step(Ti, t), 'LineWidth', 2.5, 'Color', col(i,:));
+end
+yline(1, 'k--'); xlim([0 10]);
+xlabel('시간 [s]'); ylabel('출력');
+legend(arrayfun(@(x) sprintf('\\omega_n = %.2f', x), wnv, 'UniformOutput', false), ...
+       'Location', 'southeast', 'FontSize', 9.5);
+title('\zeta = 0.2 고정, \omega_n 만 키운다 \rightarrow 빨라진다');
+
+nexttile; hold on; grid on; set(gca, 'XScale', 'log');
+w = logspace(-1, 2.5, 900);
+for i = 1:3
+    Ti = tf(wnv(i)^2, [1 2*z*wnv(i) wnv(i)^2]);
+    plot(w, 20*log10(squeeze(abs(freqresp(Ti, w)))), 'LineWidth', 2.5, 'Color', col(i,:));
+    bwi = bandwidth(Ti);
+    plot(bwi, -3, 'ks', 'MarkerFaceColor', col(i,:), 'MarkerSize', 9);
+end
+yline(-3, 'r:', 'LineWidth', 1.6); yline(0, 'k--');
+ylim([-45 15]);
+xlabel('주파수 [rad s^{-1}]'); ylabel('|T| [dB]');
+title('같은 순서로 대역폭도 넓어진다 (네모 = -3 dB)');
+end
+
+
+function fig_w10_margin_K3()
+% slide 68~72 : K = 1 / 0.7 / 1.2 에서 여유와 오버슈트
+s = tf('s');  G = (0.5*s + 1.3)/(s^3 + 1.2*s^2 + 1.6*s);
+Ks  = [0.7 1 1.2];
+col = [0 0.45 0.74; 0.93 0.69 0.13; 0.85 0.10 0.10];
+
+figure('Position', [60 60 1020 420]);
+tiledlayout(1, 3, 'TileSpacing', 'compact');
+
+% (1) 개루프 크기 — K 가 커지면 올라간다
+nexttile; hold on; grid on; set(gca, 'XScale', 'log');
+w = logspace(-1, 1.5, 900);
+for i = 1:3
+    plot(w, 20*log10(squeeze(abs(freqresp(Ks(i)*G, w)))), 'LineWidth', 2.5, 'Color', col(i,:));
+    [~, ~, ~, wc] = margin(Ks(i)*G);
+    plot(wc, 0, 'ko', 'MarkerFaceColor', col(i,:), 'MarkerSize', 9);
+end
+yline(0, 'k--', 'LineWidth', 1.4);
+ylim([-45 35]);
+xlabel('주파수 [rad s^{-1}]'); ylabel('|L| [dB]');
+legend({'K = 0.7','','K = 1','','K = 1.2',''}, 'Location', 'southwest', 'FontSize', 9);
+title('K 가 커지면 0 dB 교차점이 오른쪽으로');
+
+% (2) 여유
+nexttile; hold on; grid on;
+gmv = zeros(1,3); pmv = zeros(1,3);
+for i = 1:3
+    [g, p] = margin(Ks(i)*G);
+    gmv(i) = 20*log10(g);  pmv(i) = p;
+end
+b = bar([gmv; pmv]', 'grouped');
+b(1).FaceColor = [0 0.35 0.65];  b(2).FaceColor = [0.93 0.69 0.13];
+set(gca, 'XTickLabel', {'K = 0.7', 'K = 1', 'K = 1.2'});
+ylabel('여유'); ylim([0 80]);
+for i = 1:3
+    text(i-0.26, gmv(i)+3, sprintf('%.1f', gmv(i)), 'FontSize', 9.5, 'HorizontalAlignment','center');
+    text(i+0.14, pmv(i)+3, sprintf('%.1f', pmv(i)), 'FontSize', 9.5, 'HorizontalAlignment','center');
+end
+legend({'이득여유 [dB]', '위상여유 [도]'}, 'Location', 'northeast', 'FontSize', 9);
+title('K 가 커지면 둘 다 줄어든다');
+
+% (3) 계단응답
+nexttile; hold on; grid on;
+t = (0:0.02:25)';
+for i = 1:3
+    Ti = feedback(Ks(i)*G, 1);
+    plot(t, step(Ti, t), 'LineWidth', 2.5, 'Color', col(i,:));
+end
+yline(1, 'k--'); ylim([0 1.45]);
+xlabel('시간 [s]'); ylabel('출력');
+lbl = cell(1,3);
+for i = 1:3
+    lbl{i} = sprintf('K = %.1f : PM %.1f도, OS %.1f %%', Ks(i), pmv(i), ...
+                     stepinfo(feedback(Ks(i)*G,1)).Overshoot);
+end
+legend(lbl, 'Location', 'southeast', 'FontSize', 8.5);
+title('위상여유가 작을수록 오버슈트가 크다');
 end
