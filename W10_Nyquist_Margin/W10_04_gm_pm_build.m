@@ -182,7 +182,8 @@ table(K_3, gm_dB_3, pm_3, maxRe_3)
 
 % 여유의 부호와 극점 실수부의 부호가 같이 움직인다
 sign_margin = sign(pm_3);
-sign_pole   = -sign(maxRe_3);             % 좌반면이면 +1
+sign_pole   = -sign(round(maxRe_3, 10));  % 좌반면이면 +1. 10 자리에서 끊어
+                                          % K = 2 의 4e-16 을 0 으로 읽는다
 table(K_3, sign_margin, sign_pole)
 
 % 지속진동의 주파수는 위상교차주파수다 -> 주기를 미리 알 수 있다
