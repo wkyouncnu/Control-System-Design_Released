@@ -1,7 +1,7 @@
 function [G, p] = plant_dcmotor(mode)
 %PLANT_DCMOTOR  DC 모터 표준 플랜트 (속도 제어용 / 위치 제어용)
 %
-%   이 과목에서 5~11주차 제어기 설계에 계속 사용하는 기준 플랜트입니다.
+%   이 과목에서 5~10주차 제어기 설계에 계속 사용하는 기준 플랜트입니다.
 %
 %   [G, p] = PLANT_DCMOTOR()            속도 모델 (기본값)
 %   [G, p] = PLANT_DCMOTOR('speed')     속도 모델  : 입력 전압 -> 출력 각속도

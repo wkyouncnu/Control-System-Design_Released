@@ -231,7 +231,7 @@ assignin('base','g',g); assignin('base','theta0',theta0);
 assignin('base','u_torque',u_torque); assignin('base','t_end',t_end);
 
 %  [주의] 이 절은 Simulink Control Design 이 있어야 돕니다.
-%         10주차에서도 쓰는 도구이므로 실습실 PC 에 있어야 하지만,
+%         9주차에서도 쓰는 도구이므로 실습실 PC 에 있어야 하지만,
 %         없더라도 스크립트가 여기서 멈추지 않도록 확인하고 건너뜁니다.
 hasSCD = license('test','Simulink_Control_Design') && ~isempty(which('linearize'));
 

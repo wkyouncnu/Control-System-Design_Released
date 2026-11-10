@@ -1,5 +1,5 @@
 function dg_design_steps(ttl)
-%DG_DESIGN_STEPS  근궤적 설계 여섯 단계 — 6주차부터 7·11·13주차까지 그대로 쓴다
+%DG_DESIGN_STEPS  근궤적 설계 여섯 단계 — 6주차부터 7·11·12주차까지 그대로 쓴다
 %
 %   dg_design_steps()
 %   dg_design_steps('제목')

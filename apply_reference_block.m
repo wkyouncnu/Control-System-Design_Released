@@ -2,7 +2,7 @@ function apply_reference_block(weekFilter)
 %APPLY_REFERENCE_BLOCK  모든 강의노트 첫 장에 참고자료 블록을 넣습니다. (교수자용)
 %
 %   APPLY_REFERENCE_BLOCK()        전 주차
-%   APPLY_REFERENCE_BLOCK('W09')   한 주차만
+%   APPLY_REFERENCE_BLOCK('W08')   한 주차만
 %
 %   무엇을 하는가
 %     `_templates/reference_block.txt` 의 내용을 각 주차 강의노트 원본

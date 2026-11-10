@@ -39,7 +39,7 @@ fprintf('  루트 폴더 : %s\n', root);
 fprintf('\n');
 fprintf('  사용 가능한 공통 함수\n');
 fprintf('    plant_msd       질량-스프링-댐퍼 플랜트      (1~5주차)\n');
-fprintf('    plant_dcmotor   DC 모터 플랜트               (5~11주차)\n');
+fprintf('    plant_dcmotor   DC 모터 플랜트               (5~10주차)\n');
 fprintf('    plant_pendulum  단진자 플랜트 (선형화용)     (3주차)\n');
 fprintf('    pendulum_ode    단진자 비선형 상태방정식\n');
 fprintf('    spec2pole       사양(%%OS, ts) -> 목표 극점        (4주차부터)\n');
@@ -64,8 +64,8 @@ fprintf('\n');
 need = {
  'Control_Toolbox',          'Control System Toolbox',    '필수', '거의 모든 주차'
  'Simulink',                 'Simulink',                  '필수', '모든 주차의 .slx'
- 'Simulink_Control_Design',  'Simulink Control Design',   '선택', '3주차 6절, 10주차 6절 (linearize)'
- 'Symbolic_Toolbox',         'Symbolic Math Toolbox',     '선택', '3주차 3절, 13주차 2-2절 (jacobian)'
+ 'Simulink_Control_Design',  'Simulink Control Design',   '선택', '3주차 6절, 9주차 6절 (linearize)'
+ 'Symbolic_Toolbox',         'Symbolic Math Toolbox',     '선택', '3주차 3절, 12주차 2-2절 (jacobian)'
  };
 missReq = {};  missOpt = {};
 for i = 1:size(need,1)

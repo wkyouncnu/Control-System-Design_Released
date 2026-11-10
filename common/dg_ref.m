@@ -18,7 +18,7 @@ function dg_ref(name, caption)
 %     loop_K           비례이득만 있는 폐루프
 %     loop_controller_disturbance   제어기와 외란이 있는 폐루프
 %     rootlocus_example  근궤적 예시
-%     freq_1 ~ freq_9  주파수응답 관련 (9~10주차에서 씁니다)
+%     freq_1 ~ freq_9  주파수응답 관련 (8~9주차에서 씁니다)
 %
 %   이름만 주고 부르면 목록을 보여 줍니다.
 %

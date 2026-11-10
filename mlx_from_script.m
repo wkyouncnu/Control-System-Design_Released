@@ -176,7 +176,7 @@ for i = 1:numel(lines)
             %   [주의] 수식의 절댓값 기호와 헷갈리면 안 됩니다.
             %   "|G| = \frac{...}" 같은 줄도 | 로 시작하므로, 표로 보려면
             %   **| 로 시작하고 | 로 끝나며 | 가 셋 이상**이어야 합니다 (= 두 칸 이상).
-            %   실제로 이 조건이 없어서 W09 숙제의 $$ 수식이 표로 잘못 잡혔습니다.
+            %   실제로 이 조건이 없어서 W08 숙제의 $$ 수식이 표로 잘못 잡혔습니다.
             if startsWith(body, '|') && endsWith(body, '|') && count(body, '|') >= 3
                 flushBullet(); flushPara();
                 if isempty(regexp(body, '^\|[\s:\-|]+\|\s*$', 'once'))

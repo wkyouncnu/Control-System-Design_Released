@@ -2,7 +2,7 @@
 % 원문 : Control Tutorials for MATLAB and Simulink — Introduction: Frequency Domain Methods
 % 한글 정리 : 제어시스템설계 · 충남대학교 자율운항시스템공학과
 %
-% **이 문서는 9~10 주차 예습용입니다.** 지금 다 이해하지 못해도 괜찮습니다.
+% **이 문서는 8~9 주차 예습용입니다.** 지금 다 이해하지 못해도 괜찮습니다.
 %
 % 이 문서에서 하는 것
 %

@@ -18,7 +18,7 @@ function out = model_blocks(modelName, form)
 %
 %   예제
 %     model_blocks('W02_MSD_ThreeWays', 'print')
-%     txt = model_blocks('W13_PolePlacement', 'note');
+%     txt = model_blocks('W12_PolePlacement', 'note');
 %
 %   제어시스템설계 | 충남대학교 자율운항시스템공학과
 
@@ -150,7 +150,7 @@ T = {
 'Scope 제어입력',    '그래프',                                      '**여기가 오늘의 그림이다.** 세로 눈금을 꼭 보십시오'
 };
 
-case 'W09_SineSweep'
+case 'W08_SineSweep'
 T = {
 '사인 입력',      'Sine Wave. 정해진 주파수의 사인파를 낸다',  '**주파수를 하나씩 바꿔 가며** 넣어 볼 신호'
 '플랜트 G(s)',    'Transfer Fcn',                            '재려는 대상. 되먹임이 없다는 점을 보십시오'
@@ -158,7 +158,7 @@ T = {
 'Mux / Scope',   '묶어서 그래프로',                            '입력과 출력을 겹쳐 보면 지연이 눈에 보인다'
 };
 
-case 'W09_RC_SineCompare'
+case 'W08_RC_SineCompare'
 T = {
 '1Hz 사인',      'Sine Wave. 정해진 주파수의 사인파를 낸다',   'Frequency 에 2*pi 를 넣는다. 단위가 **Hz 가 아니라 rad/s** 다'
 '3Hz 사인',      'Sine Wave',                                 'Frequency 에 6*pi. 바뀌는 것은 **주파수 하나뿐**이다'
@@ -168,7 +168,7 @@ T = {
 'To Workspace', '작업공간으로',                                '크기비와 위상차를 숫자로 재려면 값이 필요하다'
 };
 
-case 'W10_Margin_Check'
+case 'W09_Margin_Check'
 T = {
 '목표값 r',      'Step',                                        '지령'
 '오차',          'Sum (+ -)',                                   '**이 근처를 잘라서** 개루프를 뽑는다'
@@ -179,7 +179,47 @@ T = {
 'Scope 두 개',    '그래프',                                       '지연을 키우면 언제 발산하는지 본다'
 };
 
-case 'W11_PID_AntiWindup'
+case 'W09_E1_LoopOnce'
+T = {
+'사인 입력',      'Sine Wave. 정해진 주파수의 사인파를 낸다',   'Frequency 에 w_in. 기본값 1 rad/s 는 **위상이 -180 도가 되는 그 주파수**다'
+'비례이득 K',     'Gain',                                      '루프 한 바퀴의 크기를 정하는 손잡이'
+'플랜트 G(s)',    'Transfer Fcn',                              '1 over s(s+1)^2. 강의자료 6장의 표준 예제'
+'Mux / Scope',   '묶어서 그래프로',                             '**넣은 사인과 돌아온 사인을 겹쳐 본다.** 진폭과 뒤집힘을 동시에 읽는다'
+'To Workspace',  '작업공간으로',                               '돌아온 진폭을 숫자로 재려면 값이 필요하다'
+};
+
+case 'W09_E2_GainMargin'
+T = {
+'목표값 r',      'Step',                                       '지령 1'
+'오차',          'Sum (+ -)',                                  '**여기가 빼기다.** E1 에서 뒤집혀 돌아온 신호가 여기서 한 번 더 뒤집힌다'
+'비례이득 K',     'Gain',                                       'E1 에서 쓴 것과 **같은 K** 다. 0.5 / 2 / 3 으로 바꿔 본다'
+'플랜트 G(s)',    'Transfer Fcn',                               'E1 과 **완전히 같은 플랜트.** 다른 것은 되먹임선 하나뿐'
+'Scope 출력',     '그래프',                                      '수렴 · 지속진동 · 발산 세 가지를 눈으로 가른다'
+'To Workspace',  '작업공간으로',                                 '마지막 구간의 진폭으로 안정 여부를 숫자로 판정한다'
+};
+
+case 'W09_E3_DelayMargin'
+T = {
+'목표값 r',      'Step',                                        '지령 1'
+'오차',          'Sum (+ -)',                                   '되먹임의 빼기'
+'비례이득 K',     'Gain',                                        '0.5 로 고정한다. **이번에 바꾸는 것은 K 가 아니다**'
+'시간지연',       'Transport Delay. 신호를 정해진 시간만큼 늦춘다',  '**이번 실험의 손잡이.** tau_d 를 0 에서 1.81 까지 키워 본다'
+'플랜트 G(s)',    'Transfer Fcn',                                 'E2 와 같은 플랜트. 추가된 것은 지연 블록 하나뿐'
+'Scope 출력',     '그래프',                                       '이득은 그대로인데 지연만으로 발산하는 것을 본다'
+'To Workspace',  '작업공간으로',                                   'tau_max = PM / wcp 와 맞는지 숫자로 확인한다'
+};
+
+case 'W09_E4_Bandwidth'
+T = {
+'사인 입력',      'Sine Wave',                                   'Frequency 에 w_in. 0.1 부터 2 까지 하나씩 바꿔 넣는다'
+'오차',          'Sum (+ -)',                                   '되먹임의 빼기. **E1 과 달리 루프가 닫혀 있다**'
+'비례이득 K',     'Gain',                                        '0.5 로 고정'
+'플랜트 G(s)',    'Transfer Fcn',                                 '같은 플랜트'
+'Mux / Scope',   '묶어서 그래프로',                               '넣은 사인과 나온 사인의 **진폭비**를 본다'
+'To Workspace',  '작업공간으로',                                   '진폭비가 1 을 넘는 곳이 공진봉우리, 0.707 로 떨어지는 곳이 대역폭'
+};
+
+case 'W10_PID_AntiWindup'
 T = {
 '목표 속도 r',    'Step',                                          '지령. 크게 주면 포화가 걸린다'
 '오차 계산',      'Sum (+ -)',                                      '목표에서 속도를 뺀다'
@@ -189,7 +229,7 @@ T = {
 'Scope 두 개',    '그래프',                                          '전압이 한계에 **붙어 있는 시간**이 와인드업이 자라는 구간'
 };
 
-case 'W11A_LoopShaping'
+case 'W10A_LoopShaping'
 T = {
 '목표 속도 r',     'Step',                                              '지령. T = L/(1+L) 을 눈으로 보려고 넣는다'
 '오차 계산',       'Sum (+ -)',                                          '지령에서 **센서가 준 값**을 뺀다. y 가 아니다'
@@ -203,7 +243,7 @@ T = {
 'Scope 두 개',    '그래프',                                              '외란이 **몇 배 줄어 나오는지**를 시간영역에서 잰다'
 };
 
-case 'W11B_FreqDesign'
+case 'W10B_FreqDesign'
 T = {
 '지령 r',         'Ramp. 일정한 속도로 올라가는 위치 지령',                   '사양 1 번이 램프였다. 계단은 이 설계로 불가능하다 (8-6절)'
 '지령 완만화 필터', 'Transfer Fcn 1/(tau s + 1)',                          'tau 를 줄이면 출발이 급해지고 u 가 터진다. 지령의 모양도 설계다'
@@ -216,7 +256,7 @@ T = {
 'Scope 두 개',    '그래프',                                               '위는 출력과 사양선, 아래는 제어입력과 한계선'
 };
 
-case 'W12_StateSpace_Modes'
+case 'W11_StateSpace_Modes'
 T = {
 '입력 u',        'Step',                                       '오늘은 크기를 0 으로 둔다. **초기조건만으로** 움직인다'
 '상태공간 모델',   'State-Space. 행렬 A,B,C,D 와 **초기조건**을 받는다', '더블클릭해 Initial conditions 칸을 보십시오. 전달함수에는 없다'
@@ -224,7 +264,7 @@ T = {
 'Scope 상태',     '그래프',                                      '고유벡터 방향에서 출발하면 지수함수 하나가 된다'
 };
 
-case 'W13_PolePlacement'
+case 'W12_PolePlacement'
 T = {
 '지령 r',        'Step',                                          '목표 각도'
 'Kr',           'Gain',                                           '극배치는 극점만 옮긴다. 직류이득은 이 상수가 맞춘다'
@@ -236,7 +276,7 @@ T = {
 'Scope',        '그래프',                                          '상태가 어떻게 움직이는지'
 };
 
-case 'W14_ObserverBased'
+case 'W13_ObserverBased'
 T = {
 '입력 u',       'Step',                                            '두 갈래에 **같은 입력**이 들어간다'
 '실제 플랜트',   'State-Space. 초기조건 x0 가 있다',                   '위쪽 갈래. 진짜 시스템'

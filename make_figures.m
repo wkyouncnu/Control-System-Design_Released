@@ -88,10 +88,10 @@ jobs = {
  'w03_how_narrow.png',   @() fig_w03_how_narrow(),    95
  'w06_angle_cond.png',   @() fig_w06_angle_cond(),    95
  'w07_angle_def.png',    @() fig_w07_angle_def(),     95
- 'w09_phase_asym.png',   @() fig_w09_phase_asym(),    95
- 'w09_hand_margin.png',  @() fig_w09_hand_margin(),   95
- 'w10_contour.png',      @() fig_w10_contour(),       95
- 'w10_encircle.png',     @() fig_w10_encircle(),      95
+ 'w08_phase_asym.png',   @() fig_w08_phase_asym(),    95
+ 'w08_hand_margin.png',  @() fig_w08_hand_margin(),   95
+ 'w09_contour.png',      @() fig_w09_contour(),       95
+ 'w09_encircle.png',     @() fig_w09_encircle(),      95
  'w06_real_axis.png',    @() fig_w06_real_axis(),     95
  'w06_breakaway.png',    @() fig_w06_breakaway(),     95
  'w06_jw_cross.png',     @() fig_w06_jw_cross(),      95
@@ -136,103 +136,103 @@ jobs = {
  'w07_lead_tradeoff.png',@() fig_w07_lead_tradeoff(), 95
  'w07_pd_vs_pi.png',     @() fig_w07_pd_vs_pi(),      95
  'w07_pseudo_deriv.png', @() fig_w07_pseudo_deriv(),  95
-% ---- 9~10주차 : 주파수응답 ---------------------------------------------
- 'w09_sine_io.png',      @() dg_sine_io(),           100
- 'w09_measure.png',      @() fig_sine_measure(),     100
- 'w09_asymptote.png',    @() fig_bode_asymptote(),   100
- 'w09_resonance.png',    @() fig_resonance(),        100
- 'w09_lpf.png',          @() fig_lpf(),               95
- 'w09_hpf.png',          @() fig_hpf(),               95
- 'w09_cutoff.png',       @() fig_cutoff_tradeoff(),   95
- 'w09_filters.png',      @() fig_filter_family(),     95
- 'w09_plant_lpf.png',    @() fig_plant_is_lpf(),      95
-% ---- 9주차 : 교수자 강의자료(부록 13~19쪽)의 예제를 그대로 재현 ----
- 'w09_lpf_prof.png',     @() fig_lpf_prof(),          95
- 'w09_tau_time.png',     @() fig_tau_time(),          95
- 'w09_tau_freq.png',     @() fig_tau_freq(),          95
- 'w09_bw_order.png',     @() fig_bw_order(),          95
-% ---- 9주차 : 교수자 강의자료 06_FrequencyResponse slide 1~16 ------------
- 'w09_sine_io_block.png',@() fig_w09_sine_io_block(),100
- 'w09_rc_sine.png',      @() fig_w09_rc_sine(),      100
- 'w09_linear_vs_log.png',@() fig_w09_linear_vs_log(),100
- 'w09_gain_shift.png',   @() fig_w09_gain_shift(),   100
- 'w10_margin_read.png',  @() dg_margin(tf(0.5,[1 2 1 0]), ...
+% ---- 8~9주차 : 주파수응답 ---------------------------------------------
+ 'w08_sine_io.png',      @() dg_sine_io(),           100
+ 'w08_measure.png',      @() fig_sine_measure(),     100
+ 'w08_asymptote.png',    @() fig_bode_asymptote(),   100
+ 'w08_resonance.png',    @() fig_resonance(),        100
+ 'w08_lpf.png',          @() fig_lpf(),               95
+ 'w08_hpf.png',          @() fig_hpf(),               95
+ 'w08_cutoff.png',       @() fig_cutoff_tradeoff(),   95
+ 'w08_filters.png',      @() fig_filter_family(),     95
+ 'w08_plant_lpf.png',    @() fig_plant_is_lpf(),      95
+% ---- 8주차 : 교수자 강의자료(부록 13~19쪽)의 예제를 그대로 재현 ----
+ 'w08_lpf_prof.png',     @() fig_lpf_prof(),          95
+ 'w08_tau_time.png',     @() fig_tau_time(),          95
+ 'w08_tau_freq.png',     @() fig_tau_freq(),          95
+ 'w08_bw_order.png',     @() fig_bw_order(),          95
+% ---- 8주차 : 교수자 강의자료 06_FrequencyResponse slide 1~16 ------------
+ 'w08_sine_io_block.png',@() fig_w08_sine_io_block(),100
+ 'w08_rc_sine.png',      @() fig_w08_rc_sine(),      100
+ 'w08_linear_vs_log.png',@() fig_w08_linear_vs_log(),100
+ 'w08_gain_shift.png',   @() fig_w08_gain_shift(),   100
+ 'w09_margin_read.png',  @() dg_margin(tf(0.5,[1 2 1 0]), ...
                               '읽는 자리 : 이득여유와 위상여유'),  95
- 'w10_nyquist_K.png',    @() fig_nyquist_K(),        100
- 'w10_pm_os.png',        @() fig_pm_os(),            100
- 'w10_bw_speed.png',     @() fig_bw_speed(),         100
- 'w10_why_minus1.png',   @() fig_w10_why_minus_one(), 95
- 'w10_delay.png',        @() fig_w10_delay(),         95
- 'w10_sensitivity.png',  @() fig_w10_sensitivity(),   95
-% ---- 10주차 : 교수자 강의자료 06_FrequencyResponse slide 29~72 ----------
- 'w10_why_unstable.png', @() fig_w10_why_unstable(),  95
- 'w10_gm_pm_build.png',  @() fig_w10_gm_pm_build(),  100
- 'w10_gm_pm_three.png',  @() fig_w10_gm_pm_three(),  100
- 'w10_L_to_T.png',       @() fig_w10_L_to_T(),       100
- 'w10_OL_CL.png',        @() fig_w10_OL_CL(),        100
- 'w10_Mr_zeta.png',      @() fig_w10_Mr_zeta(),      100
- 'w10_bw_zeta.png',      @() fig_w10_bw_zeta(),      100
- 'w10_pm_zeta_exact.png',@() fig_w10_pm_zeta_exact(),100
- 'w10_arrows.png',       @() fig_w10_arrows(),        95
- 'w10_wn_speed.png',     @() fig_w10_wn_speed(),     100
- 'w10_margin_K3.png',    @() fig_w10_margin_K3(),    100
-% ---- 11주차 : 주파수영역 설계와 PID ------------------------------------
- 'w11_lead_bode.png',    @() fig_lead_bode(),        100
- 'w11_lag_bode.png',     @() fig_lag_bode(),         100
- 'w11_design_steps.png', @() fig_w11_design_steps(),  95
- 'w11_multistage.png',   @() fig_w11_multistage(),   100
- 'w11_pid_compare.png',  @() fig_pid_compare(),      100
- 'w11_pid_bands.png',    @() fig_w11_pid_bands(),    100
- 'w11_windup.png',       @() fig_windup(),           100
- 'w11_lead_alpha.png',   @() fig_w11_lead_alpha(),    95
- 'w11_lead_cost.png',    @() fig_w11_lead_cost(),     95
- 'w11_lead_vs_lag.png',  @() fig_w11_lead_vs_lag(),   95
- 'w11_dfilter.png',      @() fig_w11_dfilter(),       95
+ 'w09_nyquist_K.png',    @() fig_nyquist_K(),        100
+ 'w09_pm_os.png',        @() fig_pm_os(),            100
+ 'w09_bw_speed.png',     @() fig_bw_speed(),         100
+ 'w09_why_minus1.png',   @() fig_w09_why_minus_one(), 95
+ 'w09_delay.png',        @() fig_w09_delay(),         95
+ 'w09_sensitivity.png',  @() fig_w09_sensitivity(),   95
+% ---- 9주차 : 교수자 강의자료 06_FrequencyResponse slide 29~72 ----------
+ 'w09_why_unstable.png', @() fig_w09_why_unstable(),  95
+ 'w09_gm_pm_build.png',  @() fig_w09_gm_pm_build(),  100
+ 'w09_gm_pm_three.png',  @() fig_w09_gm_pm_three(),  100
+ 'w09_L_to_T.png',       @() fig_w09_L_to_T(),       100
+ 'w09_OL_CL.png',        @() fig_w09_OL_CL(),        100
+ 'w09_Mr_zeta.png',      @() fig_w09_Mr_zeta(),      100
+ 'w09_bw_zeta.png',      @() fig_w09_bw_zeta(),      100
+ 'w09_pm_zeta_exact.png',@() fig_w09_pm_zeta_exact(),100
+ 'w09_arrows.png',       @() fig_w09_arrows(),        95
+ 'w09_wn_speed.png',     @() fig_w09_wn_speed(),     100
+ 'w09_margin_K3.png',    @() fig_w09_margin_K3(),    100
+% ---- 10주차 : 주파수영역 설계와 PID ------------------------------------
+ 'w10_lead_bode.png',    @() fig_lead_bode(),        100
+ 'w10_lag_bode.png',     @() fig_lag_bode(),         100
+ 'w10_design_steps.png', @() fig_w10_design_steps(),  95
+ 'w10_multistage.png',   @() fig_w10_multistage(),   100
+ 'w10_pid_compare.png',  @() fig_pid_compare(),      100
+ 'w10_pid_bands.png',    @() fig_w10_pid_bands(),    100
+ 'w10_windup.png',       @() fig_windup(),           100
+ 'w10_lead_alpha.png',   @() fig_w10_lead_alpha(),    95
+ 'w10_lead_cost.png',    @() fig_w10_lead_cost(),     95
+ 'w10_lead_vs_lag.png',  @() fig_w10_lead_vs_lag(),   95
+ 'w10_dfilter.png',      @() fig_w10_dfilter(),       95
 % ---- 11A 주차 : 루프 성형 -----------------------------------------------
- 'w11a_bands.png',       @() fig_w11a_bands(),        95
- 'w11a_lst.png',         @() fig_w11a_lst(),         100
- 'w11a_s_plus_t.png',    @() fig_w11a_s_plus_t(),    100
- 'w11a_wc_wbw.png',      @() fig_w11a_wc_wbw(),      100
- 'w11a_pm_zeta.png',     @() fig_w11a_pm_zeta(),     100
- 'w11a_dist.png',        @() fig_w11a_dist(),        100
- 'w11a_noise.png',       @() fig_w11a_noise(),       100
+ 'w10a_bands.png',       @() fig_w10a_bands(),        95
+ 'w10a_lst.png',         @() fig_w10a_lst(),         100
+ 'w10a_s_plus_t.png',    @() fig_w10a_s_plus_t(),    100
+ 'w10a_wc_wbw.png',      @() fig_w10a_wc_wbw(),      100
+ 'w10a_pm_zeta.png',     @() fig_w10a_pm_zeta(),     100
+ 'w10a_dist.png',        @() fig_w10a_dist(),        100
+ 'w10a_noise.png',       @() fig_w10a_noise(),       100
 % ---- 11B 주차 : controlSystemDesigner 로 설계하기 -----------------------
- 'w11b_shapes.png',      @() fig_w11b_shapes(),      100
- 'w11b_app_tour.png',    @() fig_w11b_app_tour(),     95
- 'w11b_type_ramp.png',   @() fig_w11b_type_ramp(),   100
- 'w11b_pd_vs_lead.png',  @() fig_w11b_pd_vs_lead(),  100
- 'w11b_pi_vs_lag.png',   @() fig_w11b_pi_vs_lag(),   100
- 'w11b_capstone.png',    @() fig_w11b_capstone(),    100
- 'w11b_delay.png',       @() fig_w11b_delay(),       100
-% ---- 12주차 : 상태공간 해석 ---------------------------------------------
- 'w12_transition.png',   @() fig_w12_transition(),   100
- 'w12_diagonalize.png',  @() fig_w12_diagonalize(),  100
- 'w12_modes.png',        @() fig_modes(),            100
- 'w12_eig_map.png',      @() fig_w12_eig_map(),      100
- 'w12_similarity.png',   @() fig_w12_similarity(),   100
- 'w12_reach.png',        @() fig_w12_reach(),        100
- 'w12_ctrb.png',         @() fig_ctrb(),             100
- 'w12_obsv.png',         @() fig_obsv(),             100
- 'w12_hidden_mode.png',  @() fig_w12_hidden_mode(),  100
- 'w12_gateway.png',      @() fig_w12_gateway(),       95
-% ---- 13주차 : 극배치 ----------------------------------------------------
- 'w13_place_map.png',    @() fig_place_map(),        100
- 'w13_effort.png',       @() fig_effort(),           100
- 'w13_kr.png',           @() fig_kr(),               100
- 'w13_coeff_match.png',  @() fig_w13_coeff_match(),  100
- 'w13_servo.png',        @() fig_w13_servo(),        100
- 'w13_pendulum.png',     @() fig_w13_pendulum(),      95
- 'w13_nonlin_check.png', @() fig_w13_nonlin_check(),  95
- 'w13_saturation.png',   @() fig_w13_saturation(),    95
-% ---- 14주차 : 관측기 ----------------------------------------------------
- 'w14_error_dyn.png',    @() fig_w14_error_dyn(),    100
- 'w14_duality.png',      @() fig_w14_duality(),      100
- 'w14_converge.png',     @() fig_obs_converge(),     100
- 'w14_pole_speed.png',   @() fig_w14_pole_speed(),   100
- 'w14_obs_noise.png',    @() fig_obs_noise(),        100
- 'w14_separation.png',   @() fig_separation(),       100
- 'w14_true_vs_est.png',  @() fig_w14_true_vs_est(),  100
- 'w14_semester_arc.png', @() fig_w14_semester_arc(),  95
+ 'w10b_shapes.png',      @() fig_w10b_shapes(),      100
+ 'w10b_app_tour.png',    @() fig_w10b_app_tour(),     95
+ 'w10b_type_ramp.png',   @() fig_w10b_type_ramp(),   100
+ 'w10b_pd_vs_lead.png',  @() fig_w10b_pd_vs_lead(),  100
+ 'w10b_pi_vs_lag.png',   @() fig_w10b_pi_vs_lag(),   100
+ 'w10b_capstone.png',    @() fig_w10b_capstone(),    100
+ 'w10b_delay.png',       @() fig_w10b_delay(),       100
+% ---- 11주차 : 상태공간 해석 ---------------------------------------------
+ 'w11_transition.png',   @() fig_w11_transition(),   100
+ 'w11_diagonalize.png',  @() fig_w11_diagonalize(),  100
+ 'w11_modes.png',        @() fig_modes(),            100
+ 'w11_eig_map.png',      @() fig_w11_eig_map(),      100
+ 'w11_similarity.png',   @() fig_w11_similarity(),   100
+ 'w11_reach.png',        @() fig_w11_reach(),        100
+ 'w11_ctrb.png',         @() fig_ctrb(),             100
+ 'w11_obsv.png',         @() fig_obsv(),             100
+ 'w11_hidden_mode.png',  @() fig_w11_hidden_mode(),  100
+ 'w11_gateway.png',      @() fig_w11_gateway(),       95
+% ---- 12주차 : 극배치 ----------------------------------------------------
+ 'w12_place_map.png',    @() fig_place_map(),        100
+ 'w12_effort.png',       @() fig_effort(),           100
+ 'w12_kr.png',           @() fig_kr(),               100
+ 'w12_coeff_match.png',  @() fig_w12_coeff_match(),  100
+ 'w12_servo.png',        @() fig_w12_servo(),        100
+ 'w12_pendulum.png',     @() fig_w12_pendulum(),      95
+ 'w12_nonlin_check.png', @() fig_w12_nonlin_check(),  95
+ 'w12_saturation.png',   @() fig_w12_saturation(),    95
+% ---- 13주차 : 관측기 ----------------------------------------------------
+ 'w13_error_dyn.png',    @() fig_w13_error_dyn(),    100
+ 'w13_duality.png',      @() fig_w13_duality(),      100
+ 'w13_converge.png',     @() fig_obs_converge(),     100
+ 'w13_pole_speed.png',   @() fig_w13_pole_speed(),   100
+ 'w13_obs_noise.png',    @() fig_obs_noise(),        100
+ 'w13_separation.png',   @() fig_separation(),       100
+ 'w13_true_vs_est.png',  @() fig_w13_true_vs_est(),  100
+ 'w13_semester_arc.png', @() fig_w13_semester_arc(),  95
 };
 
 if strcmp(only, '--jobs')
@@ -637,7 +637,7 @@ title('PD 만 제어입력이 요동친다');
 end
 
 % ======================================================================
-%  9~10주차 : 주파수응답
+%  8~9주차 : 주파수응답
 % ======================================================================
 
 function fig_sine_measure()
@@ -875,7 +875,7 @@ end
 
 
 % ======================================================================
-%  11주차 : 주파수영역 설계와 PID
+%  10주차 : 주파수영역 설계와 PID
 % ======================================================================
 
 function fig_lead_bode()
@@ -1009,9 +1009,9 @@ text(6.3, yL-2.45, ['e = 0 인데 u = 1 이다.  적분기가 지나간 오차�
 end
 
 
-function fig_w11_multistage()
+function fig_w10_multistage()
 % 한 단으로 모자란 사양 — 단을 늘리면 되지만 수확이 점점 줄어든다
-%   W11_01_lead_design.m 의 5절과 같은 설정 (강의자료 예제 7-3)
+%   W10_01_lead_design.m 의 5절과 같은 설정 (강의자료 예제 7-3)
 s = tf('s');
 G3 = 1/(s*(s+1)*(s/5+1));
 K3 = 5;  target = 55;
@@ -1060,7 +1060,7 @@ title('한 단마다 올라가는 폭이 줄고 차수는 그대로 늘어난다
 end
 
 
-function fig_w11_design_steps()
+function fig_w10_design_steps()
 % 주파수영역 설계 다섯 단계 — 6주차 근궤적 여섯 단계와 짝이 된다
 W = 16.4; H = 7.6;
 dg_new(W, H, '주파수영역 설계 : 순서를 바꾸면 앞 단계가 무너진다');
@@ -1107,7 +1107,7 @@ text(b.C(1), b.C(2)-0.36, bot, 'HorizontalAlignment','center', ...
 end
 
 
-function fig_w11_pid_bands()
+function fig_w10_pid_bands()
 % PID 의 세 항이 주파수축을 나누어 맡는다 — "PID = Lead + Lag" 의 그림판
 s  = tf('s');
 % 세 대역이 눈에 띄게 갈리도록 꺾이는 두 주파수를 두 자리수 떨어뜨린다
@@ -1263,10 +1263,10 @@ end
 
 
 % ======================================================================
-%  12주차 : 상태공간 해석
+%  11주차 : 상태공간 해석
 % ======================================================================
 
-function fig_w12_transition()
+function fig_w11_transition()
 % 상태천이행렬이 하는 일 : 지금 상태를 넣으면 t 초 뒤 상태를 돌려준다
 A = [0 1; -2 -3];
 [V, D] = eig(A);  lam = diag(D);
@@ -1336,7 +1336,7 @@ title('상태천이행렬 e^{At} 가 지정하는 시각 t 에서의 상태');
 end
 
 
-function fig_w12_eig_map()
+function fig_w11_eig_map()
 % 고유값이 s 평면 어디에 있으면 응답이 어떻게 생기는가 — 오늘의 지도
 lam = {-2, -0.5, 0, 0.7, -0.4+3i, 3i};
 nm  = {'-2 : 빠르게 사라진다', '-0.5 : 느리게 사라진다', ...
@@ -1391,7 +1391,7 @@ end
 end
 
 
-function fig_w12_diagonalize()
+function fig_w11_diagonalize()
 % 대각화가 e^{At} 계산을 왜 쉽게 만드는가
 W = 16.0; H = 8.6;
 dg_new(W, H, '대각화 : 어려운 행렬 지수함수를 스칼라 지수함수 두 개로');
@@ -1436,7 +1436,7 @@ text(b.C(1), b.C(2)-0.42, bot, 'HorizontalAlignment','center', ...
 end
 
 
-function fig_w12_reach()
+function fig_w11_reach()
 % 가제어성의 기하학적 뜻 : B 와 AB 가 평면을 덮는가
 A  = [0 1; -2 -3];
 Bc = [0; 1];        % 가제어
@@ -1479,7 +1479,7 @@ title(sprintf('%s   (rank(ctrb) = %d)', ttl, r));
 end
 
 
-function fig_w12_hidden_mode()
+function fig_w11_hidden_mode()
 % 상쇄된 불안정 모드는 출력에 안 보이는 채로 상태에서 발산한다
 %   7주차 3-1 절의 그 예제를 이번에는 고유값으로 설명한다
 s = tf('s');
@@ -1521,10 +1521,10 @@ title('같은 순간 내부에서는 — e^{+t} 로 발산하고 있다');
 end
 
 
-function fig_w12_gateway()
+function fig_w11_gateway()
 % 오늘의 두 판정이 다음 두 주의 입장권이다
 W = 15.8; H = 9.2;
-dg_new(W, H, '오늘 판정한 두 가지가 13·14주차의 입장권이다');
+dg_new(W, H, '오늘 판정한 두 가지가 13·13주차의 입장권이다');
 set(gcf, 'Position', [60 60 1160 680]);
 
 cQ  = [0.93 0.93 0.93];
@@ -1540,11 +1540,11 @@ n2 = dg_block(11.6, 1.6, 5.6, 1.4, '', cNG);
 
 local_gw(q1, 'rank(ctrb(A,B)) = n ?', '가제어성');
 local_gw(q2, 'rank(obsv(A,C)) = n ?', '가관측성');
-text(a1.C(1), a1.C(2), '13주차 극배치 — 극점을 원하는 자리로', ...
+text(a1.C(1), a1.C(2), '12주차 극배치 — 극점을 원하는 자리로', ...
      'HorizontalAlignment','center', 'FontSize', 12);
 text(n1.C(1), n1.C(2), '못 옮기는 극점이 있다. 그 극점은 그대로', ...
      'HorizontalAlignment','center', 'FontSize', 12);
-text(a2.C(1), a2.C(2), '14주차 관측기 — 못 재는 상태를 만든다', ...
+text(a2.C(1), a2.C(2), '13주차 관측기 — 못 재는 상태를 만든다', ...
      'HorizontalAlignment','center', 'FontSize', 12);
 text(n2.C(1), n2.C(2), '못 알아내는 상태가 있다. 센서를 늘린다', ...
      'HorizontalAlignment','center', 'FontSize', 12);
@@ -1567,7 +1567,7 @@ text(b.C(1), b.C(2)-0.38, bot, 'HorizontalAlignment','center', ...
 end
 
 
-function fig_w12_similarity()
+function fig_w11_similarity()
 % 유사변환 : 좌표를 바꾸면 모양은 달라져도 고유값은 그대로
 A = [0 1; -2 -3];
 [V, D] = eig(A);  lam = diag(D);
@@ -1715,7 +1715,7 @@ end
 
 
 % ======================================================================
-%  13주차 : 극배치
+%  12주차 : 극배치
 % ======================================================================
 
 function fig_place_map()
@@ -1807,10 +1807,10 @@ end
 
 
 % ======================================================================
-%  14주차 : 관측기
+%  13주차 : 관측기
 % ======================================================================
 
-function fig_w14_error_dyn()
+function fig_w13_error_dyn()
 % 추정오차는 (A-LC)e 만 따른다 — 입력이 무엇이든 상관없다
 [~, p] = plant_dcmotor('position');
 A = p.A;  B = p.B;  C = p.C;
@@ -1857,14 +1857,14 @@ title('네 곡선이 완전히 겹친다 — 오차 방정식에 u 가 없다');
 end
 
 
-function fig_w14_duality()
-% 쌍대성 : 13주차 제어 문제와 14주차 추정 문제는 전치 관계
+function fig_w13_duality()
+% 쌍대성 : 12주차 제어 문제와 13주차 추정 문제는 전치 관계
 W = 15.0; H = 10.4;
 dg_new(W, H, '쌍대성 : 전치를 두 번 하면 지난주 문제가 그대로 된다');
 set(gcf, 'Position', [60 60 1100 760]);
 
-cL = [0.88 0.93 1.00];        % 13주차 (제어)
-cR = [0.93 0.97 0.90];        % 14주차 (추정)
+cL = [0.88 0.93 1.00];        % 12주차 (제어)
+cR = [0.93 0.97 0.90];        % 13주차 (추정)
 xL = 3.3;  xR = 11.7;  wB = 5.4;  hB = 1.3;
 
 rows = { '푸는 문제',   '극점을 옮긴다',          '상태를 알아낸다'
@@ -1890,9 +1890,9 @@ for i = 1:5
     dg_arrow(bl.R, br.L, '');
 end
 
-text(xL, 9.9, '13주차 — 제어', 'HorizontalAlignment','center', ...
+text(xL, 9.9, '12주차 — 제어', 'HorizontalAlignment','center', ...
      'FontSize', 14, 'FontWeight','bold', 'Color', [0.10 0.35 0.65]);
-text(xR, 9.9, '14주차 — 추정', 'HorizontalAlignment','center', ...
+text(xR, 9.9, '13주차 — 추정', 'HorizontalAlignment','center', ...
      'FontSize', 14, 'FontWeight','bold', 'Color', [0.25 0.50 0.15]);
 text(W/2, 9.9, '전치', 'HorizontalAlignment','center', ...
      'FontSize', 12, 'FontWeight','bold', 'Color', [0.75 0.20 0.15]);
@@ -1910,7 +1910,7 @@ end
 end
 
 
-function fig_w14_pole_speed()
+function fig_w13_pole_speed()
 % 관측기 극을 제어기 극의 몇 배로 둘 것인가 — 2~5 배 관례의 근거
 [~, p] = plant_dcmotor('position');
 A = p.A;  B = p.B;  C = p.C;
@@ -1961,7 +1961,7 @@ title('2\sim5 배 구간 밖에서는 얻는 것보다 잃는 것이 크다');
 end
 
 
-function fig_w14_true_vs_est()
+function fig_w13_true_vs_est()
 % 진짜 상태를 쓴 것과 추정 상태를 쓴 것이 얼마나 다른가
 [~, p] = plant_dcmotor('position');
 A = p.A;  B = p.B;  C = p.C;
@@ -2009,7 +2009,7 @@ title('차이는 초기 추정오차가 살아 있는 동안만 생긴다');
 end
 
 
-function fig_w14_semester_arc()
+function fig_w13_semester_arc()
 % 한 학기 되짚기 : 역진자 하나가 네 주차를 관통한다
 W = 17.6; H = 7.8;
 dg_new(W, H, '거꾸로 선 진자 하나가 네 주차를 관통한다');
@@ -2023,7 +2023,7 @@ for i = 1:4
     b(i) = dg_block(xv(i), yb, 3.3, 2.2, '', c(i,:)); %#ok<AGROW>
 end
 
-top = {'3주차', '12주차', '13주차', '14주차'};
+top = {'3주차', '11주차', '12주차', '13주차'};
 mid = {'선형화', '가제어 · 가관측', '극배치', '관측기'};
 bot = {'sin\theta \approx \theta', 'rank(ctrb), rank(obsv)', ...
        'K = place(A,B,p)', 'L = place(A'',C'',p)'''};
@@ -2748,7 +2748,7 @@ end
 set(gca,'XScale','log'); yline(0,'k--','HandleVisibility','off');
 xlabel('주파수 [rad s^{-1}]'); ylabel('|S| = |1/(1+KG)|  [dB]');
 legend('Location','southeast'); ylim([-45 15]);
-title('주파수로 보면 — 9~10주차에서 다시 만난다');
+title('주파수로 보면 — 8~9주차에서 다시 만난다');
 end
 
 % ======================================================================
@@ -3070,19 +3070,19 @@ legend('u_1 \rightarrow y_1','u_1 \rightarrow y_2','u_2 \rightarrow y_1','u_2 \r
        'Location','northwest', 'NumColumns', 2);
 title('이유 3 — 입력 2개 출력 2개도 행렬 하나로');
 
-% (4) 그래서 12~14주차
+% (4) 그래서 11~13주차
 % [주의] 한글이 섞이므로 FontName 을 Consolas 같은 영문 전용으로 두면 안 된다.
 %        네모(두부) 로 깨진다. 기본 글꼴을 쓰고 자리는 x 좌표로 맞춘다.
 nexttile
 axis off; xlim([0 1]); ylim([0 1]);
-text(0.00, 0.96, '이유 4 — 12~14주차의 도구가 전부 여기서 나온다', ...
+text(0.00, 0.96, '이유 4 — 11~13주차의 도구가 전부 여기서 나온다', ...
      'FontSize', 12, 'FontWeight','bold');
-rows = { '12주차', 'eig(A)',            '모드와 안정성'
+rows = { '11주차', 'eig(A)',            '모드와 안정성'
          '',       'ctrb(A,B)',         '제어할 수 있는가'
          '',       'obsv(A,C)',         '볼 수 있는가'
-         '13주차', 'place(A,B,p)',      '극점을 원하는 자리에 정확히'
+         '12주차', 'place(A,B,p)',      '극점을 원하는 자리에 정확히'
          '',       '',                  '근궤적처럼 정해진 길을 안 따라간다'
-         '14주차', 'place(A'',C'',p)''', '못 재는 상태를 만들어 낸다' };
+         '13주차', 'place(A'',C'',p)''', '못 재는 상태를 만들어 낸다' };
 yv = [0.80 0.71 0.62 0.47 0.38 0.23];
 for i = 1:size(rows,1)
     text(0.00, yv(i), rows{i,1}, 'FontSize', 11, 'FontWeight','bold');
@@ -3144,7 +3144,7 @@ patch(real([tip sideL sideR]), imag([tip sideL sideR]), [0.00 0.30 0.55], ...
 end
 
 
-function fig_w09_phase_asym()
+function fig_w08_phase_asym()
 % 위상 점근선 : 꺾임주파수의 1/10 에서 시작해 10 배에서 끝나는 직선
 s = tf('s');
 L = 10/(s*(s+1)*(0.1*s+1));
@@ -3184,7 +3184,7 @@ title('더하면 실제 위상과 거의 같다 (최대 어긋남 6.3°)');
 end
 
 
-function fig_w09_hand_margin()
+function fig_w08_hand_margin()
 % 점근선만으로 교차주파수와 위상여유를 읽는다
 s = tf('s');
 L = 10/(s*(s+1)*(0.1*s+1));
@@ -3230,7 +3230,7 @@ title('2 단계 : 그 자리에서 위상을 읽고 180° 를 더하면 위상�
 end
 
 
-function fig_w10_contour()
+function fig_w09_contour()
 % 나이퀴스트 경로 : s 평면에서 우반면을 통째로 감싸는 길
 figure('Position',[60 60 1060 460]);
 tiledlayout(1,2,'TileSpacing','compact');
@@ -3284,7 +3284,7 @@ title('L 평면 : 그 길이 이렇게 옮겨진다');
 end
 
 
-function fig_w10_encircle()
+function fig_w09_encircle()
 % 감은 횟수 N 을 실제로 세어 본다 (개루프가 불안정한 예)
 s  = tf('s');
 Gu = 1/((s-1)*(s+3));
@@ -4734,10 +4734,10 @@ end
 
 
 % ======================================================================
-%  10주차 추가 그림
+%  9주차 추가 그림
 % ======================================================================
 
-function fig_w10_why_minus_one()
+function fig_w09_why_minus_one()
 % 왜 하필 -1 인가 — 되먹임 신호가 원래 자리로 돌아오는 그림
 s = tf('s');
 G = 1/(s*(s+1)^2);
@@ -4784,7 +4784,7 @@ title('그래서 폐루프가 이렇게 된다');
 end
 
 
-function fig_w10_delay()
+function fig_w09_delay()
 % 위상여유를 시간지연으로 바꿔 읽기
 s  = tf('s');
 G  = 1/(s*(s+1)^2);
@@ -4836,7 +4836,7 @@ title(sprintf('견디는 한계는 \\tau = %.2f s (PM %.1f도 / \\omega_{cp} %.3
 end
 
 
-function fig_w10_sensitivity()
+function fig_w09_sensitivity()
 % 감도함수 — 근본적인 맞바꿈
 s = tf('s');
 G = 1/(s*(s+1)^2);
@@ -4882,10 +4882,10 @@ end
 
 
 % ======================================================================
-%  11주차 추가 그림
+%  10주차 추가 그림
 % ======================================================================
 
-function fig_w11_lead_alpha()
+function fig_w10_lead_alpha()
 % Lead 한 단이 올릴 수 있는 위상과 그 대가
 al = linspace(0.02, 0.98, 400);
 ph = asind((1-al)./(1+al));
@@ -4945,7 +4945,7 @@ title('봉우리의 꼭대기가 항상 \omega_m 에 온다');
 end
 
 
-function fig_w11_lead_cost()
+function fig_w10_lead_cost()
 % Lead 의 대가 — 제어입력과 잡음 민감도
 % [주의] 강의노트 2절과 같은 플랜트를 써야 숫자가 맞는다.
 %        DC 모터 속도 모델은 이미 위상여유가 충분해 Lead 가 안 붙는다.
@@ -4985,7 +4985,7 @@ title('고주파 잡음이 제어입력으로 얼마나 새어 나오는가');
 end
 
 
-function fig_w11_lead_vs_lag()
+function fig_w10_lead_vs_lag()
 % Lead 와 Lag 는 교차주파수를 반대쪽으로 옮긴다
 s = tf('s');
 G = 1/(s*(s+1));
@@ -5034,7 +5034,7 @@ title('Lead 는 빨라지고 Lag 는 느려진다');
 end
 
 
-function fig_w11_dfilter()
+function fig_w10_dfilter()
 % 미분 필터 N — 성능은 그대로인데 고주파만 커진다
 s  = tf('s');
 G  = plant_dcmotor('speed');
@@ -5078,10 +5078,10 @@ end
 
 
 % ======================================================================
-%  13주차 추가 그림
+%  12주차 추가 그림
 % ======================================================================
 
-function fig_w13_coeff_match()
+function fig_w12_coeff_match()
 % 계수비교법 : 원하는 극점에서 K 까지 가는 길을 한 장에
 %   식만 나열하면 "어느 계수를 어디에 맞추는 것인지" 가 안 보인다.
 %   그래서 네 단계를 블록으로 놓고, 맞추는 계수끼리 화살표로 잇는다.
@@ -5120,7 +5120,7 @@ text(xt, yt-0.80, 's^0 :  20  =  2 + k_1      \rightarrow   k_1 = 18', ...
      'FontSize', 12, 'FontName', 'Consolas');
 
 text(W/2, 0.75, ['가제어가 아니면 ③ 에 k_1 이나 k_2 가 아예 안 나타난다. ' ...
-                 '그러면 ④ 를 풀 수 없다 — 12주차 판정이 여기서 쓰인다'], ...
+                 '그러면 ④ 를 풀 수 없다 — 11주차 판정이 여기서 쓰인다'], ...
      'HorizontalAlignment', 'center', 'FontSize', 11, 'Color', [0.35 0.35 0.35]);
 end
 
@@ -5132,7 +5132,7 @@ text(b.C(1), b.C(2)-0.38, bot, 'HorizontalAlignment','center', ...
 end
 
 
-function fig_w13_servo()
+function fig_w12_servo()
 % K_r 의 약점과 적분 상태 : 모델이 틀리면 무슨 일이 생기는가
 %   적분기가 없는 플랜트(DC 모터 속도)에서만 이 차이가 드러난다.
 [~, p] = plant_dcmotor('speed');
@@ -5195,7 +5195,7 @@ title('적분 상태는 모델 오차와 무관하게 오차를 0 으로 만든�
 end
 
 
-function fig_w13_nonlin_check()
+function fig_w12_nonlin_check()
 % 선형 설계가 진짜 비선형 진자에서도 통하는가
 %   [좌표 주의] p.f 는 매달린 자세 기준 절대각을 받고,
 %   선형 모델 (A,B) 는 직립 기준 편차이다. u = u0 - K*dx , u0 = m*g*l*sin(pi) = 0
@@ -5252,7 +5252,7 @@ title('각이 커질수록 선형 예측이 어긋나고 토크가 커진다');
 end
 
 
-function fig_w13_pendulum()
+function fig_w12_pendulum()
 % 거꾸로 선 진자를 세운다 — 학기의 하이라이트
 [~, pUp] = plant_pendulum(pi);
 A = pUp.A;  B = pUp.B;  C = pUp.C;
@@ -5294,7 +5294,7 @@ title('10도 기울여 놓았을 때');
 end
 
 
-function fig_w13_saturation()
+function fig_w12_saturation()
 % 토크 한계가 유효범위를 정한다 (거꾸로 선 진자)
 % [좌표 주의] p.f 는 매달린 자세 기준 절대각, A/B 는 직립 기준 편차다.
 [~, pUp] = plant_pendulum(pi);
@@ -5359,7 +5359,7 @@ end
 %  11A 주차 : 루프 성형 (Loop shaping)
 % ======================================================================
 
-function fig_w11a_bands()
+function fig_w10a_bands()
 % 주파수축을 셋으로 나눠 요구사항을 배치한다 — 오늘의 한 장
 w = logspace(-2, 3, 1200);
 L = 200 ./ ((1j*w) .* (1j*w/5 + 1) .* (1j*w/50 + 1));
@@ -5389,7 +5389,7 @@ title('루프 성형 — 저주파는 올리고, 고주파는 내리고, 그 사
 end
 
 
-function fig_w11a_s_plus_t()
+function fig_w10a_s_plus_t()
 % S + T = 1 — 둘을 동시에 작게 만들 수 없다
 s = tf('s');
 P = 0.1/(0.5*s + 2);  C = (500*s + 2000)/s;
@@ -5421,7 +5421,7 @@ title('더하면 언제나 1 — 이것이 설계의 한계다');
 end
 
 
-function fig_w11a_lst()
+function fig_w10a_lst()
 % DC 모터 예제 : L, S, T 를 한 그림에
 s = tf('s');
 P = 0.1/(0.5*s + 2);  C = (500*s + 2000)/s;
@@ -5475,7 +5475,7 @@ title(sprintf('위상 — \\omega_c 에서 -180도까지 %.0f도 남았다 (PM)'
 end
 
 
-function fig_w11a_wc_wbw()
+function fig_w10a_wc_wbw()
 % 교차주파수(개루프 0 dB) 와 대역폭(폐루프 -3 dB) 은 다른 것인데 거의 같다
 s = tf('s');
 zlist = [0.2 0.5 0.9];
@@ -5536,7 +5536,7 @@ title('대역폭이 넓으면 빠르다 — 대역폭은 빠르기의 주파수�
 end
 
 
-function fig_w11a_pm_zeta()
+function fig_w10a_pm_zeta()
 % 위상여유와 감쇠비 — 공식은 없지만 규칙은 있다
 s = tf('s');
 zz = linspace(0.05, 1.2, 240);
@@ -5587,7 +5587,7 @@ title('PM 을 정하면 오버슈트가 정해진다 — 사양을 번역하는 
 end
 
 
-function fig_w11a_dist()
+function fig_w10a_dist()
 % 외란 — 왜 되먹임인가에 대한 답
 s = tf('s');
 P = 0.1/(0.5*s + 2);  C = (500*s + 2000)/s;
@@ -5636,7 +5636,7 @@ title(sprintf('2\\pi rad/s 정현 외란 : 되먹임이 %.1f dB 만큼 줄인다
 end
 
 
-function fig_w11a_noise()
+function fig_w10a_noise()
 % 되먹임의 대가 — 센서 잡음은 T 를 타고 그대로 들어온다
 s = tf('s');
 P = 0.1/(0.5*s + 2);
@@ -5682,7 +5682,7 @@ end
 %  11B 주차 : controlSystemDesigner 로 설계하기
 % ======================================================================
 
-function fig_w11b_shapes()
+function fig_w10b_shapes()
 % 외울 것은 이 다섯 개의 모양뿐이다 — 오늘의 한 장
 s = tf('s');
 w = logspace(-2, 3, 800);
@@ -5719,7 +5719,7 @@ end
 end
 
 
-function fig_w11b_app_tour()
+function fig_w10b_app_tour()
 % controlSystemDesigner 화면을 어디부터 보는가
 figure('Position', [60 60 940 430]);
 axes('Position', [0 0 1 1]); axis off; hold on;
@@ -5753,7 +5753,7 @@ text(50, 1.5, '처음 켜면 창이 둘뿐이다. 나머지 둘은 [New Plot] �
 end
 
 
-function fig_w11b_type_ramp()
+function fig_w10b_type_ramp()
 % 시스템 형과 정상상태오차 — 램프 입력으로 본다
 s = tf('s');
 t = (0:0.01:10)';
@@ -5790,7 +5790,7 @@ title('오차만 따로 그리면 세 가지가 확실히 갈린다');
 end
 
 
-function fig_w11b_pd_vs_lead()
+function fig_w10b_pd_vs_lead()
 % PD 와 Lead — 위상은 똑같이 올리는데 대가가 다르다
 s = tf('s');
 G = 100/(s*(s+1));
@@ -5856,7 +5856,7 @@ title('대가는 여기서 — PD 는 N 을 키울수록 u 가 끝없이 커진�
 end
 
 
-function fig_w11b_pi_vs_lag()
+function fig_w10b_pi_vs_lag()
 % PI 와 Lag — 둘 다 저주파를 올리지만 위상여유의 대가가 다르다
 s = tf('s');
 G = 1/((s+1)*(s/5+1));
@@ -5912,7 +5912,7 @@ title('Lag 의 원리 — 위상을 올리는 게 아니라 \omega_c 를 왼쪽�
 end
 
 
-function fig_w11b_capstone()
+function fig_w10b_capstone()
 % 종합 설계 다섯 단계 — 사양을 하나씩 채워 간다
 s = tf('s');
 P = 1000/((s+1)*(s+8)*(s+20));
@@ -5975,7 +5975,7 @@ title('같은 과정을 시간영역에서 보면');
 end
 
 
-function fig_w11b_delay()
+function fig_w10b_delay()
 % 공칭 플랜트로 다 맞춰 놓고 실제 플랜트로 확인하면
 s = tf('s');
 P = 1000/((s+1)*(s+8)*(s+20));
@@ -6021,10 +6021,10 @@ end
 
 
 % ========================================================================
-%  10주차 추가 그림 — 교수자 강의자료 06_FrequencyResponse slide 29~72
+%  9주차 추가 그림 — 교수자 강의자료 06_FrequencyResponse slide 29~72
 % ========================================================================
 
-function fig_w10_why_unstable()
+function fig_w09_why_unstable()
 % slide 29~30 : 왜 |L|=1 이고 각이 -180도면 폐루프가 불안정한가
 figure('Position', [60 60 980 420]);
 tiledlayout(1, 2, 'TileSpacing', 'compact');
@@ -6059,7 +6059,7 @@ title('-1 은 두 군데서 온다. 그래서 같은 -1 이다');
 end
 
 
-function fig_w10_gm_pm_build()
+function fig_w09_gm_pm_build()
 % slide 31~32 : 이득여유와 위상여유가 보드 선도에서 만들어지는 과정
 s = tf('s');  G = 1/(s*(s+1)^2);
 w = logspace(-1.1, 1, 900);
@@ -6121,7 +6121,7 @@ title('③ 거기서 -180도까지 몇 도 남았나 = 위상여유');
 end
 
 
-function fig_w10_gm_pm_three()
+function fig_w09_gm_pm_three()
 % slide 33~43 : K = 0.5 / 2 / 3 을 나이퀴스트 · 여유 · 계단응답으로 한 번에
 s = tf('s');  G = 1/(s*(s+1)^2);
 Ks  = [0.5 2 3];
@@ -6187,7 +6187,7 @@ title('여유가 0 이 되는 순간이 안정 한계');
 end
 
 
-function fig_w10_L_to_T()
+function fig_w09_L_to_T()
 % slide 44~46 : L 이 크면 T=1, L 이 작으면 T=L
 s = tf('s');
 L = 1/s;                         % 교수자 강의자료의 가장 작은 예
@@ -6230,7 +6230,7 @@ title('숫자로 보면 더 분명하다');
 end
 
 
-function fig_w10_OL_CL()
+function fig_w09_OL_CL()
 % slide 47~48, 63 : 개루프 교차주파수와 폐루프 대역폭
 s = tf('s');  G = (0.5*s + 1.3)/(s^3 + 1.2*s^2 + 1.6*s);
 w = logspace(-2, 2, 1200);
@@ -6266,7 +6266,7 @@ end
 end
 
 
-function fig_w10_Mr_zeta()
+function fig_w09_Mr_zeta()
 % slide 50~53, 66 : 공진봉우리와 감쇠비
 figure('Position', [60 60 1010 430]);
 tiledlayout(1, 2, 'TileSpacing', 'compact');
@@ -6313,7 +6313,7 @@ title('\zeta \geq 0.707 이면 \omega_r 이 허수 \rightarrow 봉우리가 없�
 end
 
 
-function fig_w10_bw_zeta()
+function fig_w09_bw_zeta()
 % slide 54~56 : 대역폭은 wn 에 비례하고 zeta 가 커지면 줄어든다
 figure('Position', [60 60 1010 430]);
 tiledlayout(1, 2, 'TileSpacing', 'compact');
@@ -6352,7 +6352,7 @@ title('셋 다 대역폭에 반비례한다 (기울기 -1 인 직선)');
 end
 
 
-function fig_w10_pm_zeta_exact()
+function fig_w09_pm_zeta_exact()
 % slide 57~60 : 위상여유와 감쇠비의 정확한 관계
 zz = linspace(0.01, 1.0, 500);
 pm_exact = atan2(2*zz, sqrt(sqrt(1 + 4*zz.^4) - 2*zz.^2))*180/pi;
@@ -6386,7 +6386,7 @@ title('그래서 위상여유가 커지면 오버슈트가 줄어든다');
 end
 
 
-function fig_w10_arrows()
+function fig_w09_arrows()
 % slide 61 : 세 가지 관계를 화살표 한 장으로
 figure('Position', [60 60 980 420]);
 axes('Position', [0.02 0.02 0.96 0.9]); hold on; axis off;
@@ -6416,7 +6416,7 @@ title('주파수응답과 시간응답의 대응 — 한 장 요약', 'FontSize'
 end
 
 
-function fig_w10_wn_speed()
+function fig_w09_wn_speed()
 % slide 64 : zeta 를 고정하고 wn 만 키우면 대역폭과 빠르기가 함께 커진다
 z   = 0.2;
 wnv = [1, sqrt(10), 10];
@@ -6452,7 +6452,7 @@ title('같은 순서로 대역폭도 넓어진다 (네모 = -3 dB)');
 end
 
 
-function fig_w10_margin_K3()
+function fig_w09_margin_K3()
 % slide 68~72 : K = 1 / 0.7 / 1.2 에서 여유와 오버슈트
 s = tf('s');  G = (0.5*s + 1.3)/(s^3 + 1.2*s^2 + 1.6*s);
 Ks  = [0.7 1 1.2];
@@ -6513,10 +6513,10 @@ end
 
 
 % ======================================================================
-%  9주차 : 교수자 강의자료 06_FrequencyResponse slide 1~16
+%  8주차 : 교수자 강의자료 06_FrequencyResponse slide 1~16
 % ======================================================================
 
-function fig_w09_sine_io_block()
+function fig_w08_sine_io_block()
 % slide 2 : A sin(wt) 가 들어가면 A|G| sin(wt + angle G) 가 나온다
 A  = 2;                         % 입력 진폭 (1 이 아닌 값으로 둬서 A 가 보이게)
 G  = tf(1, [1 1]);
@@ -6583,7 +6583,7 @@ title(sprintf('G = 1/(s+1), \\omega = 1, A = %g', A));
 end
 
 
-function fig_w09_rc_sine()
+function fig_w08_rc_sine()
 % slide 3 : R = 100옴, C = 0.001F -> G = 1/(0.1s+1). 1 Hz 와 3 Hz 를 넣어 본다
 R = 100;  C = 0.001;  tau = R*C;        % 0.1 s
 G = tf(1, [tau 1]);
@@ -6648,7 +6648,7 @@ title('위상 : -32도, -62도 (늦는 쪽)');
 end
 
 
-function fig_w09_linear_vs_log()
+function fig_w08_linear_vs_log()
 % slide 12 : 왜 가로축은 로그, 세로축은 dB 인가
 G = tf(1, conv([1 1], [0.01 1]));       % 극점 -1 과 -100
 
@@ -6685,7 +6685,7 @@ text(0.02, -95, {'20log_{10}|G_1G_2|', '= 20log_{10}|G_1| + 20log_{10}|G_2|', ..
 end
 
 
-function fig_w09_gain_shift()
+function fig_w08_gain_shift()
 % K 를 바꾸면 크기 선도는 통째로 위아래로, 위상 선도는 꼼짝도 않는다
 G  = tf(1, [1 1 0]);                    % 1/(s(s+1))
 Ks = [0.5 2 8];

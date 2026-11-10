@@ -70,9 +70,9 @@ Scope 창이 자동으로 열리며 결과가 나타납니다.
 | W05 | 임계이득 손 계산 | 타입과 오차상수 | 적분기를 넣으면 잃는 것 |
 | W06 | 궤적 모양 손 예측 | 근궤적으로 이득 고르기 | 구동기 한계를 넣으면 |
 | W07 | 비례제어의 한계 진단 | PD 설계 ($z$ 와 $K$) | 제어입력 한계까지 넣은 설계 |
-| W09 | $s$ 에 $j\omega$ 넣어 손 계산 | 점근선 손작도와 `bode` 대조 | Simulink 로 직접 측정 |
-| W10 | 여유 표 채우고 임계이득 찾기 | 사양을 만족하는 이득 고르기 | 견딜 수 있는 시간지연 |
-| W11 | Lead 의 $\alpha$ 손 계산 | Lead 설계 5단계 | Lag 로 같은 사양, 비교 |
+| W08 | $s$ 에 $j\omega$ 넣어 손 계산 | 점근선 손작도와 `bode` 대조 | Simulink 로 직접 측정 |
+| W09 | 여유 표 채우고 임계이득 찾기 | 사양을 만족하는 이득 고르기 | 견딜 수 있는 시간지연 |
+| W10 | Lead 의 $\alpha$ 손 계산 | Lead 설계 5단계 | Lag 로 같은 사양, 비교 |
 
 난이도를 낮추려고 지킨 것들
 
@@ -220,52 +220,52 @@ Scope 창이 자동으로 열리며 결과가 나타납니다.
 
 숙제의 B·C는 2025년 근궤적 퀴즈 두 문제(제어입력 제약 포함)를 그대로 다룹니다.
 
-### 8주차 — 중간고사
+### 중간고사 — W07 이 끝난 뒤
 
-범위 W01~W07.
+범위 W01~W07. 시험 주는 실습 폴더가 없습니다.
 
-### 9주차 — 주파수응답과 보드 선도 (`W09_Bode`)
+### 8주차 — 주파수응답과 보드 선도 (`W08_Bode`)
 
 **한 줄**: 보드 선도는 사인을 넣고 재 본 결과를 모아 놓은 것일 뿐이다.
 
 | 파일 | 내용 |
 |---|---|
-| `W09_LectureNote.mlx` | 강의노트 |
-| `W09_01_sine_to_bode.m` | 사인을 넣어 크기비와 위상차를 직접 재고 `bode` 곡선과 대조 |
-| `W09_02_bode_asymptotes.m` | 네 조각(상수·적분기·1차·2차)의 점근선을 더해 손작도 |
-| `W09_03_run_simulink.m` | Simulink 로 주파수를 훑어 보드 선도를 **측정**. 오차 0.001 dB |
-| `W09_SineSweep.slx` | 사인을 넣고 정상상태를 재는 모델 |
+| `W08_LectureNote.mlx` | 강의노트 |
+| `W08_01_sine_to_bode.m` | 사인을 넣어 크기비와 위상차를 직접 재고 `bode` 곡선과 대조 |
+| `W08_02_bode_asymptotes.m` | 네 조각(상수·적분기·1차·2차)의 점근선을 더해 손작도 |
+| `W08_03_run_simulink.m` | Simulink 로 주파수를 훑어 보드 선도를 **측정**. 오차 0.001 dB |
+| `W08_SineSweep.slx` | 사인을 넣고 정상상태를 재는 모델 |
 
 핵심 실험 하나 — 과도응답이 남은 상태에서 재면 얼마나 틀리는가.
 감쇠비 0.1 인 MSD 를 8 초만 돌리면 **71 % 틀립니다.**
 
-### 10주차 — 나이퀴스트와 안정 여유 (`W10_Nyquist_Margin`)
+### 9주차 — 나이퀴스트와 안정 여유 (`W09_Nyquist_Margin`)
 
 **한 줄**: 불안정의 조건은 $L(j\omega) = -1$. 여유란 그 점에서 얼마나 떨어졌는가다.
 
 | 파일 | 내용 |
 |---|---|
-| `W10_LectureNote.mlx` | 강의노트 |
-| `W10_01_nyquist_margin.m` | 나이퀴스트 선도, GM/PM 읽는 순서, 개루프가 불안정한 경우 |
-| `W10_02_pm_to_time.m` | 시간영역과의 번역표, 감도함수 $S + T = 1$ |
-| `W10_03_run_simulink.m` | 모델을 **선형화**해 개루프를 뽑고, 시간지연이 위상여유를 깎는 것 확인 |
-| `W10_Margin_Check.slx` | 시간지연 블록이 있는 폐루프 |
+| `W09_LectureNote.mlx` | 강의노트 |
+| `W09_01_nyquist_margin.m` | 나이퀴스트 선도, GM/PM 읽는 순서, 개루프가 불안정한 경우 |
+| `W09_02_pm_to_time.m` | 시간영역과의 번역표, 감도함수 $S + T = 1$ |
+| `W09_03_run_simulink.m` | 모델을 **선형화**해 개루프를 뽑고, 시간지연이 위상여유를 깎는 것 확인 |
+| `W09_Margin_Check.slx` | 시간지연 블록이 있는 폐루프 |
 
 핵심 숫자 하나 — 위상여유는 **견딜 수 있는 시간지연**이다.
 $\tau_{max} = PM/\omega_{cp} = 1.81$ 초로 예측했고, 시뮬레이션에서 1.5 초는 버티고 2.0 초에서 발산했습니다.
 
-### 11주차 — 주파수영역 설계와 PID (`W11_FreqDesign_PID`)
+### 10주차 — 주파수영역 설계와 PID (`W10_FreqDesign_PID`)
 
 **한 줄**: 정상상태 사양으로 이득을 먼저 정하고, 모자란 위상여유를 보상기로 채운다.
 
 | 파일 | 내용 |
 |---|---|
-| `W11_LectureNote.mlx` | 강의노트 |
-| `W11_01_lead_design.m` | Lead 설계 5단계. PD 의 한계, 두 단으로 나누기, DC 모터 적용 |
-| `W11_02_lag_and_pi.m` | PI 의 $1/T_i$ 위치, Lag 설계, Lead 와 Lag 비교 |
-| `W11_03_pid_tuning.m` | 미분 필터, 지글러-니콜스, `pidtune`, 모델 오차 |
-| `W11_04_run_simulink.m` | **적분 와인드업**과 anti-windup |
-| `W11_PID_AntiWindup.slx` | PID 블록의 포화·anti-windup 옵션 실험 |
+| `W10_LectureNote.mlx` | 강의노트 |
+| `W10_01_lead_design.m` | Lead 설계 5단계. PD 의 한계, 두 단으로 나누기, DC 모터 적용 |
+| `W10_02_lag_and_pi.m` | PI 의 $1/T_i$ 위치, Lag 설계, Lead 와 Lag 비교 |
+| `W10_03_pid_tuning.m` | 미분 필터, 지글러-니콜스, `pidtune`, 모델 오차 |
+| `W10_04_run_simulink.m` | **적분 와인드업**과 anti-windup |
+| `W10_PID_AntiWindup.slx` | PID 블록의 포화·anti-windup 옵션 실험 |
 
 이 주차도 **설계 예제가 중심**입니다.
 
@@ -374,10 +374,10 @@ build_lecture_notes()   % 3) 문서를 다시 만든다
 | Introduction_SystemModeling | `..._KR.mlx` | W02, W03 |
 | Introduction_SystemAnalysis | `..._KR.mlx` | W04, W05 |
 | Introduction_ControlRootLocus | `..._KR.mlx` | W06, W07 |
-| Introduction_ControlFrequency | `..._KR.mlx` | W09, W10 |
+| Introduction_ControlFrequency | `..._KR.mlx` | W08, W09 |
 | CruiseControl_SystemAnalysis | `..._KR.mlx` | W01, W02, W04 |
 | MotorSpeed_SystemAnalysis | `..._KR.mlx` | W05 |
-| MotorPosition_ControlPID | `..._KR.mlx` | W07, W11 |
+| MotorPosition_ControlPID | `..._KR.mlx` | W07, W10 |
 
 한글 원고는 `_KR_src/` 에 있고, 다시 만들려면 그 폴더에서 `build_kr()` 입니다.
 
@@ -535,12 +535,15 @@ verify_all('W07')     % 한 주차만
 무엇을 봐야 하는지 알 수 있습니다.
 
 그림을 다시 만들려면 `make_figures()` 를, 하나만 다시 만들려면
-`make_figures('w09_lpf')` 처럼 이름을 주면 됩니다.
+`make_figures('w08_lpf')` 처럼 이름을 주면 됩니다.
 
 ### 시험 주차
 
-- **W08** — 중간고사 (범위 W01~W07)
-- **W15** — 기말고사 (범위 W09~W14)
+시험 주는 **실습 폴더를 만들지 않습니다.** 폴더는 `W01`~`W13` 이 연속으로 붙고,
+시험은 학사일정에 따라 그 사이와 학기 끝에 들어갑니다.
+
+- **중간고사** — `W07` 이 끝난 뒤 (범위 W01~W07)
+- **기말고사** — 학기 마지막 주 (범위 W08~W13)
 
 자세한 내용은 상위 폴더의 계획서 `../2026_15주_계획.md` 를 참고하십시오.
 새 주차를 만들 때는 `.claude/skills/control-course-week` 스킬을 쓰면
