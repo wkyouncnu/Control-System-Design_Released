@@ -20,3 +20,17 @@ margin(sys1); hold on;
 margin(sys2); hold on;
 margin(sys3); hold on;
 
+T1 = feedback(sys1, 1);
+T2 = feedback(sys2, 1);
+T3 = feedback(sys3, 1);
+
+
+t = 0:0.01:30;
+y1 = step(T1, t);
+y2 = step(T2, t);
+y3 = step(T3, t);
+
+figure()
+plot(t, y1); hold on;
+plot(t, y2); hold on;
+plot(t, y3); hold on;
